@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import { db } from "@/lib/db";
-import { generus, mandiri } from "@/lib/schema";
-import { eq } from "drizzle-orm";
-import { checkMaintenance } from "@/lib/maintenance";
 import AccessDenied from "@/components/AccessDenied";
 import AutoLogout from "@/components/AutoLogout";
 
@@ -26,44 +24,84 @@ const VALID_DASHBOARD_ROLES = [
   "tim_pnkb_gambuh"
 ];
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-  if (!session) redirect("/login");
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    role: string;
+    foto?: string;
+    generusId?: string | null;
+    isInMandiri?: boolean;
+  } | null>(null);
 
-  // Maintenance Mode Check
-  const isMaintenanceActive = await checkMaintenance();
-  if (isMaintenanceActive) {
-    redirect("/");
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => {
+        if (!res.ok) {
+          router.push("/login");
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (!data || data.error) {
+          router.push("/login");
+          return;
+        }
+        const role = data.role;
+        let isInMandiri = [
+          "admin",
+          "pengurus_daerah",
+          "kmm_daerah",
+          "tim_pnkb",
+          "admin_romantic_room",
+          "admin_keuangan",
+          "admin_kegiatan",
+          "tim_pnkb_gambuh"
+        ].includes(role);
+
+        if (data.isInMandiri !== undefined) {
+          isInMandiri = Boolean(data.isInMandiri) || isInMandiri;
+        }
+
+        setUser({
+          name: data.name || data.nama || "",
+          email: data.email || "",
+          role,
+          foto: data.foto || "",
+          generusId: data.generusId || null,
+          isInMandiri,
+        });
+        setLoading(false);
+      })
+      .catch(() => {
+        router.push("/login");
+      });
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <div className="spinner" />
+      </div>
+    );
   }
 
-  // Broken Access Control check: Block users without a valid role
-  if (!session.role || !VALID_DASHBOARD_ROLES.includes(session.role)) {
+  if (!user?.role || !VALID_DASHBOARD_ROLES.includes(user.role)) {
     return <AccessDenied />;
-  }
-
-  let userFoto = "";
-  let isInMandiri = ["admin", "pengurus_daerah", "kmm_daerah", "tim_pnkb", "admin_romantic_room", "admin_keuangan", "admin_kegiatan", "tim_pnkb_gambuh"].includes(session.role);
-
-  if (session.generusId) {
-    const res = await db.select({ foto: generus.foto }).from(generus).where(eq(generus.id, session.generusId)).limit(1);
-    if (res.length > 0) userFoto = res[0].foto || "";
-    
-    if (!isInMandiri) {
-      const mandiriRes = await db.select({ id: mandiri.id }).from(mandiri).where(eq(mandiri.generusId, session.generusId)).limit(1);
-      isInMandiri = mandiriRes.length > 0;
-    }
   }
 
   return (
     <div className="layout">
       <AutoLogout timeoutMinutes={30} />
-      <Sidebar user={{ name: session.name, email: session.email, role: session.role, foto: userFoto, isInMandiri }} />
-      <main className="main-content">{children}</main>
+      <Sidebar user={user} />
+      <main className="main-content portal-root">{children}</main>
     </div>
   );
 }
-

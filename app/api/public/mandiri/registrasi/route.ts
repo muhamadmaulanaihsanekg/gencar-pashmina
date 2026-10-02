@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         hobi, makananMinumanFavorit, suku, foto, anakKe, jumlahSaudara, tinggiBadan,
         mandiriDesaId, mandiriKelompokId, instagram,
         statusPeserta, dibayarkanSenilai, buktiPembayaran,
-        kriteriaPasangan, statusHaid, targetMenikah
+        kriteriaPasangan, targetMenikah
     } = body;
 
     if (!nama || !jenisKelamin || !mandiriDesaId || !tempatLahir || !tanggalLahir || !noTelp || !pendidikan || !pekerjaan || !foto) {
@@ -192,7 +192,6 @@ export async function POST(request: NextRequest) {
             tinggiBadan: tinggiBadan ? Number(tinggiBadan) : null,
             mandiriDesaId: mandiriDesaId ? Number(mandiriDesaId) : null,
             mandiriKelompokId: mandiriKelompokId ? Number(mandiriKelompokId) : null,
-            statusHaid: jenisKelamin === "P" ? (statusHaid || "Tidak") : null,
             instagram: instagram || duplicate.instagram, 
             kriteriaPasangan: kriteriaPasangan || duplicate.kriteriaPasangan,
             targetMenikah: targetMenikah || duplicate.targetMenikah,
@@ -225,7 +224,6 @@ export async function POST(request: NextRequest) {
             nomorUrut: nextNr,
             nama: duplicate.nama,
             jenisKelamin,
-            statusHaid: jenisKelamin === "P" ? statusHaid : "Tidak"
         });
     }
 
@@ -280,7 +278,6 @@ export async function POST(request: NextRequest) {
       kelompokId: null,
       mandiriDesaId: mandiriDesaId ? Number(mandiriDesaId) : null,
       mandiriKelompokId: mandiriKelompokId ? Number(mandiriKelompokId) : null,
-      statusHaid: jenisKelamin === "P" ? (statusHaid || "Tidak") : null,
       instagram,
       kriteriaPasangan,
       targetMenikah,
@@ -312,7 +309,6 @@ export async function POST(request: NextRequest) {
       nomorUrut: nextNr,
       nama,
       jenisKelamin,
-      statusHaid: jenisKelamin === "P" ? statusHaid : "Tidak"
     });  } catch (error) {
     console.error("Public Registration error:", error);
     const status = Number((error as any)?.status || 500);

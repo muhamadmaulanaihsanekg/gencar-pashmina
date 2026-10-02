@@ -1,0 +1,13 @@
+story_id: e03s02
+title: "Porting Endpoint Absensi, Scanner, & Kegiatan"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Lengkapi endpoint /api/absensi/scan dengan validasi GPS dan insert D1 di Hono"
+    verify: "grep -q 'absensi' worker/index.ts"
+    status: completed
+  - id: 2
+    description: "Implementasi endpoint CRUD /api/kegiatan di Hono"
+    verify: "grep -q 'kegiatan' worker/index.ts"
+    status: completed

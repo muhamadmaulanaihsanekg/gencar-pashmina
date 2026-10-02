@@ -1,0 +1,18 @@
+id: e05
+title: "Cloudflare Routing & Deployment"
+wsjf: 6.0
+total_bcps: 6
+status: done
+stories:
+  - id: e05s01
+    title: "Konfigurasi SPA Fallback & Cloudflare Pages Static"
+    bcps: 3
+    status: done
+    spec: e05s01-spa-fallback-routing.md
+    tasks: e05s01-tasks.yaml
+  - id: e05s02
+    title: "Routing Single Domain Cloudflare Pages & Worker"
+    bcps: 3
+    status: done
+    spec: e05s02-worker-pages-integration.md
+    tasks: e05s02-tasks.yaml

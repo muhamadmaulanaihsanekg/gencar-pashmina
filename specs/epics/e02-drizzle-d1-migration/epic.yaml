@@ -1,0 +1,18 @@
+id: e02
+title: "Drizzle D1 Database Migration"
+wsjf: 8.3
+total_bcps: 6
+status: done
+stories:
+  - id: e02s01
+    title: "Adaptasi Skema Drizzle untuk Cloudflare D1"
+    bcps: 3
+    status: done
+    spec: e02s01-schema-d1-adapter.md
+    tasks: e02s01-tasks.yaml
+  - id: e02s02
+    title: "Eksekusi Migrasi Data Turso ke D1"
+    bcps: 3
+    status: done
+    spec: e02s02-data-migration-script.md
+    tasks: e02s02-tasks.yaml

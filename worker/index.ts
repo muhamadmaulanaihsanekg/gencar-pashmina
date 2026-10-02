@@ -3,12 +3,31 @@ import { cors } from "hono/cors";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../shared/schema";
 import { haversineM } from "../shared/validation";
+import { authMiddleware, JWTPayload } from "./middleware/auth";
+import { authRouter } from "./routes/auth";
+import { profileRouter } from "./routes/profile";
+import { kegiatanRouter } from "./routes/kegiatan";
+import { absensiRouter } from "./routes/absensi";
+import { generusRouter } from "./routes/generus";
+import { contentRouter } from "./routes/content";
+import { masterRouter } from "./routes/master";
+import { uploadRouter } from "./routes/upload";
 
-type Env = { DB: D1Database; KV?: KVNamespace; JWT_SECRET: string; DAERAH_NAMA?: string } & Record<string, unknown>;
+type Env = { DB: D1Database; BUCKET: R2Bucket; KV?: KVNamespace; JWT_SECRET: string; DAERAH_NAMA?: string; R2_PUBLIC_URL?: string } & Record<string, unknown>;
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { user?: JWTPayload } }>();
 
 app.use("/*", cors({ origin: (o) => o || "*", credentials: true, allowHeaders: ["Content-Type", "Authorization"] }));
+app.use("/api/*", authMiddleware);
+
+app.route("/api/auth", authRouter);
+app.route("/api/profile", profileRouter);
+app.route("/api/kegiatan", kegiatanRouter);
+app.route("/api/absensi", absensiRouter);
+app.route("/api/generus", generusRouter);
+app.route("/api/upload", uploadRouter);
+app.route("/api", contentRouter);
+app.route("/api", masterRouter);
 
 app.get("/api/health", (c) => c.json({ ok: true, daerah: c.env.DAERAH_NAMA || "Cengkareng" }));
 
@@ -40,65 +59,8 @@ app.get("/api/auth/magic/verify", async (c) => {
   if (found.consumed_at) return c.json({ error: "Token sudah dipakai" }, 401);
   if (new Date(found.expires_at).getTime() < Date.now()) return c.json({ error: "Token kadaluarsa" }, 401);
   await c.env.DB.prepare("UPDATE magic_tokens SET consumed_at = datetime('now') WHERE token_hash = ?").bind(hash).run();
-  // TODO: issue JWT cookie via jose (reuse lib/auth logic di worker)
   return c.json({ ok: true, generusId: found.generus_id });
 });
-
-// POST /api/absensi/scan — QR wilayah statis + GPS + modal multi-kegiatan
-app.post("/api/absensi/scan", async (c) => {
-  const { qrToken, lat, lng, accuracy, generusId } = await c.req.json().catch(() => ({}));
-  if (!qrToken || !generusId) return c.json({ error: "qrToken & generusId wajib" }, 400);
-  const qr = await c.env.DB.prepare("SELECT * FROM wilayah_qr WHERE qr_token = ?").bind(qrToken).first<any>();
-  if (!qr) return c.json({ error: "QR tidak dikenal" }, 404);
-
-  // Cari kegiatan aktif pada level QR (hari ini)
-  const today = new Date().toISOString().slice(0, 10);
-  let kegs: any[] = [];
-  if (qr.level === "daerah") {
-    kegs = await c.env.DB.prepare("SELECT * FROM kegiatan WHERE tanggal = ? AND desa_id IS NULL AND kelompok_id IS NULL").bind(today).all().then((r: any) => r.results || []);
-  } else if (qr.level === "desa") {
-    kegs = await c.env.DB.prepare("SELECT * FROM kegiatan WHERE tanggal = ? AND desa_id = ? AND kelompok_id IS NULL").bind(today, qr.desa_id).all().then((r: any) => r.results || []);
-  } else {
-    kegs = await c.env.DB.prepare("SELECT * FROM kegiatan WHERE tanggal = ? AND kelompok_id = ?").bind(today, qr.kelompok_id).all().then((r: any) => r.results || []);
-  }
-  if (kegs.length === 0) return c.json({ error: "Tidak ada kegiatan aktif di wilayah ini", kegiatan: [] }, 404);
-  if (kegs.length === 1) {
-    const k = kegs[0];
-    const gps = gpsCheck(k, lat, lng, accuracy);
-    if (!gps.ok && k.gps_required) return c.json({ error: gps.reason, kegiatanId: k.id }, 403);
-    return c.json({ ok: true, kegiatanId: k.id, gps, needPick: false });
-  }
-  // 2+ → filter GPS dulu, yang jauh dibuang
-  const filtered = kegs.filter((k) => {
-    if (k.lat == null || k.lng == null || lat == null || lng == null) return true;
-    const d = haversineM(Number(lat), Number(lng), Number(k.lat), Number(k.lng));
-    return d <= (Number(k.radius_m) || 100) + 10;
-  });
-  if (filtered.length === 0) return c.json({ error: "Tidak ada kegiatan dalam radius GPS", kegiatan: kegs }, 404);
-  if (filtered.length === 1) {
-    const k = filtered[0];
-    const gps = gpsCheck(k, lat, lng, accuracy);
-    if (!gps.ok && k.gps_required) return c.json({ error: gps.reason, kegiatanId: k.id }, 403);
-    return c.json({ ok: true, kegiatanId: k.id, gps, needPick: false });
-  }
-  // 2+ setelah filter → modal pilih
-  const withGps = filtered.map((k) => ({
-    ...k,
-    _gps: gpsCheck(k, lat, lng, accuracy),
-    _distanceM: k.lat != null && lat != null ? Math.round(haversineM(Number(lat), Number(lng), Number(k.lat), Number(k.lng))) : null,
-  }));
-  return c.json({ needPick: true, kegiatan: withGps });
-});
-
-function gpsCheck(k: any, lat: any, lng: any, accuracy: any) {
-  if (k.lat == null || k.lng == null) return { ok: true, reason: null };
-  if (lat == null || lng == null) return { ok: true, reason: "GPS tidak tersedia — advisory" };
-  if (accuracy != null && Number(accuracy) > 100) return { ok: false, reason: "Akurasi GPS buruk (>100m)" };
-  const d = haversineM(Number(lat), Number(lng), Number(k.lat), Number(k.lng));
-  const radius = Number(k.radius_m) || 100;
-  if (d > radius + 10) return { ok: false, reason: `Di luar radius (${Math.round(d)}m > ${radius}m)` };
-  return { ok: true, reason: null, distanceM: Math.round(d) };
-}
 
 async function sha256(s: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));

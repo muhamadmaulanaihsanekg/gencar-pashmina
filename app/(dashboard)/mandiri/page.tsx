@@ -566,7 +566,7 @@ export default function MandiriPage() {
          text: `Peserta atas nama ${item.nama} akan diubah statusnya menjadi Aktif.`,
          icon: "question",
          showCancelButton: true,
-         confirmButtonColor: "#10b981",
+         confirmButtonColor: "#3d5a45",
          cancelButtonColor: "#64748b",
          confirmButtonText: "Ya, Izinkan!",
       });
@@ -594,7 +594,7 @@ export default function MandiriPage() {
          text: "Peserta laki-laki akan berada di nomor 1-199, dan peserta perempuan di nomor 200 ke atas untuk kegiatan yang sedang dipilih.",
          icon: "question",
          showCancelButton: true,
-         confirmButtonColor: "#2563eb",
+         confirmButtonColor: "#3d5a45",
          cancelButtonColor: "#64748b",
          confirmButtonText: "Ya, Perbaiki",
          cancelButtonText: "Batal"
@@ -802,30 +802,29 @@ export default function MandiriPage() {
       <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
          <style dangerouslySetInnerHTML={{ __html: `
             .toolbar-container {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
                 margin-bottom: 20px;
                 background: #ffffff;
-                padding: 16px;
-                border-radius: 14px;
-                border: 1px solid #e2e8f0;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+                padding: 14px;
+                border-radius: 12px;
+                border: 1px solid #e6dfd3;
+                box-shadow: 0 4px 12px -2px rgba(23, 36, 27, 0.05);
              }
-             .toolbar-row {
-                display: flex;
-                gap: 12px;
-                flex-wrap: wrap;
-                width: 100%;
-             }
+            @media (min-width: 900px) {
+               .toolbar-container {
+                  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+               }
+            }
             .toolbar-btn {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
+                gap: 8px;
                 height: 38px;
-                padding: 0 16px;
-                border-radius: 10px;
+                padding: 0 10px;
+                border-radius: 8px;
                 font-size: 13px;
                 font-weight: 600;
                 cursor: pointer;
@@ -833,25 +832,22 @@ export default function MandiriPage() {
                 border: 1px solid transparent;
                 text-decoration: none;
                 white-space: nowrap;
-                flex: 1;
-                min-width: 140px;
+                overflow: hidden;
              }
             .toolbar-btn:active {
-               transform: scale(0.97);
+               transform: scale(0.98);
             }
             .toolbar-btn svg {
-               width: 14px;
-               height: 14px;
+               width: 15px;
+               height: 15px;
             }
             .toolbar-btn-success {
-               background: #f0fdf4;
-               color: #16a34a;
-               border: 1px solid #bbf7d0;
+               background: #eef4f0;
+               color: #26392d;
+               border: 1px solid rgba(61, 90, 69, 0.35);
             }
             .toolbar-btn-success:hover {
-               background: #dcfce7;
-               border-color: #86efac;
-               transform: translateY(-1px);
+               background: #e2ede5;
             }
             .toolbar-btn-danger-status {
                background: #fef2f2;
@@ -860,61 +856,180 @@ export default function MandiriPage() {
             }
             .toolbar-btn-danger-status:hover {
                background: #fee2e2;
-               border-color: #fca5a5;
-               transform: translateY(-1px);
             }
-            .toolbar-btn-blue {
-               background: #eff6ff;
-               color: #2563eb;
-               border: 1px solid #bfdbfe;
+            .toolbar-btn-secondary {
+               background: #faf7f2;
+               color: #26392d;
+               border: 1px solid #e6dfd3;
             }
-            .toolbar-btn-blue:hover {
-               background: #dbeafe;
-               border-color: #93c5fd;
-               transform: translateY(-1px);
+            .toolbar-btn-secondary:hover {
+               background: #f4efe6;
+               border-color: #c5a059;
             }
-            .toolbar-btn-purple {
-               background: #faf5ff;
-               color: #7c3aed;
-               border: 1px solid #e9d5ff;
+            .toolbar-btn-primary {
+               background: #26392d;
+               color: #ffffff;
+               border: 1px solid #26392d;
             }
-            .toolbar-btn-purple:hover {
-               background: #ede9fe;
-               border-color: #c084fc;
-               transform: translateY(-1px);
-            }
-            .toolbar-btn-teal {
-               background: #f0fdfa;
-               color: #0d9488;
-               border: 1px solid #99f6e4;
-            }
-            .toolbar-btn-teal:hover {
-               background: #ccfbf1;
-               border-color: #5eead4;
-               transform: translateY(-1px);
-            }
-            .toolbar-btn-emerald {
-               background: #ecfdf5;
-               color: #059669;
-               border: 1px solid #a7f3d0;
-            }
-            .toolbar-btn-emerald:hover {
-               background: #d1fae5;
-               border-color: #6ee7b7;
-               transform: translateY(-1px);
+            .toolbar-btn-primary:hover {
+               background: #3d5a45;
+               border-color: #3d5a45;
             }
             .toolbar-btn-danger {
-               background: #fef2f2;
+               background: #fff5f5;
                color: #dc2626;
                border: 1px solid #fecaca;
             }
             .toolbar-btn-danger:hover {
                background: #fee2e2;
-               border-color: #fca5a5;
-               transform: translateY(-1px);
             }
-            
-            
+
+            /* Card header */
+            .mandiri-card-header {
+               display: flex;
+               flex-direction: column;
+               gap: 12px;
+               padding: 16px;
+               border-bottom: 1px solid #eee6d9;
+            }
+            .mandiri-header-row {
+               display: flex;
+               align-items: center;
+               justify-content: space-between;
+               gap: 10px;
+               flex-wrap: wrap;
+            }
+            .filter-pill-scroll {
+               display: flex;
+               gap: 8px;
+               flex-wrap: wrap;
+               align-items: center;
+            }
+            .filter-pill-btn {
+               display: inline-flex;
+               align-items: center;
+               gap: 6px;
+               padding: 6px 12px;
+               border-radius: 20px;
+               border: 1px solid #e6dfd3;
+               background: #ffffff;
+               color: #5b6b60;
+               font-size: 13px;
+               font-weight: 600;
+               cursor: pointer;
+               transition: all 0.15s ease;
+               white-space: nowrap;
+            }
+            .filter-pill-btn:hover {
+               border-color: #c5a059;
+               color: #26392d;
+            }
+            .filter-pill-btn.active {
+               background: #26392d;
+               border-color: #26392d;
+               color: #ffffff;
+            }
+            .filter-pill-btn .pill-badge {
+               background: #f4efe6;
+               color: #5b6b60;
+               padding: 1px 7px;
+               border-radius: 10px;
+               font-size: 11px;
+               font-weight: 700;
+            }
+            .filter-pill-btn.active .pill-badge {
+               background: rgba(255, 255, 255, 0.22);
+               color: #ffffff;
+            }
+            .pill-divider {
+               width: 1px;
+               height: 22px;
+               background: #e6dfd3;
+               margin: 0 2px;
+            }
+            .mandiri-controls-row {
+               display: flex;
+               gap: 10px;
+               align-items: center;
+               flex-wrap: wrap;
+               justify-content: space-between;
+            }
+            .mandiri-sort-group {
+               display: inline-flex;
+               gap: 6px;
+            }
+            .btn-sort-mandiri {
+               display: inline-flex;
+               align-items: center;
+               gap: 4px;
+               height: 36px;
+               padding: 0 12px;
+               border-radius: 8px;
+               border: 1px solid #e6dfd3;
+               background: #ffffff;
+               color: #5b6b60;
+               white-space: nowrap;
+               font-size: 13px;
+               font-weight: 600;
+               cursor: pointer;
+               transition: all 0.15s ease;
+            }
+            .btn-sort-mandiri:hover {
+               border-color: #c5a059;
+            }
+            .btn-sort-mandiri.active {
+               background: #26392d;
+               border-color: #26392d;
+               color: #ffffff;
+            }
+            .mandiri-search-wrap {
+               position: relative;
+               flex: 1;
+               min-width: 180px;
+               max-width: 320px;
+            }
+            .mandiri-search-icon {
+               position: absolute;
+               left: 12px;
+               top: 50%;
+               transform: translateY(-50%);
+               width: 16px;
+               height: 16px;
+               color: #9aa89e;
+               pointer-events: none;
+            }
+            .mandiri-search-input {
+               width: 100%;
+               height: 36px;
+               padding: 0 12px 0 34px;
+               border-radius: 8px;
+               border: 1px solid #e6dfd3;
+               background: #ffffff;
+               font-size: 13px;
+               color: #26392d;
+               outline: none;
+               transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            }
+            .mandiri-search-input:focus {
+               border-color: #c5a059;
+               box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
+            }
+            @media (max-width: 640px) {
+               .filter-pill-scroll {
+                  flex-wrap: nowrap;
+                  overflow-x: auto;
+                  padding-bottom: 4px;
+                  -webkit-overflow-scrolling: touch;
+                  scrollbar-width: none;
+               }
+               .filter-pill-scroll::-webkit-scrollbar { display: none; }
+               .mandiri-controls-row {
+                  flex-wrap: nowrap;
+               }
+               .mandiri-search-wrap {
+                  max-width: none;
+               }
+            }
          ` }} />
          <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
             <Topbar title={regTitle || "Usia Mandiri / Persiapan Nikah"} role={userRole} />
@@ -963,7 +1078,6 @@ export default function MandiriPage() {
 
                <div className="toolbar-container">
                    {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
-                   <div className="toolbar-row">
                       <button
                          className={`toolbar-btn ${regStatus === "1" ? 'toolbar-btn-success' : 'toolbar-btn-danger-status'}`}
                          onClick={handleSettings}
@@ -974,8 +1088,10 @@ export default function MandiriPage() {
                          </svg>
                          {regStatus === "1" ? "Pendaftaran Buka" : "Pendaftaran Tutup"}
                       </button>
+                   )}
+                   {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
                       <button
-                         className="toolbar-btn toolbar-btn-blue"
+                         className="toolbar-btn toolbar-btn-secondary"
                          onClick={() => {
                             const url = `${window.location.origin}/mandiri/daftar`;
                             navigator.clipboard.writeText(url);
@@ -988,8 +1104,10 @@ export default function MandiriPage() {
                          </svg>
                          Link Peserta Wajib
                       </button>
+                   )}
+                   {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
                       <button
-                         className="toolbar-btn toolbar-btn-purple"
+                         className="toolbar-btn toolbar-btn-secondary"
                          onClick={() => {
                             const url = `${window.location.origin}/mandiri/daftar?status=person`;
                             navigator.clipboard.writeText(url);
@@ -1002,12 +1120,10 @@ export default function MandiriPage() {
                          </svg>
                          Link Person
                       </button>
-                   </div>
                    )}
-                   <div className="toolbar-row">
-                      {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
+                   {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
                       <button
-                         className="toolbar-btn toolbar-btn-teal"
+                         className="toolbar-btn toolbar-btn-secondary"
                          onClick={handleFixNomorUrut}
                          title="Perbaiki nomor peserta sesuai jenis kelamin"
                       >
@@ -1019,20 +1135,20 @@ export default function MandiriPage() {
                          </svg>
                          Perbaiki Nomor
                       </button>
-                      )}
-                      {(userRole === "admin_romantic_room" || userRole === "admin" || userRole === "pengurus_daerah" || userRole === "kmm_daerah" || userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
-                         <button
-                            className="toolbar-btn toolbar-btn-emerald"
-                            onClick={handleExportExcel}
-                            title="Export Data Peserta ke Excel"
-                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                            </svg>
-                            Export Excel
-                         </button>
-                      )}
-                      {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
+                   )}
+                   {(userRole === "admin_romantic_room" || userRole === "admin" || userRole === "pengurus_daerah" || userRole === "kmm_daerah" || userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
+                      <button
+                         className="toolbar-btn toolbar-btn-primary"
+                         onClick={handleExportExcel}
+                         title="Export Data Peserta ke Excel"
+                      >
+                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                         </svg>
+                         Export Excel
+                      </button>
+                   )}
+                   {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
                       <button
                          className="toolbar-btn toolbar-btn-danger"
                          onClick={handleDeleteAll}
@@ -1043,186 +1159,112 @@ export default function MandiriPage() {
                          </svg>
                          Hapus Semua
                       </button>
-                      )}
-                   </div>
+                   )}
                 </div>
 
                <div className="card">
-                  <div className="card-header" style={{ justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-                     <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+                  <div className="mandiri-card-header">
+                     <div className="mandiri-header-row">
                         <span className="card-title" style={{ marginBottom: 0 }}>Daftar Peserta ({total})</span>
-                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                           <button
-                              onClick={() => setFilterStatusPeserta("all")}
-                              style={{
-                                 padding: "6px 12px",
-                                 borderRadius: "20px",
-                                 border: "1px solid",
-                                 borderColor: filterStatusPeserta === "all" ? "var(--primary)" : "#e2e8f0",
-                                 background: filterStatusPeserta === "all" ? "var(--primary)" : "#fff",
-                                 color: filterStatusPeserta === "all" ? "#fff" : "#475569",
-                                 fontSize: "13px",
-                                 fontWeight: "600",
-                                 cursor: "pointer",
-                                 transition: "all 0.2s ease",
-                                 display: "inline-flex",
-                                 alignItems: "center",
-                                 gap: "6px"
-                              }}
-                           >
-                              Semua
-                              <span style={{
-                                 background: filterStatusPeserta === "all" ? "rgba(255,255,255,0.2)" : "#f1f5f9",
-                                 padding: "1px 6px",
-                                 borderRadius: "10px",
-                                 fontSize: "11px",
-                                 color: filterStatusPeserta === "all" ? "#fff" : "#64748b"
-                              }}>
-                                 {utusanDaerahCount + personCount}
-                              </span>
-                           </button>
-                           
-                           <button
-                              onClick={() => setFilterStatusPeserta("Utusan Daerah")}
-                              style={{
-                                 padding: "6px 12px",
-                                 borderRadius: "20px",
-                                 border: "1px solid",
-                                 borderColor: filterStatusPeserta === "Utusan Daerah" ? "#2563eb" : "#e2e8f0",
-                                 background: filterStatusPeserta === "Utusan Daerah" ? "#2563eb" : "#fff",
-                                 color: filterStatusPeserta === "Utusan Daerah" ? "#fff" : "#475569",
-                                 fontSize: "13px",
-                                 fontWeight: "600",
-                                 cursor: "pointer",
-                                 transition: "all 0.2s ease",
-                                 display: "inline-flex",
-                                 alignItems: "center",
-                                 gap: "6px"
-                              }}
-                           >
-                              Utusan Daerah
-                              <span style={{
-                                 background: filterStatusPeserta === "Utusan Daerah" ? "rgba(255,255,255,0.2)" : "#f1f5f9",
-                                 padding: "1px 6px",
-                                 borderRadius: "10px",
-                                 fontSize: "11px",
-                                 color: filterStatusPeserta === "Utusan Daerah" ? "#fff" : "#64748b"
-                              }}>
-                                 {utusanDaerahCount}
-                              </span>
-                           </button>
-                           
-                           <button
-                              onClick={() => setFilterStatusPeserta("Person")}
-                              style={{
-                                 padding: "6px 12px",
-                                 borderRadius: "20px",
-                                 border: "1px solid",
-                                 borderColor: filterStatusPeserta === "Person" ? "#8b5cf6" : "#e2e8f0",
-                                 background: filterStatusPeserta === "Person" ? "#8b5cf6" : "#fff",
-                                 color: filterStatusPeserta === "Person" ? "#fff" : "#475569",
-                                 fontSize: "13px",
-                                 fontWeight: "600",
-                                 cursor: "pointer",
-                                 transition: "all 0.2s ease",
-                                 display: "inline-flex",
-                                 alignItems: "center",
-                                 gap: "6px"
-                              }}
-                           >
-                              Person
-                              <span style={{
-                                 background: filterStatusPeserta === "Person" ? "rgba(255,255,255,0.2)" : "#f1f5f9",
-                                 padding: "1px 6px",
-                                 borderRadius: "10px",
-                                 fontSize: "11px",
-                                 color: filterStatusPeserta === "Person" ? "#fff" : "#64748b"
-                              }}>
-                                 {personCount}
-                              </span>
-                           </button>
-                           
-                           {/* Pemisah */}
-                           <div style={{ width: "1px", background: "#e2e8f0", margin: "0 4px" }}></div>
-                           
-                           <button onClick={() => setFilterStatusPeserta("pesertaAll")} style={{
-                               padding: "6px 12px", border: "1px solid #e0f2fe", borderRadius: "20px", fontSize: "13px", 
-                               background: filterStatusPeserta === "pesertaAll" ? "#0ea5e9" : "#f0f9ff",
-                               color: filterStatusPeserta === "pesertaAll" ? "#fff" : "#0284c7", fontWeight: filterStatusPeserta === "pesertaAll" ? 600 : 500, cursor: "pointer", display: "flex", gap: "6px", alignItems: "center"
-                           }}>
-                              Peserta <span style={{ background: filterStatusPeserta === "pesertaAll" ? "rgba(255,255,255,0.2)" : "#bae6fd", color: filterStatusPeserta === "pesertaAll" ? "#fff" : "#0369a1", padding: "1px 6px", borderRadius: "10px", fontSize: "11px" }}>{pesertaAllCount}</span>
-                           </button>
-
-                           <button onClick={() => setFilterStatusPeserta("pesertaL")} style={{
-                               padding: "6px 12px", border: "1px solid #e0f2fe", borderRadius: "20px", fontSize: "13px",
-                               background: filterStatusPeserta === "pesertaL" ? "#0ea5e9" : "transparent",
-                               color: filterStatusPeserta === "pesertaL" ? "#fff" : "#0284c7", fontWeight: filterStatusPeserta === "pesertaL" ? 600 : 500, cursor: "pointer", display: "flex", gap: "6px", alignItems: "center"
-                           }}>
-                              Peserta (L) <span style={{ background: filterStatusPeserta === "pesertaL" ? "rgba(255,255,255,0.2)" : "#bae6fd", color: filterStatusPeserta === "pesertaL" ? "#fff" : "#0369a1", padding: "1px 6px", borderRadius: "10px", fontSize: "11px" }}>{pesertaLCount}</span>
-                           </button>
-
-                           <button onClick={() => setFilterStatusPeserta("pesertaP")} style={{
-                               padding: "6px 12px", border: "1px solid #e0f2fe", borderRadius: "20px", fontSize: "13px",
-                               background: filterStatusPeserta === "pesertaP" ? "#0ea5e9" : "transparent",
-                               color: filterStatusPeserta === "pesertaP" ? "#fff" : "#0284c7", fontWeight: filterStatusPeserta === "pesertaP" ? 600 : 500, cursor: "pointer", display: "flex", gap: "6px", alignItems: "center"
-                           }}>
-                              Peserta (P) <span style={{ background: filterStatusPeserta === "pesertaP" ? "rgba(255,255,255,0.2)" : "#bae6fd", color: filterStatusPeserta === "pesertaP" ? "#fff" : "#0369a1", padding: "1px 6px", borderRadius: "10px", fontSize: "11px" }}>{pesertaPCount}</span>
-                           </button>
-
-                           {/* Pemisah */}
-                           <div style={{ width: "1px", background: "#e2e8f0", margin: "0 4px" }}></div>
-                           
-                           <button onClick={() => setFilterStatusPeserta("panitiaAll")} style={{
-                               padding: "6px 12px", border: "1px solid #dcfce7", borderRadius: "20px", fontSize: "13px",
-                               background: filterStatusPeserta === "panitiaAll" ? "#10b981" : "#f0fdf4",
-                               color: filterStatusPeserta === "panitiaAll" ? "#fff" : "#15803d", fontWeight: filterStatusPeserta === "panitiaAll" ? 600 : 500, cursor: "pointer", display: "flex", gap: "6px", alignItems: "center"
-                           }}>
-                              Panitia <span style={{ background: filterStatusPeserta === "panitiaAll" ? "rgba(255,255,255,0.2)" : "#bbf7d0", color: filterStatusPeserta === "panitiaAll" ? "#fff" : "#15803d", padding: "1px 6px", borderRadius: "10px", fontSize: "11px" }}>{panitiaAllCount}</span>
-                           </button>
-
-                           <button onClick={() => setFilterStatusPeserta("panitiaL")} style={{
-                               padding: "6px 12px", border: "1px solid #dcfce7", borderRadius: "20px", fontSize: "13px",
-                               background: filterStatusPeserta === "panitiaL" ? "#10b981" : "transparent",
-                               color: filterStatusPeserta === "panitiaL" ? "#fff" : "#15803d", fontWeight: filterStatusPeserta === "panitiaL" ? 600 : 500, cursor: "pointer", display: "flex", gap: "6px", alignItems: "center"
-                           }}>
-                              Panitia (L) <span style={{ background: filterStatusPeserta === "panitiaL" ? "rgba(255,255,255,0.2)" : "#bbf7d0", color: filterStatusPeserta === "panitiaL" ? "#fff" : "#15803d", padding: "1px 6px", borderRadius: "10px", fontSize: "11px" }}>{panitiaLCount}</span>
-                           </button>
-
-                           <button onClick={() => setFilterStatusPeserta("panitiaP")} style={{
-                               padding: "6px 12px", border: "1px solid #dcfce7", borderRadius: "20px", fontSize: "13px",
-                               background: filterStatusPeserta === "panitiaP" ? "#10b981" : "transparent",
-                               color: filterStatusPeserta === "panitiaP" ? "#fff" : "#15803d", fontWeight: filterStatusPeserta === "panitiaP" ? 600 : 500, cursor: "pointer", display: "flex", gap: "6px", alignItems: "center"
-                           }}>
-                              Panitia (P) <span style={{ background: filterStatusPeserta === "panitiaP" ? "rgba(255,255,255,0.2)" : "#bbf7d0", color: filterStatusPeserta === "panitiaP" ? "#fff" : "#15803d", padding: "1px 6px", borderRadius: "10px", fontSize: "11px" }}>{panitiaPCount}</span>
-                           </button>
-
-                        </div>
                      </div>
-                     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        <div className="flex gap-1">
+                     <div className="filter-pill-scroll">
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "all" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("all")}
+                        >
+                           Semua <span className="pill-badge">{utusanDaerahCount + personCount}</span>
+                        </button>
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "Utusan Daerah" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("Utusan Daerah")}
+                        >
+                           Utusan Daerah <span className="pill-badge">{utusanDaerahCount}</span>
+                        </button>
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "Person" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("Person")}
+                        >
+                           Person <span className="pill-badge">{personCount}</span>
+                        </button>
+
+                        <div className="pill-divider" />
+
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "pesertaAll" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("pesertaAll")}
+                        >
+                           Peserta <span className="pill-badge">{pesertaAllCount}</span>
+                        </button>
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "pesertaL" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("pesertaL")}
+                        >
+                           Peserta (L) <span className="pill-badge">{pesertaLCount}</span>
+                        </button>
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "pesertaP" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("pesertaP")}
+                        >
+                           Peserta (P) <span className="pill-badge">{pesertaPCount}</span>
+                        </button>
+
+                        <div className="pill-divider" />
+
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "panitiaAll" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("panitiaAll")}
+                        >
+                           Panitia <span className="pill-badge">{panitiaAllCount}</span>
+                        </button>
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "panitiaL" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("panitiaL")}
+                        >
+                           Panitia (L) <span className="pill-badge">{panitiaLCount}</span>
+                        </button>
+                        <button
+                           className={`filter-pill-btn ${filterStatusPeserta === "panitiaP" ? "active" : ""}`}
+                           onClick={() => setFilterStatusPeserta("panitiaP")}
+                        >
+                           Panitia (P) <span className="pill-badge">{panitiaPCount}</span>
+                        </button>
+                     </div>
+
+                     <div className="mandiri-controls-row">
+                        <div className="mandiri-sort-group">
                            <button 
-                              className={`btn btn-sm ${sort === 'asc' ? 'btn-primary' : 'btn-secondary'}`} 
+                              className={`btn-sort-mandiri ${sort === 'asc' ? 'active' : ''}`} 
                               onClick={() => setSort(sort === 'asc' ? '' : 'asc')}
                               title="Urutkan No. Terkecil ke Terbesar"
                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14 }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14 }}>
                                  <path d="M12 19V5M5 12l7-7 7 7" />
                               </svg>
                               1-9
                            </button>
                            <button 
-                              className={`btn btn-sm ${sort === 'desc' ? 'btn-primary' : 'btn-secondary'}`} 
+                              className={`btn-sort-mandiri ${sort === 'desc' ? 'active' : ''}`} 
                               onClick={() => setSort(sort === 'desc' ? '' : 'desc')}
                               title="Urutkan No. Terbesar ke Terkecil"
                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14 }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14 }}>
                                  <path d="M12 5v14M5 12l7 7 7-7" />
                               </svg>
                               9-1
                            </button>
                         </div>
-                        <div className="search-bar" style={{ maxWidth: "250px" }}>
-                           <input type="text" className="form-control" placeholder="Cari di list ini..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <div className="mandiri-search-wrap">
+                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mandiri-search-icon">
+                              <circle cx="11" cy="11" r="8" />
+                              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                           </svg>
+                           <input 
+                              type="text" 
+                              className="mandiri-search-input" 
+                              placeholder="Cari nama, nomor unik, desa..." 
+                              value={search} 
+                              onChange={(e) => setSearch(e.target.value)} 
+                           />
                         </div>
                      </div>
                   </div>
@@ -1317,7 +1359,7 @@ export default function MandiriPage() {
                                           </td>
                                           <td data-label="Kehadiran" style={{ textAlign: "center" }}>
                                              {item.keterangan === "pulang" ? (
-                                                <span className="badge" style={{ background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>Pulang</span>
+                                                <span className="badge" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>Pulang</span>
                                              ) : item.isHadir === 1 ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                                                    <span className="badge badge-green">Hadir</span>
@@ -1376,7 +1418,7 @@ export default function MandiriPage() {
                                              <div className="flex gap-2">
                                                 {item.statusMandiri === "Menunggu" ? (
                                                    <>
-                                                      <button className="btn btn-sm" style={{ backgroundColor: "#10b981", color: "white" }} onClick={() => handleIzinkan(item)}>Izinkan</button>
+                                                      <button className="btn btn-sm" style={{ backgroundColor: "#3d5a45", color: "white" }} onClick={() => handleIzinkan(item)}>Izinkan</button>
                                                       <button className="btn btn-sm btn-danger" onClick={() => handleTolak(item.id, item.nama)}>Tidak Izinkan</button>
                                                    </>
                                                 ) : (
@@ -1485,8 +1527,12 @@ export default function MandiriPage() {
                                           ) : (
                                              <span className="badge badge-gray">Belum Hadir</span>
                                           )}
-                                          <div><strong>Target Menikah</strong>: {item.targetMenikah || "-"}</div>
-                                    </div>
+                                       </div>
+
+                                       <div className="status-item">
+                                          <span className="status-label">Target Menikah</span>
+                                          <span style={{ fontSize: 12 }}>{item.targetMenikah || "-"}</span>
+                                       </div>
 
                                        <div className="status-item">
                                           <span className="status-label">Status Akun</span>
@@ -1541,7 +1587,7 @@ export default function MandiriPage() {
                                     <div className="card-actions">
                                        {item.statusMandiri === "Menunggu" ? (
                                           <>
-                                             <button className="btn btn-sm flex-grow" style={{ backgroundColor: "#10b981", color: "white" }} onClick={() => handleIzinkan(item)}>
+                                             <button className="btn btn-sm flex-grow" style={{ backgroundColor: "#3d5a45", color: "white" }} onClick={() => handleIzinkan(item)}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14, marginRight: 6 }}>
                                                    <path d="M20 6L9 17l-5-5" />
                                                 </svg>
@@ -2035,18 +2081,19 @@ export default function MandiriPage() {
             .mobile-only-cards {
                display: none;
             }
-            .badge-blue { background: #eff6ff; color: #1d4ed8; }
+            .badge-blue { background: #eef4f0; color: #26392d; }
+            .badge-purple { background: #f7f0e2; color: #8a6d2f; }
             .badge-gray {
-               background: #f8fafc;
-               color: #64748b;
+               background: #faf7f2;
+               color: #5b6b60;
                padding: 4px 8px;
                border-radius: 6px;
                font-size: 11px;
                font-weight: 700;
             }
             .badge-green {
-               background: #f0fdf4;
-               color: #16a34a;
+               background: #eef4f0;
+               color: #3d5a45;
                padding: 4px 8px;
                border-radius: 6px;
                font-size: 11px;
@@ -2055,11 +2102,16 @@ export default function MandiriPage() {
             table thead th {
                position: sticky;
                top: 0;
-               background: #f8fafc;
+               background: #faf7f2;
                z-index: 10;
-               box-shadow: 0 1px 0 #e2e8f0;
+               box-shadow: 0 1px 0 #e6dfd3;
             }
             @media (max-width: 1024px) {
+               .table-wrapper {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  overflow: visible !important;
+               }
                .desktop-only-table {
                   display: none;
                }
@@ -2071,7 +2123,7 @@ export default function MandiriPage() {
                }
                .mobile-card {
                   background: #ffffff;
-                  border: 1px solid #e2e8f0;
+                  border: 1px solid #e6dfd3;
                   border-radius: 12px;
                   padding: 14px;
                   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
@@ -2088,12 +2140,12 @@ export default function MandiriPage() {
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                  border-bottom: 1px solid #f1f5f9;
+                  border-bottom: 1px solid #f4efe6;
                   padding-bottom: 8px;
                }
                .no-urut-badge {
-                  background: #f1f5f9;
-                  color: #475569;
+                  background: #f4efe6;
+                  color: #5b6b60;
                   font-weight: 700;
                   font-size: 12px;
                   padding: 4px 8px;
@@ -2103,35 +2155,35 @@ export default function MandiriPage() {
                   display: flex;
                   align-items: center;
                   gap: 4px;
-                  background: #f0fdf4;
-                  border: 1px solid #bbf7d0;
+                  background: #eef4f0;
+                  border: 1px solid rgba(61, 90, 69, 0.25);
                   padding: 2px 8px;
                   border-radius: 6px;
                }
                .unik-label {
                   font-size: 10px;
                   font-weight: 600;
-                  color: #16a34a;
+                  color: #3d5a45;
                   text-transform: uppercase;
                }
                .unik-value {
                   font-family: monospace;
                   font-size: 13px;
                   font-weight: 700;
-                  color: #15803d;
+                  color: #26392d;
                }
                .btn-copy-unik {
                   background: none;
                   border: none;
                   padding: 2px;
                   cursor: pointer;
-                  color: #16a34a;
+                  color: #3d5a45;
                   display: inline-flex;
                   align-items: center;
                   border-radius: 4px;
                }
                .btn-copy-unik:hover {
-                  background: #dcfce7;
+                  background: #e2ede5;
                }
                .profile-row {
                   display: flex;
@@ -2143,11 +2195,11 @@ export default function MandiriPage() {
                   height: 48px;
                   border-radius: 50%;
                   overflow: hidden;
-                  background: #f1f5f9;
+                  background: #f4efe6;
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  border: 2px solid #e2e8f0;
+                  border: 2px solid #e6dfd3;
                   flex-shrink: 0;
                }
                .avatar-img {
@@ -2158,7 +2210,7 @@ export default function MandiriPage() {
                .avatar-initial {
                   font-size: 18px;
                   font-weight: 700;
-                  color: #64748b;
+                  color: #5b6b60;
                }
                .profile-info {
                   display: flex;
@@ -2169,7 +2221,7 @@ export default function MandiriPage() {
                   margin: 0;
                   font-size: 15px;
                   font-weight: 700;
-                  color: #1e293b;
+                  color: #26392d;
                }
                .profile-badges {
                   display: flex;
@@ -2183,16 +2235,16 @@ export default function MandiriPage() {
                   font-weight: 500;
                }
                .gender-badge.male {
-                  background: #e0f2fe;
-                  color: #0369a1;
+                  background: #eef4f0;
+                  color: #26392d;
                }
                .gender-badge.female {
-                  background: #fce7f3;
-                  color: #be185d;
+                  background: #f7f0e2;
+                  color: #8a6d2f;
                }
                .category-badge {
-                  background: #f3f4f6;
-                  color: #4b5563;
+                  background: #f4efe6;
+                  color: #5b6b60;
                   font-size: 11px;
                   padding: 2px 6px;
                   border-radius: 4px;
@@ -2202,13 +2254,13 @@ export default function MandiriPage() {
                   display: flex;
                   align-items: center;
                   gap: 6px;
-                  color: #64748b;
+                  color: #5b6b60;
                   font-size: 12.5px;
                }
                .loc-icon {
                   width: 14px;
                   height: 14px;
-                  color: #94a3b8;
+                  color: #9aa89e;
                   flex-shrink: 0;
                }
                .location-text {
@@ -2218,7 +2270,7 @@ export default function MandiriPage() {
                   display: grid;
                   grid-template-columns: 1fr 1fr;
                   gap: 12px;
-                  background: #f8fafc;
+                  background: #faf7f2;
                   padding: 10px;
                   border-radius: 10px;
                }
@@ -2230,7 +2282,7 @@ export default function MandiriPage() {
                .status-label {
                   font-size: 10px;
                   font-weight: 600;
-                  color: #94a3b8;
+                  color: #9aa89e;
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
                }
@@ -2241,7 +2293,7 @@ export default function MandiriPage() {
                }
                .attendance-time {
                   font-size: 9.5px;
-                  color: #64748b;
+                  color: #5b6b60;
                   font-weight: 500;
                   padding-left: 2px;
                }
@@ -2268,12 +2320,7 @@ export default function MandiriPage() {
                .card-actions {
                   display: flex;
                   gap: 8px;
-                  padding: 14px;
-                  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-                  display: flex;
-                  flex-direction: column;
-gap: 12px;
-                  transition: transform 0.2s, box-shadow 0.2s;
+                  margin-top: 4px;
                }
                .mobile-card:hover {
                   transform: translateY(-1px);
@@ -2283,12 +2330,12 @@ gap: 12px;
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                  border-bottom: 1px solid #f1f5f9;
+                  border-bottom: 1px solid #f4efe6;
                   padding-bottom: 8px;
                }
                .no-urut-badge {
-                  background: #f1f5f9;
-                  color: #475569;
+                  background: #f4efe6;
+                  color: #5b6b60;
                   font-weight: 700;
                   font-size: 12px;
                   padding: 4px 8px;
@@ -2298,35 +2345,35 @@ gap: 12px;
                   display: flex;
                   align-items: center;
                   gap: 4px;
-                  background: #f0fdf4;
-                  border: 1px solid #bbf7d0;
+                  background: #eef4f0;
+                  border: 1px solid rgba(61, 90, 69, 0.25);
                   padding: 2px 8px;
                   border-radius: 6px;
                }
                .unik-label {
                   font-size: 10px;
                   font-weight: 600;
-                  color: #16a34a;
+                  color: #3d5a45;
                   text-transform: uppercase;
                }
                .unik-value {
                   font-family: monospace;
                   font-size: 13px;
                   font-weight: 700;
-                  color: #15803d;
+                  color: #26392d;
                }
                .btn-copy-unik {
                   background: none;
                   border: none;
                   padding: 2px;
                   cursor: pointer;
-                  color: #16a34a;
+                  color: #3d5a45;
                   display: inline-flex;
                   align-items: center;
                   border-radius: 4px;
                }
                .btn-copy-unik:hover {
-                  background: #dcfce7;
+                  background: #e2ede5;
                }
                .profile-row {
                   display: flex;
@@ -2338,11 +2385,11 @@ gap: 12px;
                   height: 48px;
                   border-radius: 50%;
                   overflow: hidden;
-                  background: #f1f5f9;
+                  background: #f4efe6;
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  border: 2px solid #e2e8f0;
+                  border: 2px solid #e6dfd3;
                   flex-shrink: 0;
                }
                .avatar-img {
@@ -2353,7 +2400,7 @@ gap: 12px;
                .avatar-initial {
                   font-size: 18px;
                   font-weight: 700;
-                  color: #64748b;
+                  color: #5b6b60;
                }
                .profile-info {
                   display: flex;
@@ -2364,7 +2411,7 @@ gap: 12px;
                   margin: 0;
                   font-size: 15px;
                   font-weight: 700;
-                  color: #1e293b;
+                  color: #26392d;
                }
                .profile-badges {
                   display: flex;
@@ -2378,16 +2425,16 @@ gap: 12px;
                   font-weight: 500;
                }
                .gender-badge.male {
-                  background: #e0f2fe;
-                  color: #0369a1;
+                  background: #eef4f0;
+                  color: #26392d;
                }
                .gender-badge.female {
-                  background: #fce7f3;
-                  color: #be185d;
+                  background: #f7f0e2;
+                  color: #8a6d2f;
                }
                .category-badge {
-                  background: #f3f4f6;
-                  color: #4b5563;
+                  background: #f4efe6;
+                  color: #5b6b60;
                   font-size: 11px;
                   padding: 2px 6px;
                   border-radius: 4px;
@@ -2397,13 +2444,13 @@ gap: 12px;
                   display: flex;
                   align-items: center;
                   gap: 6px;
-                  color: #64748b;
+                  color: #5b6b60;
                   font-size: 12.5px;
                }
                .loc-icon {
                   width: 14px;
                   height: 14px;
-                  color: #94a3b8;
+                  color: #9aa89e;
                   flex-shrink: 0;
                }
                .location-text {
@@ -2413,7 +2460,7 @@ gap: 12px;
                   display: grid;
                   grid-template-columns: 1fr 1fr;
                   gap: 12px;
-                  background: #f8fafc;
+                  background: #faf7f2;
                   padding: 10px;
                   border-radius: 10px;
                }
@@ -2425,7 +2472,7 @@ gap: 12px;
                .status-label {
                   font-size: 10px;
                   font-weight: 600;
-                  color: #94a3b8;
+                  color: #9aa89e;
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
                }
@@ -2436,7 +2483,7 @@ gap: 12px;
                }
                .attendance-time {
                   font-size: 9.5px;
-                  color: #64748b;
+                  color: #5b6b60;
                   font-weight: 500;
                   padding-left: 2px;
                }

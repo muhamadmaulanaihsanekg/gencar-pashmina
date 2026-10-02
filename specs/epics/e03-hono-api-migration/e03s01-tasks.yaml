@@ -1,0 +1,13 @@
+story_id: e03s01
+title: "Porting Auth & Session Middleware ke Hono"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Implementasi auth router dan JWT middleware di worker/index.ts atau worker/routes/auth.ts"
+    verify: "grep -q 'auth' worker/index.ts"
+    status: completed
+  - id: 2
+    description: "Verifikasi endpoint profile dan session check merespons JSON yang valid"
+    verify: "npx tsc --project worker/tsconfig.json"
+    status: completed

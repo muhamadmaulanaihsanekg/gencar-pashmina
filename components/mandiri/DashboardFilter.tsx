@@ -105,25 +105,30 @@ export default function DashboardFilter({ cities, villages, groups = [] }: Dashb
 
       <style jsx>{`
         .dashboard-filter-container {
-          background: white;
+          background: #ffffff;
           padding: 1.5rem;
           border-radius: 1rem;
-          border: 1px solid #e2e8f0;
+          border: 1px solid #e6dfd3;
           margin-bottom: 1.5rem;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 4px 16px rgba(38, 57, 45, 0.04);
         }
         .filter-header {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           font-weight: 700;
-          color: #1e293b;
+          color: #26392d;
           margin-bottom: 1.25rem;
-          font-size: 0.95rem;
+          font-size: 1rem;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          letter-spacing: 0.02em;
         }
         .filter-header span {
           text-transform: uppercase;
-          letter-spacing: 0.025em;
+          letter-spacing: 0.05em;
+        }
+        .filter-header :global(svg) {
+          color: #c5a059;
         }
         .filter-grid {
           display: grid;
@@ -137,33 +142,35 @@ export default function DashboardFilter({ cities, villages, groups = [] }: Dashb
           gap: 0.5rem;
         }
         .filter-item label {
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           font-weight: 700;
-          color: #64748b;
+          color: #5e6d62;
           text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
         .filter-item select {
           padding: 0.625rem;
           border-radius: 0.5rem;
-          border: 1px solid #e2e8f0;
+          border: 1px solid #e6dfd3;
           font-size: 0.9rem;
           outline: none;
-          background-color: #f8fafc;
+          background-color: #faf7f2;
+          color: #1f2b23;
           transition: all 0.2s;
         }
         .filter-item select:focus {
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-          background-color: white;
+          border-color: #3d5a45;
+          box-shadow: 0 0 0 3px rgba(61, 90, 69, 0.15);
+          background-color: #ffffff;
         }
         .filter-actions {
           display: flex;
           gap: 0.75rem;
         }
         .btn-filter-apply {
-          background: #1e293b;
-          color: white;
-          border: none;
+          background: linear-gradient(135deg, #3d5a45 0%, #26392d 100%);
+          color: #faf7f2;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           padding: 0.625rem 1.25rem;
           border-radius: 0.5rem;
           font-weight: 600;
@@ -173,12 +180,14 @@ export default function DashboardFilter({ cities, villages, groups = [] }: Dashb
           flex: 1;
         }
         .btn-filter-apply:hover {
-          background: #334155;
+          background: linear-gradient(135deg, #2e4434 0%, #1a271f 100%);
+          color: #ffffff;
+          box-shadow: 0 4px 12px rgba(38, 57, 45, 0.25);
         }
         .btn-filter-reset {
-          background: #f1f5f9;
-          color: #64748b;
-          border: 1px solid #e2e8f0;
+          background: #f5f0e6;
+          color: #5e6d62;
+          border: 1px solid #e6dfd3;
           padding: 0.625rem 1rem;
           border-radius: 0.5rem;
           font-weight: 600;
@@ -190,8 +199,8 @@ export default function DashboardFilter({ cities, villages, groups = [] }: Dashb
           transition: all 0.2s;
         }
         .btn-filter-reset:hover {
-          background: #e2e8f0;
-          color: #1e293b;
+          background: #eae2d3;
+          color: #1f2b23;
         }
         @media (max-width: 640px) {
           .filter-grid {

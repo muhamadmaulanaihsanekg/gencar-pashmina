@@ -1,0 +1,18 @@
+id: e01
+title: "Frontend Static Export"
+wsjf: 8.5
+total_bcps: 6
+status: done
+stories:
+  - id: e01s01
+    title: "Konversi 7 Server Components ke Client-Side Fetch"
+    bcps: 3
+    status: done
+    spec: e01s01-convert-server-pages.md
+    tasks: e01s01-tasks.yaml
+  - id: e01s02
+    title: "Konfigurasi output export & Verifikasi Build Statis"
+    bcps: 3
+    status: done
+    spec: e01s02-static-export-config.md
+    tasks: e01s02-tasks.yaml

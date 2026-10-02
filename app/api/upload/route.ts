@@ -49,7 +49,25 @@ export async function POST(request: NextRequest) {
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
-      return NextResponse.json({ error: "Konfigurasi Cloudinary tidak ditemukan" }, { status: 500 });
+      // Fallback: simpan langsung ke local public/uploads
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const fs = await import("fs");
+      const path = await import("path");
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const ext = path.extname(file.name || "") || ".jpg";
+      const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
+      const filePath = path.join(uploadDir, uniqueFilename);
+      fs.writeFileSync(filePath, buffer);
+
+      return NextResponse.json({
+        success: true,
+        url: `/uploads/${uniqueFilename}`,
+        public_id: uniqueFilename,
+      });
     }
 
     const timestamp = Math.round(new Date().getTime() / 1000).toString();

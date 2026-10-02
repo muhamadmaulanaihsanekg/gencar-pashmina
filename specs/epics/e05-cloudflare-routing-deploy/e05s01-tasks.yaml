@@ -1,0 +1,13 @@
+story_id: e05s01
+title: "Konfigurasi SPA Fallback & Cloudflare Pages Static"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Tambahkan file public/_redirects untuk SPA rewrite fallback di Cloudflare Pages"
+    verify: "test -f public/_redirects && grep -q '/index.html' public/_redirects"
+    status: completed
+  - id: 2
+    description: "Tambahkan script npm run deploy:pages yang mendeploy out/ langsung ke Cloudflare Pages"
+    verify: "grep -q 'deploy:pages' package.json"
+    status: completed

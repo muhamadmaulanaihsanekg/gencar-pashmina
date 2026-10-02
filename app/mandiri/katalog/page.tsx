@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Swal from "sweetalert2";
 import {
   Sparkles, Search, User, MapPin, Heart, Calendar,
-  GraduationCap, Briefcase, Lock, LogOut, ChevronDown,
+  GraduationCap, Briefcase, Lock, LogOut, ChevronDown, ChevronLeft, ChevronRight,
   Settings2, CheckCircle2, UserCheck, Users, Globe, Music, Utensils,
   X, ShieldCheck, Star, UtilityPole as UtensilsIcon, ArrowLeft, Instagram, Timer, MessageSquare, Clock, QrCode, Send
 } from "lucide-react";
@@ -811,7 +811,10 @@ export default function PublicKatalogPage() {
     async function fetchMyProfile() {
       setLoadingProfile(true);
       try {
-        const res = await fetch(`/api/public/mandiri/katalog/${currentUser.id}`);
+        const storedUnik = (typeof window !== "undefined" ? localStorage.getItem("attended_nomor_unik") : "") || currentUser?.nomorUnik || "";
+        const storedToken = (typeof window !== "undefined" ? localStorage.getItem("attended_session_token") : "") || "";
+        const qs = buildQuery({ nomorUnik: storedUnik, sessionToken: storedToken });
+        const res = await fetch(`/api/public/mandiri/katalog/${currentUser.id}${qs ? `?${qs}` : ""}`);
         if (res.ok) {
           const json = await res.json();
           setMyFullProfile(json);
@@ -823,7 +826,7 @@ export default function PublicKatalogPage() {
       }
     }
     fetchMyProfile();
-  }, [currentUser?.id]);
+  }, [currentUser?.id, currentUser?.nomorUnik]);
 
 
 
@@ -957,7 +960,7 @@ export default function PublicKatalogPage() {
             text: "Amal sholeh anda ke ruang titik tunggu utama, agar dijemput oleh Tim PNKB & Ibu Gambuh",
             icon: "info",
             confirmButtonText: "Baik",
-            confirmButtonColor: "#3b82f6",
+            confirmButtonColor: "#3d5a45",
             allowOutsideClick: false
           });
         }
@@ -993,7 +996,7 @@ export default function PublicKatalogPage() {
       showCancelButton: true,
       confirmButtonText: 'Ya, Kirim',
       cancelButtonText: 'Batal',
-      confirmButtonColor: '#3b82f6',
+      confirmButtonColor: '#3d5a45',
     });
 
     if (!isConfirmed) return;
@@ -1196,7 +1199,7 @@ export default function PublicKatalogPage() {
       showCancelButton: true,
       confirmButtonText: "Ya, Keluar",
       cancelButtonText: "Batal",
-      confirmButtonColor: "#3b82f6",
+      confirmButtonColor: "#3d5a45",
       cancelButtonColor: "#64748b"
     });
 
@@ -1277,7 +1280,7 @@ export default function PublicKatalogPage() {
           text: "Semoga alloh berikan pengampunan dan jodoh yg barokah",
           icon: "success",
           confirmButtonText: "Aamiin",
-          confirmButtonColor: "#3b82f6"
+          confirmButtonColor: "#3d5a45"
         });
       } catch (e: any) {
         console.error("Failed to perform pulang API request:", e);
@@ -1652,21 +1655,25 @@ export default function PublicKatalogPage() {
 
   if (isLocked || (katalogPublicStatus === "closed" && !hasAttended && !isAdmin)) {
     return (
-      <div className="locked-container">
-        <div className="locked-card">
-          <Lock size={48} className="lock-icon" />
-          <h1>Halaman Ditutup</h1>
-          <p>Maaf, halaman saat ini ditutup oleh Admin.</p>
-          <Link href="/" className="home-btn">Kembali ke Beranda</Link>
+      <div className="portal-root katalog-page-root">
+        <div className="arabesque-bg-layer" aria-hidden="true" />
+        <div className="ambient-glow-layer" aria-hidden="true" />
+        <div className="locked-container">
+          <div className="locked-card">
+            <Lock size={48} className="lock-icon" />
+            <h1>Halaman Ditutup</h1>
+            <p>Maaf, katalog saat ini ditutup oleh Panitia.</p>
+            <Link href="/" className="home-btn">Kembali ke Beranda</Link>
+          </div>
         </div>
         <style jsx>{`
-          .locked-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc; padding: 20px; }
-          .locked-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 400px; border: 1px solid #e2e8f0; }
-          .lock-icon { color: #ef4444; margin-bottom: 20px; }
-          h1 { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
-          p { color: #64748b; margin-bottom: 24px; line-height: 1.6; }
-          .home-btn { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: 0.2s; }
-          .home-btn:hover { background: #2563eb; transform: translateY(-2px); }
+          .locked-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; z-index: 1; }
+          .locked-card { background: #faf7f2; padding: 40px; border-radius: 24px; box-shadow: 0 16px 40px rgba(0,0,0,0.25); text-align: center; max-width: 420px; border: 1px solid rgba(197, 160, 89, 0.45); }
+          .lock-icon { color: #c5a059; margin-bottom: 20px; }
+          h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 700; color: #26392d; margin-bottom: 12px; }
+          p { color: #627265; margin-bottom: 24px; line-height: 1.6; font-size: 14px; }
+          .home-btn { display: inline-block; background: #3d5a45; color: white; padding: 12px 28px; border-radius: 999px; font-weight: 700; text-decoration: none; transition: 0.2s; border: 1px solid #c5a059; }
+          .home-btn:hover { background: #4d7057; transform: translateY(-2px); }
         `}</style>
       </div>
     );
@@ -1674,11 +1681,17 @@ export default function PublicKatalogPage() {
 
   if (verifying) {
     return (
-      <div className="loading-screen">
-        <div className="spinner-large"></div>
+      <div className="portal-root katalog-page-root">
+        <div className="arabesque-bg-layer" aria-hidden="true" />
+        <div className="ambient-glow-layer" aria-hidden="true" />
+        <div className="loading-screen">
+          <div className="spinner-large"></div>
+          <div className="loading-text">Memuat Katalog Pashmina 8.0...</div>
+        </div>
         <style jsx>{`
-          .loading-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc; flex-direction: column; }
-          .spinner-large { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+          .loading-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; position: relative; z-index: 1; gap: 16px; }
+          .spinner-large { width: 50px; height: 50px; border: 4px solid rgba(197, 160, 89, 0.2); border-top-color: #c5a059; border-radius: 50%; animation: spin 1s linear infinite; }
+          .loading-text { color: #c5a059; font-size: 14px; font-weight: 600; letter-spacing: 0.3px; }
           @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         `}</style>
       </div>
@@ -1694,7 +1707,11 @@ export default function PublicKatalogPage() {
   const selectedNames = selections.map(item => `${item.penerimaNama} (#${item.penerimaNoUrut || item.penerimaNo})`);
 
   return (
-    <div className="container pb-24">
+    <div className="portal-root katalog-page-root">
+      <div className="arabesque-bg-layer" aria-hidden="true" />
+      <div className="ambient-glow-layer" aria-hidden="true" />
+
+      <div className="container pb-24">
 
       {/* Desktop Tabs */}
       <div className="desktop-tab-nav">
@@ -1704,7 +1721,7 @@ export default function PublicKatalogPage() {
         </button>
         <button className={activeTab === "cart" ? "active" : ""} onClick={() => setActiveTab("cart")}>
           <div className="badge-icon-wrapper">
-            <Heart size={16} fill={activeTab === "cart" ? "#f43f5e" : "transparent"} color={activeTab === "cart" ? "#f43f5e" : "#64748b"} />
+            <Heart size={16} fill={activeTab === "cart" ? "#c5a059" : "transparent"} color={activeTab === "cart" ? "#c5a059" : "#64748b"} />
             {selectedIds.length > 0 && (
               <span className="badge-count-bubble">{selectedIds.length}</span>
             )}
@@ -2372,13 +2389,46 @@ export default function PublicKatalogPage() {
 
           {totalPages > 1 && (
             <div className="pagination">
-              <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>Sebelumnya</button>
+              <button
+                className="pagination-nav-btn"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                title="Halaman Sebelumnya"
+              >
+                <ChevronLeft size={16} />
+                <span className="pagination-text">Prev</span>
+              </button>
               <div className="page-numbers">
-                {[...Array(Math.min(5, totalPages))].map((_, i) => (
-                  <button key={i} className={page === i + 1 ? "active" : ""} onClick={() => setPage(i + 1)}>{i + 1}</button>
-                ))}
+                {(() => {
+                  let start = Math.max(1, page - 2);
+                  let end = Math.min(totalPages, start + 4);
+                  if (end - start < 4) {
+                    start = Math.max(1, end - 4);
+                  }
+                  const pages = [];
+                  for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                  }
+                  return pages.map(num => (
+                    <button
+                      key={num}
+                      className={page === num ? "active" : ""}
+                      onClick={() => setPage(num)}
+                    >
+                      {num}
+                    </button>
+                  ));
+                })()}
               </div>
-              <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Berikutnya</button>
+              <button
+                className="pagination-nav-btn"
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+                title="Halaman Berikutnya"
+              >
+                <span className="pagination-text">Next</span>
+                <ChevronRight size={16} />
+              </button>
             </div>
           )}
         </>
@@ -2388,7 +2438,7 @@ export default function PublicKatalogPage() {
       {activeTab === "cart" && (
         <div className="cart-container">
           <div className="selection-info-card">
-            <Heart size={20} fill="#f43f5e" color="#f43f5e" />
+            <Heart size={20} fill="#c5a059" color="#c5a059" />
             <span>Pilihan Anda ({selectedIds.length}/3)</span>
           </div>
 
@@ -2414,7 +2464,7 @@ export default function PublicKatalogPage() {
                   <div key={sel.id} className="cart-item-card">
                     <div className="cart-item-info">
                       <div className="cart-item-avatar">
-                        <Heart size={20} fill="#f43f5e" color="#f43f5e" />
+                        <Heart size={20} fill="#c5a059" color="#c5a059" />
                       </div>
                       <div>
                         <div className="cart-item-name">#{sel.penerimaNoUrut || sel.penerimaNo} {sel.penerimaNama}</div>
@@ -2466,21 +2516,21 @@ export default function PublicKatalogPage() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "24px 16px", minHeight: "60vh", justifyContent: "center" }}>
 
             {/* Mode Toggle Switch */}
-            <div style={{ display: "flex", gap: "6px", background: "#f1f5f9", padding: "4px", borderRadius: "10px", width: "100%", maxWidth: "340px", marginBottom: "4px" }}>
+            <div style={{ display: "flex", gap: "6px", background: "rgba(197, 160, 89, 0.15)", padding: "5px", borderRadius: "14px", width: "100%", maxWidth: "360px", marginBottom: "4px", border: "1px solid rgba(197, 160, 89, 0.35)" }}>
               <button
                 type="button"
                 onClick={() => setAbsenTabMode("show_barcode")}
                 style={{
                   flex: 1,
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: absenTabMode === "show_barcode" ? "white" : "transparent",
-                  color: absenTabMode === "show_barcode" ? "#6366f1" : "#64748b",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: absenTabMode === "show_barcode" ? "1px solid #c5a059" : "none",
+                  background: absenTabMode === "show_barcode" ? "#26392d" : "transparent",
+                  color: absenTabMode === "show_barcode" ? "#faf7f2" : "#c4d4c8",
                   fontWeight: 700,
                   fontSize: "13px",
                   cursor: "pointer",
-                  boxShadow: absenTabMode === "show_barcode" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                  boxShadow: absenTabMode === "show_barcode" ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
                   transition: "all 0.2s"
                 }}
               >
@@ -2494,15 +2544,15 @@ export default function PublicKatalogPage() {
                 }}
                 style={{
                   flex: 1,
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: absenTabMode === "scan_camera" ? "white" : "transparent",
-                  color: absenTabMode === "scan_camera" ? "#6366f1" : "#64748b",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: absenTabMode === "scan_camera" ? "1px solid #c5a059" : "none",
+                  background: absenTabMode === "scan_camera" ? "#26392d" : "transparent",
+                  color: absenTabMode === "scan_camera" ? "#faf7f2" : "#c4d4c8",
                   fontWeight: 700,
                   fontSize: "13px",
                   cursor: "pointer",
-                  boxShadow: absenTabMode === "scan_camera" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                  boxShadow: absenTabMode === "scan_camera" ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
                   transition: "all 0.2s"
                 }}
               >
@@ -2510,33 +2560,35 @@ export default function PublicKatalogPage() {
               </button>
             </div>
 
-            <div style={{ background: "white", borderRadius: "20px", padding: "28px", boxShadow: "0 8px 32px rgba(0,0,0,0.10)", border: "1px solid #f1f5f9", textAlign: "center", width: "100%", maxWidth: "340px" }}>
+            <div style={{ background: "#faf7f2", borderRadius: "24px", padding: "28px 24px", boxShadow: "0 10px 35px rgba(0,0,0,0.2)", border: "1px solid rgba(197, 160, 89, 0.45)", textAlign: "center", width: "100%", maxWidth: "360px" }}>
 
               {absenTabMode === "show_barcode" ? (
                 <>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "6px" }}>
-                    <QrCode size={20} color="#6366f1" />
-                    <span style={{ fontWeight: 800, fontSize: "15px", color: "#0f172a" }}>QR Code Absensi</span>
+                    <QrCode size={20} color="#c5a059" />
+                    <span style={{ fontWeight: 700, fontSize: "20px", color: "#26392d", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>QR Code Absensi</span>
                   </div>
-                  <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "20px" }}>Tunjukkan QR Code ini ke panitia untuk absensi</p>
+                  <p style={{ fontSize: "12px", color: "#627265", marginBottom: "20px" }}>Tunjukkan QR Code ini ke panitia untuk absensi</p>
 
                   {uniqueNo ? (
                     <>
-                      <div style={{ background: "white", borderRadius: "16px", padding: "16px", display: "inline-block", border: "2px solid #e2e8f0", marginBottom: "16px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+                      <div style={{ background: "white", borderRadius: "18px", padding: "16px", display: "inline-block", border: "2px solid rgba(197, 160, 89, 0.4)", marginBottom: "16px", boxShadow: "0 4px 15px rgba(0,0,0,0.06)" }}>
                         <img
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${uniqueNo}&margin=10`}
                           alt="QR Code Peserta"
                           style={{ width: "160px", height: "160px", display: "block" }}
                         />
                       </div>
-                      <div style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "white", borderRadius: "8px", padding: "8px 18px", fontSize: "18px", fontWeight: 900, letterSpacing: "3px", marginBottom: "8px", display: "inline-block" }}>
-                        {uniqueNo}
+                      <div>
+                        <div style={{ background: "linear-gradient(135deg, #26392d, #3d5a45)", color: "#faf7f2", borderRadius: "12px", padding: "10px 22px", fontSize: "19px", fontWeight: 800, letterSpacing: "3px", marginBottom: "6px", display: "inline-block", border: "1px solid #c5a059", boxShadow: "0 4px 15px rgba(38, 57, 45, 0.25)" }}>
+                          {uniqueNo}
+                        </div>
                       </div>
-                      <p style={{ fontSize: "11px", color: "#94a3b8", margin: "8px 0 0" }}>Nomor Unik Peserta</p>
+                      <p style={{ fontSize: "11px", color: "#627265", margin: "6px 0 0", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase" }}>Nomor Unik {attendanceRoleLabel}</p>
                     </>
                   ) : (
-                    <div style={{ padding: "30px", color: "#94a3b8", fontSize: "13px" }}>
-                      <QrCode size={40} color="#e2e8f0" style={{ margin: "0 auto 12px" }} />
+                    <div style={{ padding: "30px", color: "#627265", fontSize: "13px" }}>
+                      <QrCode size={40} color="#c5a059" style={{ margin: "0 auto 12px", opacity: 0.5 }} />
                       <p>Data QR Code tidak tersedia</p>
                     </div>
                   )}
@@ -2544,12 +2596,12 @@ export default function PublicKatalogPage() {
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "6px" }}>
-                    <QrCode size={20} color="#6366f1" />
-                    <span style={{ fontWeight: 800, fontSize: "15px", color: "#0f172a" }}>Scan QR Kegiatan</span>
+                    <QrCode size={20} color="#c5a059" />
+                    <span style={{ fontWeight: 700, fontSize: "20px", color: "#26392d", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Scan QR Kegiatan</span>
                   </div>
-                  <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "20px" }}>Pindai QR Code kegiatan yang ditampilkan panitia</p>
+                  <p style={{ fontSize: "12px", color: "#627265", marginBottom: "20px" }}>Pindai QR Code kegiatan yang ditampilkan panitia</p>
 
-                  <div style={{ position: "relative", width: "100%", height: "240px", borderRadius: "12px", overflow: "hidden", border: "2px dashed #cbd5e1", background: "#f8fafc", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ position: "relative", width: "100%", height: "240px", borderRadius: "16px", overflow: "hidden", border: "2px dashed rgba(197, 160, 89, 0.45)", background: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                     <div id="katalog-qr-reader" style={{ width: "100%", height: "100%" }} />
                     <style dangerouslySetInnerHTML={{
                       __html: `
@@ -2560,20 +2612,20 @@ export default function PublicKatalogPage() {
                       }
                     `}} />
                     {!scanningAbsen && (
-                      <div style={{ position: "absolute", zIndex: 2, padding: "20px", color: "#94a3b8" }}>
+                      <div style={{ position: "absolute", zIndex: 2, padding: "20px", color: "#627265" }}>
                         <button
                           type="button"
                           onClick={startSelfAbsenScan}
                           style={{
-                            background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                            background: "#3d5a45",
                             color: "white",
-                            border: "none",
-                            padding: "10px 20px",
-                            borderRadius: "10px",
-                            fontWeight: 800,
+                            border: "1px solid #c5a059",
+                            padding: "10px 22px",
+                            borderRadius: "999px",
+                            fontWeight: 700,
                             cursor: "pointer",
-                            fontSize: "14px",
-                            boxShadow: "0 4px 12px rgba(99,102,241,0.3)"
+                            fontSize: "13px",
+                            boxShadow: "0 4px 12px rgba(61, 90, 69, 0.3)"
                           }}
                         >
                           Mulai Pindai Kamera
@@ -2587,11 +2639,11 @@ export default function PublicKatalogPage() {
                       onClick={stopSelfAbsenScan}
                       style={{
                         marginTop: "16px",
-                        background: "#ef4444",
+                        background: "#842029",
                         color: "white",
-                        border: "none",
-                        padding: "8px 16px",
-                        borderRadius: "8px",
+                        border: "1px solid #f5c2c7",
+                        padding: "8px 18px",
+                        borderRadius: "999px",
                         fontWeight: 700,
                         cursor: "pointer",
                         fontSize: "12px"
@@ -2605,27 +2657,27 @@ export default function PublicKatalogPage() {
             </div>
 
             {attendanceValidation && (
-              <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ffffff)", borderRadius: "16px", padding: "16px", border: "1px solid #bbf7d0", width: "100%", maxWidth: "340px", boxShadow: "0 8px 24px rgba(34,197,94,0.12)" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                  <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", color: "white", flexShrink: 0 }}>
-                    <ShieldCheck size={22} />
+              <div style={{ background: "#faf7f2", borderRadius: "20px", padding: "18px 20px", border: "1px solid rgba(197, 160, 89, 0.45)", width: "100%", maxWidth: "360px", boxShadow: "0 8px 25px rgba(0,0,0,0.12)" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+                  <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#3d5a45", display: "flex", alignItems: "center", justifyContent: "center", color: "#faf7f2", border: "1px solid #c5a059", flexShrink: 0 }}>
+                    <ShieldCheck size={22} color="#c5a059" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#166534", fontSize: "13px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: "2px" }}>
-                      <CheckCircle2 size={15} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#3d5a45", fontSize: "11px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "2px" }}>
+                      <CheckCircle2 size={14} color="#3d5a45" />
                       <span>Kehadiran Tervalidasi</span>
                     </div>
-                    <div style={{ color: "#0f172a", fontSize: "14px", fontWeight: 800, lineHeight: 1.35 }}>
+                    <div style={{ color: "#26392d", fontSize: "15px", fontWeight: 700, lineHeight: 1.35, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
                       {attendanceRoleLabel} sudah hadir.
                     </div>
-                    <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "6px", color: "#475569", fontSize: "12px", fontWeight: 600 }}>
+                    <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "6px", color: "#627265", fontSize: "12px", fontWeight: 600 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                        <Calendar size={14} color="#16a34a" />
-                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{attendanceValidation.kegiatanJudul || "Kegiatan Mandiri"}</span>
+                        <Calendar size={14} color="#c5a059" />
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{attendanceValidation.kegiatanJudul || "Pashmina 8.0"}</span>
                       </div>
                       {attendanceValidation.timestamp && (
                         <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                          <Clock size={14} color="#16a34a" />
+                          <Clock size={14} color="#c5a059" />
                           <span>{formatAttendanceDate(attendanceValidation.timestamp)}</span>
                         </div>
                       )}
@@ -2636,14 +2688,14 @@ export default function PublicKatalogPage() {
             )}
 
             {currentUser && (
-              <div style={{ background: "white", borderRadius: "14px", padding: "16px 20px", border: "1px solid #e2e8f0", width: "100%", maxWidth: "340px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+              <div style={{ background: "#faf7f2", borderRadius: "18px", padding: "16px 20px", border: "1px solid rgba(197, 160, 89, 0.4)", width: "100%", maxWidth: "360px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: "18px", flexShrink: 0 }}>
+                  <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "linear-gradient(135deg, #26392d, #3d5a45)", border: "1px solid #c5a059", display: "flex", alignItems: "center", justifyContent: "center", color: "#faf7f2", fontWeight: 800, fontSize: "18px", flexShrink: 0 }}>
                     {currentUser.nama?.charAt(0) || "?"}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: "14px", color: "#0f172a" }}>{currentUser.nama}</div>
-                    <div style={{ fontSize: "12px", color: "#64748b" }}>No. Urut #{currentUser.nomorUrut || "-"}</div>
+                    <div style={{ fontWeight: 700, fontSize: "15px", color: "#26392d", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>{currentUser.nama}</div>
+                    <div style={{ fontSize: "12px", color: "#627265", fontWeight: 600 }}>No. Urut #{currentUser.nomorUrut || "-"}</div>
                   </div>
                 </div>
               </div>
@@ -3023,39 +3075,39 @@ export default function PublicKatalogPage() {
       {/* TAB CONTENT: SARAN */}
       {activeTab === "saran" && (
         <div className="cart-container" style={{ padding: '0 16px', maxWidth: '600px', margin: '0 auto', animation: 'slideUp 0.3s ease-out' }}>
-          <div style={{ background: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MessageSquare size={20} color="#3b82f6" />
+          <div style={{ background: '#faf7f2', borderRadius: '24px', padding: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', border: '1px solid rgba(197, 160, 89, 0.4)' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '22px', fontWeight: 700, fontFamily: "'Cormorant Garamond', Georgia, serif", color: '#26392d', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MessageSquare size={20} color="#c5a059" />
               Saran & Masukan
             </h3>
-            <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#627265', lineHeight: 1.5 }}>
               Berikan saran, kritik, atau masukan Anda terkait pelaksanaan Romantic Room untuk membantu kami menjadi lebih baik.
             </p>
 
             {mySaranList.length > 0 && !showSaranForm && !editingSaranId ? (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#627265' }}>
                     Riwayat saran dan masukan yang pernah Anda kirimkan.
                   </p>
-                  <button onClick={() => setShowSaranForm(true)} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button onClick={() => setShowSaranForm(true)} style={{ background: '#3d5a45', color: 'white', border: '1px solid #c5a059', padding: '8px 18px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Tambah
                   </button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {mySaranList.map((s, idx) => (
-                    <div key={idx} style={{ padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div key={idx} style={{ padding: '16px', background: '#ffffff', borderRadius: '14px', border: '1px solid rgba(197, 160, 89, 0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div style={{ flex: 1, marginRight: '16px' }}>
-                        <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+                        <div style={{ fontSize: '12px', color: '#c5a059', marginBottom: '4px', fontWeight: 600 }}>
                           {new Date(s.createdAt.replace(' ', 'T') + (!s.createdAt.endsWith('Z') ? 'Z' : '')).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} WIB
                           {s.isAnonim ? ' • Anonim' : ''}
                           {s.kepada ? ` • Kepada: ${s.kepada}` : ''}
                         </div>
-                        <div style={{ fontSize: '14px', color: '#334155', whiteSpace: 'pre-wrap' }}>{s.saran}</div>
+                        <div style={{ fontSize: '14px', color: '#1f2922', whiteSpace: 'pre-wrap' }}>{s.saran}</div>
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => handleEditSaran(s)} style={{ background: 'white', border: '1px solid #cbd5e1', color: '#3b82f6', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}>
+                        <button onClick={() => handleEditSaran(s)} style={{ background: 'white', border: '1px solid rgba(197, 160, 89, 0.4)', color: '#3d5a45', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                         <button onClick={() => handleDeleteSaran(s.id)} style={{ background: 'white', border: '1px solid #cbd5e1', color: '#ef4444', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}>
@@ -3075,9 +3127,9 @@ export default function PublicKatalogPage() {
                   <select
                     value={kepadaSaran}
                     onChange={(e) => setKepadaSaran(e.target.value)}
-                    style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '2px solid #e2e8f0', outline: 'none', fontSize: '14px', lineHeight: 1.5, background: '#f8fafc', transition: '0.2s', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                    style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '1px solid rgba(197, 160, 89, 0.4)', outline: 'none', fontSize: '14px', lineHeight: 1.5, background: '#ffffff', color: '#1f2922', transition: '0.2s', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    onFocus={(e) => e.target.style.borderColor = '#3d5a45'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(197, 160, 89, 0.4)'}
                     required
                   >
                     <option value="" disabled>Pilih Tujuan Saran...</option>
@@ -3095,9 +3147,9 @@ export default function PublicKatalogPage() {
                       value={kepadaSaranLainnya}
                       onChange={(e) => setKepadaSaranLainnya(e.target.value)}
                       placeholder="Masukkan tujuan saran lainnya..."
-                      style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '2px solid #e2e8f0', outline: 'none', fontSize: '14px', lineHeight: 1.5, background: '#f8fafc', transition: '0.2s', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                      onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                      onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                      style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '1px solid rgba(197, 160, 89, 0.4)', outline: 'none', fontSize: '14px', lineHeight: 1.5, background: '#ffffff', color: '#1f2922', transition: '0.2s', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                      onFocus={(e) => e.target.style.borderColor = '#3d5a45'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(197, 160, 89, 0.4)'}
                       required
                     />
                   </div>
@@ -3109,9 +3161,9 @@ export default function PublicKatalogPage() {
                     onChange={(e) => setSaranText(e.target.value)}
                     placeholder="Ketik saran atau masukan Anda di sini..."
                     rows={6}
-                    style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '2px solid #e2e8f0', outline: 'none', resize: 'none', fontSize: '14px', lineHeight: 1.5, background: '#f8fafc', transition: '0.2s', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                    style={{ width: '100%', padding: '16px', borderRadius: '16px', border: '1px solid rgba(197, 160, 89, 0.4)', outline: 'none', resize: 'none', fontSize: '14px', lineHeight: 1.5, background: '#ffffff', color: '#1f2922', transition: '0.2s', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    onFocus={(e) => e.target.style.borderColor = '#3d5a45'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(197, 160, 89, 0.4)'}
                     required
                   />
                 </div>
@@ -3124,7 +3176,7 @@ export default function PublicKatalogPage() {
                     onChange={(e) => setIsAnonimSaran(e.target.checked)}
                     style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                   />
-                  <label htmlFor="anonim-saran" style={{ fontSize: '13px', color: '#475569', cursor: 'pointer', fontWeight: 600 }}>
+                  <label htmlFor="anonim-saran" style={{ fontSize: '13px', color: '#26392d', cursor: 'pointer', fontWeight: 600 }}>
                     Kirim sebagai Anonim
                   </label>
                 </div>
@@ -3133,7 +3185,7 @@ export default function PublicKatalogPage() {
                   <button
                     type="submit"
                     disabled={submittingSaran || !saranText.trim()}
-                    style={{ flex: 1, padding: '14px', borderRadius: '16px', border: 'none', background: !saranText.trim() ? '#cbd5e1' : '#3b82f6', color: 'white', fontWeight: 800, fontSize: '14px', cursor: !saranText.trim() ? 'not-allowed' : 'pointer', transition: '0.2s', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    style={{ flex: 1, padding: '14px', borderRadius: '16px', border: !saranText.trim() ? 'none' : '1px solid #c5a059', background: !saranText.trim() ? '#ede8de' : '#3d5a45', color: !saranText.trim() ? '#8c9b90' : 'white', fontWeight: 800, fontSize: '14px', cursor: !saranText.trim() ? 'not-allowed' : 'pointer', transition: '0.2s', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                   >
                     {submittingSaran ? (
                       "Mengirim..."
@@ -3148,7 +3200,7 @@ export default function PublicKatalogPage() {
                     <button
                       type="button"
                       onClick={() => { setEditingSaranId(null); setSaranText(''); setKepadaSaran(''); setIsAnonimSaran(false); }}
-                      style={{ padding: '14px 20px', borderRadius: '16px', border: '2px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      style={{ padding: '14px 20px', borderRadius: '16px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#faf7f2', color: '#26392d', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                       Batal
                     </button>
@@ -3156,7 +3208,7 @@ export default function PublicKatalogPage() {
                     <button
                       type="button"
                       onClick={() => { setShowSaranForm(false); setSaranText(''); setKepadaSaran(''); setIsAnonimSaran(false); }}
-                      style={{ padding: '14px 20px', borderRadius: '16px', border: '2px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      style={{ padding: '14px 20px', borderRadius: '16px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#faf7f2', color: '#26392d', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                       Batal
                     </button>
@@ -3298,7 +3350,7 @@ export default function PublicKatalogPage() {
                     mandiriKelompokId: myFullProfile.mandiriKelompokId?.toString() || "",
                   });
                   setIsEditingProfile(true);
-                }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '14px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 800, fontSize: '15px', cursor: 'pointer', transition: '0.2s', width: '100%', marginBottom: '4px' }}>
+                }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '16px', border: '1px solid #c5a059', background: '#3d5a45', color: 'white', fontWeight: 800, fontSize: '15px', cursor: 'pointer', transition: '0.2s', width: '100%', marginBottom: '4px' }}>
                   <Settings2 size={18} />
                   <span>Edit Biodata</span>
                 </button>
@@ -3313,7 +3365,27 @@ export default function PublicKatalogPage() {
               </div>
             </div>
           ) : (
-            <div className="profile-error">Gagal memuat profil Anda. Silakan coba lagi.</div>
+            <div className="profile-error" style={{ textAlign: "center", padding: "40px 24px", background: "#faf7f2", borderRadius: "24px", border: "1px solid rgba(197, 160, 89, 0.4)", boxShadow: "0 10px 30px rgba(0,0,0,0.15)", maxWidth: "420px", margin: "20px auto" }}>
+              <p style={{ margin: "0 0 16px 0", fontSize: "15px", color: "#26392d", fontWeight: 600 }}>Gagal memuat profil Anda.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (currentUser?.id) {
+                    setLoadingProfile(true);
+                    const storedUnik = (typeof window !== "undefined" ? localStorage.getItem("attended_nomor_unik") : "") || currentUser?.nomorUnik || "";
+                    const storedToken = (typeof window !== "undefined" ? localStorage.getItem("attended_session_token") : "") || "";
+                    const qs = buildQuery({ nomorUnik: storedUnik, sessionToken: storedToken });
+                    fetch(`/api/public/mandiri/katalog/${currentUser.id}${qs ? `?${qs}` : ""}`)
+                      .then(r => r.json())
+                      .then(json => { if (!json.error) setMyFullProfile(json); })
+                      .finally(() => setLoadingProfile(false));
+                  }
+                }}
+                style={{ background: "#3d5a45", color: "white", border: "1px solid #c5a059", padding: "10px 24px", borderRadius: "999px", fontWeight: 700, fontSize: "13px", cursor: "pointer", transition: "0.2s" }}
+              >
+                Coba Muat Ulang
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -3321,13 +3393,13 @@ export default function PublicKatalogPage() {
       {/* EDIT PROFILE MODAL */}
       {isEditingProfile && (
         <div className="modal-overlay" onClick={() => setIsEditingProfile(false)} style={{ zIndex: 9999 }}>
-          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%', padding: '24px', borderRadius: '24px', background: 'white' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '20px', fontWeight: 800, color: '#1e293b' }}>Edit Biodata</h3>
+          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%', padding: '28px', borderRadius: '24px', background: '#faf7f2', border: '1px solid rgba(197, 160, 89, 0.45)', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '24px', fontWeight: 700, fontFamily: "'Cormorant Garamond', Georgia, serif", color: '#26392d' }}>Edit Biodata</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '60vh', overflowY: 'auto', paddingRight: '4px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
                 <div
-                  style={{ width: "100px", height: "100px", borderRadius: "50%", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: "12px", border: "2px solid #e2e8f0", cursor: editProfileForm.foto ? "zoom-in" : "default" }}
+                  style={{ width: "100px", height: "100px", borderRadius: "50%", background: "rgba(197, 160, 89, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: "12px", border: "2px solid #c5a059", cursor: editProfileForm.foto ? "zoom-in" : "default" }}
                   onClick={() => {
                     if (editProfileForm.foto) {
                       Swal.fire({
@@ -3344,11 +3416,11 @@ export default function PublicKatalogPage() {
                   {editProfileForm.foto ? (
                     <img src={editProfileForm.foto} alt="Foto Baru" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
-                    <User size={40} color="#94a3b8" />
+                    <User size={40} color="#26392d" />
                   )}
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <label style={{ background: "#3b82f6", color: "white", padding: "8px 16px", borderRadius: "8px", fontSize: "12px", fontWeight: "bold", cursor: uploadingFoto ? "not-allowed" : "pointer", opacity: uploadingFoto ? 0.7 : 1 }}>
+                  <label style={{ background: "#3d5a45", color: "white", border: "1px solid #c5a059", padding: "8px 18px", borderRadius: "999px", fontSize: "12px", fontWeight: "bold", cursor: uploadingFoto ? "not-allowed" : "pointer", opacity: uploadingFoto ? 0.7 : 1 }}>
                     {uploadingFoto ? "Mengunggah..." : "Ganti Foto"}
                     <input
                       type="file"
@@ -3382,48 +3454,48 @@ export default function PublicKatalogPage() {
                     />
                   </label>
                   {editProfileForm.foto && (
-                    <button type="button" onClick={() => setEditProfileForm({ ...editProfileForm, foto: "" })} style={{ background: "#fee2e2", color: "#ef4444", border: "1px solid #fca5a5", padding: "8px 16px", borderRadius: "8px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>
+                    <button type="button" onClick={() => setEditProfileForm({ ...editProfileForm, foto: "" })} style={{ background: "#fee2e2", color: "#ef4444", border: "1px solid #fca5a5", padding: "8px 16px", borderRadius: "999px", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}>
                       Hapus Foto
                     </button>
                   )}
                 </div>
-                <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "8px" }}>Format JPG/PNG/WEBP maks 5MB.</div>
+                <div style={{ fontSize: "11px", color: "#627265", marginTop: "8px" }}>Format JPG/PNG/WEBP maks 5MB.</div>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Nama Lengkap</label>
-                <input type="text" value={editProfileForm.nama} onChange={e => setEditProfileForm({ ...editProfileForm, nama: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Nama Lengkap</label>
+                <input type="text" value={editProfileForm.nama} onChange={e => setEditProfileForm({ ...editProfileForm, nama: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Jenis Kelamin</label>
-                  <select value={editProfileForm.jenisKelamin} onChange={e => setEditProfileForm({ ...editProfileForm, jenisKelamin: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Jenis Kelamin</label>
+                  <select value={editProfileForm.jenisKelamin} onChange={e => setEditProfileForm({ ...editProfileForm, jenisKelamin: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}>
                     <option value="L">Laki-laki</option>
                     <option value="P">Perempuan</option>
                   </select>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Suku</label>
-                  <input type="text" value={editProfileForm.suku} onChange={e => setEditProfileForm({ ...editProfileForm, suku: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Suku</label>
+                  <input type="text" value={editProfileForm.suku} onChange={e => setEditProfileForm({ ...editProfileForm, suku: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Tempat Lahir</label>
-                  <input type="text" value={editProfileForm.tempatLahir} onChange={e => setEditProfileForm({ ...editProfileForm, tempatLahir: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Tempat Lahir</label>
+                  <input type="text" value={editProfileForm.tempatLahir} onChange={e => setEditProfileForm({ ...editProfileForm, tempatLahir: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Tanggal Lahir</label>
-                  <IndonesianDateInput value={editProfileForm.tanggalLahir} onChange={(val: string) => setEditProfileForm({ ...editProfileForm, tanggalLahir: val })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none', fontFamily: 'inherit' }} />
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Tanggal Lahir</label>
+                  <IndonesianDateInput value={editProfileForm.tanggalLahir} onChange={(val: string) => setEditProfileForm({ ...editProfileForm, tanggalLahir: val })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none', fontFamily: 'inherit' }} />
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Tinggi Badan (cm)</label>
-                  <input type="number" value={editProfileForm.tinggiBadan || ""} onChange={e => setEditProfileForm({ ...editProfileForm, tinggiBadan: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Tinggi Badan (cm)</label>
+                  <input type="number" value={editProfileForm.tinggiBadan || ""} onChange={e => setEditProfileForm({ ...editProfileForm, tinggiBadan: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Status Nikah</label>
-                  <select value={editProfileForm.statusNikah || ""} onChange={e => setEditProfileForm({ ...editProfileForm, statusNikah: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Status Nikah</label>
+                  <select value={editProfileForm.statusNikah || ""} onChange={e => setEditProfileForm({ ...editProfileForm, statusNikah: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}>
                     <option value="">Pilih Status</option>
                     <option value="Lajang / Perjaka / Perawan">Lajang / Perjaka / Perawan</option>
                     <option value="Duda / Janda">Duda / Janda</option>
@@ -3432,69 +3504,69 @@ export default function PublicKatalogPage() {
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Anak Ke</label>
-                  <input type="number" value={editProfileForm.anakKe || ""} onChange={e => setEditProfileForm({ ...editProfileForm, anakKe: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Anak Ke</label>
+                  <input type="number" value={editProfileForm.anakKe || ""} onChange={e => setEditProfileForm({ ...editProfileForm, anakKe: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Dari Saudara</label>
-                  <input type="number" value={editProfileForm.jumlahSaudara || ""} onChange={e => setEditProfileForm({ ...editProfileForm, jumlahSaudara: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Dari Saudara</label>
+                  <input type="number" value={editProfileForm.jumlahSaudara || ""} onChange={e => setEditProfileForm({ ...editProfileForm, jumlahSaudara: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Daerah/Kota</label>
-                  <select value={editProfileForm.kota || ""} onChange={e => setEditProfileForm({ ...editProfileForm, kota: e.target.value, mandiriDesaId: "", mandiriKelompokId: "" })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Daerah/Kota</label>
+                  <select value={editProfileForm.kota || ""} onChange={e => setEditProfileForm({ ...editProfileForm, kota: e.target.value, mandiriDesaId: "", mandiriKelompokId: "" })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}>
                     <option value="">Pilih Daerah/Kota</option>
                     {kotaList.map(k => <option key={k} value={k}>{k}</option>)}
                   </select>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Desa</label>
-                  <select value={editProfileForm.mandiriDesaId || ""} onChange={e => setEditProfileForm({ ...editProfileForm, mandiriDesaId: e.target.value, mandiriKelompokId: "" })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} disabled={!editProfileForm.kota}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Desa</label>
+                  <select value={editProfileForm.mandiriDesaId || ""} onChange={e => setEditProfileForm({ ...editProfileForm, mandiriDesaId: e.target.value, mandiriKelompokId: "" })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} disabled={!editProfileForm.kota}>
                     <option value="">Pilih Desa</option>
                     {wilayahList.filter(w => w.kota === editProfileForm.kota).map(w => <option key={w.id} value={w.id}>{w.nama}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Kelompok</label>
-                <select value={editProfileForm.mandiriKelompokId || ""} onChange={e => setEditProfileForm({ ...editProfileForm, mandiriKelompokId: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} disabled={!editProfileForm.mandiriDesaId}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Kelompok</label>
+                <select value={editProfileForm.mandiriKelompokId || ""} onChange={e => setEditProfileForm({ ...editProfileForm, mandiriKelompokId: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} disabled={!editProfileForm.mandiriDesaId}>
                   <option value="">Pilih Kelompok</option>
                   {kelompokList.filter(k => String(k.desaId || k.mandiriDesaId) === String(editProfileForm.mandiriDesaId)).map(k => <option key={k.id} value={k.id}>{k.nama}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Alamat Lengkap</label>
-                <textarea value={editProfileForm.alamat || ""} onChange={e => setEditProfileForm({ ...editProfileForm, alamat: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none', minHeight: '60px', fontFamily: 'inherit' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Alamat Lengkap</label>
+                <textarea value={editProfileForm.alamat || ""} onChange={e => setEditProfileForm({ ...editProfileForm, alamat: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none', minHeight: '60px', fontFamily: 'inherit' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Pendidikan</label>
-                <input type="text" value={editProfileForm.pendidikan} onChange={e => setEditProfileForm({ ...editProfileForm, pendidikan: e.target.value })} placeholder="S1/SMA/dll" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Pendidikan</label>
+                <input type="text" value={editProfileForm.pendidikan} onChange={e => setEditProfileForm({ ...editProfileForm, pendidikan: e.target.value })} placeholder="S1/SMA/dll" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Pekerjaan</label>
-                <input type="text" value={editProfileForm.pekerjaan} onChange={e => setEditProfileForm({ ...editProfileForm, pekerjaan: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Pekerjaan</label>
+                <input type="text" value={editProfileForm.pekerjaan} onChange={e => setEditProfileForm({ ...editProfileForm, pekerjaan: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Instagram</label>
-                <input type="text" value={editProfileForm.instagram} onChange={e => setEditProfileForm({ ...editProfileForm, instagram: e.target.value })} placeholder="@username" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Instagram</label>
+                <input type="text" value={editProfileForm.instagram} onChange={e => setEditProfileForm({ ...editProfileForm, instagram: e.target.value })} placeholder="@username" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Hobi</label>
-                <input type="text" value={editProfileForm.hobi} onChange={e => setEditProfileForm({ ...editProfileForm, hobi: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Hobi</label>
+                <input type="text" value={editProfileForm.hobi} onChange={e => setEditProfileForm({ ...editProfileForm, hobi: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Makanan/Minuman Favorit</label>
-                <input type="text" value={editProfileForm.makananMinumanFavorit} onChange={e => setEditProfileForm({ ...editProfileForm, makananMinumanFavorit: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Makanan/Minuman Favorit</label>
+                <input type="text" value={editProfileForm.makananMinumanFavorit} onChange={e => setEditProfileForm({ ...editProfileForm, makananMinumanFavorit: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Kriteria Pasangan</label>
-                <textarea value={editProfileForm.kriteriaPasangan} onChange={e => setEditProfileForm({ ...editProfileForm, kriteriaPasangan: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none', minHeight: '80px', fontFamily: 'inherit' }} />
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Kriteria Pasangan</label>
+                <textarea value={editProfileForm.kriteriaPasangan} onChange={e => setEditProfileForm({ ...editProfileForm, kriteriaPasangan: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none', minHeight: '80px', fontFamily: 'inherit' }} />
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={() => setIsEditingProfile(false)} disabled={savingProfile} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: 700, cursor: 'pointer' }}>Batal</button>
+              <button onClick={() => setIsEditingProfile(false)} disabled={savingProfile} style={{ flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid rgba(197, 160, 89, 0.4)', background: 'white', color: '#26392d', fontWeight: 700, cursor: 'pointer' }}>Batal</button>
               <button onClick={async () => {
                 setSavingProfile(true);
                 try {
@@ -3522,7 +3594,7 @@ export default function PublicKatalogPage() {
                 } finally {
                   setSavingProfile(false);
                 }
-              }} disabled={savingProfile} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}>
+              }} disabled={savingProfile} style={{ flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid #c5a059', background: '#3d5a45', color: 'white', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}>
                 {savingProfile ? "Menyimpan..." : "Simpan"}
               </button>
             </div>
@@ -3544,7 +3616,7 @@ export default function PublicKatalogPage() {
           onClick={() => setActiveTab("cart")}
         >
           <div className="badge-icon-wrapper">
-            <Heart size={20} fill={activeTab === "cart" ? "#f43f5e" : "transparent"} color={activeTab === "cart" ? "#f43f5e" : "#64748b"} />
+            <Heart size={20} fill={activeTab === "cart" ? "#c5a059" : "transparent"} color={activeTab === "cart" ? "#c5a059" : "#64748b"} />
             {selectedIds.length > 0 && (
               <span className="badge-count-bubble">{selectedIds.length}</span>
             )}
@@ -3594,16 +3666,13 @@ export default function PublicKatalogPage() {
         const isFull = (sp.selectedCount || 0) >= 5;
         const isMaxed = selectedIds.length >= 3;
         const isMale = sp.jenisKelamin === "L";
-        const accentColor = isMale ? "#3b82f6" : "#ec4899";
-        const accentGrad = isMale
-          ? "linear-gradient(135deg,#1e40af,#3b82f6)"
-          : "linear-gradient(135deg,#be185d,#ec4899)";
+        const heroGrad = "linear-gradient(180deg, #18261e 0%, #26392d 100%)";
         return (
           <div className="dm-overlay" onClick={closeDetail}>
             <div className="dm-sheet" onClick={e => e.stopPropagation()}>
 
               {/* HERO */}
-              <div className="dm-hero" style={{ background: accentGrad }}>
+              <div className="dm-hero" style={{ background: heroGrad }}>
                 <button className="dm-close" onClick={closeDetail}><X size={18} /></button>
                 <div
                   className="dm-avatar-wrap"
@@ -3623,15 +3692,15 @@ export default function PublicKatalogPage() {
                 >
                   {sp.foto
                     ? <img src={sp.foto} alt={sp.nama} className="dm-avatar-img" />
-                    : <div className="dm-avatar-init" style={{ background: accentColor }}>{sp.nama.charAt(0)}</div>
+                    : <div className="dm-avatar-init" style={{ background: "linear-gradient(135deg, #26392d, #3d5a45)", color: "#faf7f2" }}>{sp.nama.charAt(0)}</div>
                   }
                 </div>
                 <div className="dm-hero-badge">#{sp.nomorUrut || "-"}</div>
                 <h2 className="dm-name">{sp.nama}</h2>
-                <div className="dm-loc"><MapPin size={13} /><span>{sp.mandiriDesaKota || "-"} • {sp.mandiriDesaNama || sp.desaNama || "-"}</span></div>
+                <div className="dm-loc"><MapPin size={13} color="#c5a059" /><span>{sp.mandiriDesaKota || "-"} • {sp.mandiriDesaNama || sp.desaNama || "-"}</span></div>
                 <div className="dm-chips">
-                  <span className="dm-chip">{isMale ? "👨 Laki-laki" : "👩 Perempuan"}</span>
-                  <span className="dm-chip"><UserCheck size={12} /> {sp.selectedCount || 0}/5</span>
+                  <span className="dm-chip">{isMale ? "👨 Ikhwan" : "🧕 Akhwat"}</span>
+                  <span className="dm-chip"><UserCheck size={12} color="#c5a059" /> {sp.selectedCount || 0}/5 Dipilih</span>
                 </div>
               </div>
 
@@ -3664,16 +3733,28 @@ export default function PublicKatalogPage() {
 
                   if (isPulang || isTidakHadir || isBelumHadir) {
                     return (
-                      <div style={{ textAlign: "center", color: "#ef4444", fontSize: "13px", fontWeight: "600", padding: "12px", background: "#fef2f2", borderRadius: "14px", border: "1px solid #fee2e2" }}>
-                        Mohon maaf, peserta {sp.nama} {isPulang ? "pulang lebih awal" : (isBelumHadir ? "belum melakukan absensi kehadiran" : "tidak hadir")}, Anda tidak bisa memilih peserta tersebut.
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div style={{ textAlign: "center", color: "#742a2a", fontSize: "13px", fontWeight: "600", padding: "14px 18px", background: "#fcf6f4", borderRadius: "16px", border: "1px solid rgba(197, 160, 89, 0.4)", lineHeight: 1.5, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                          Mohon maaf, peserta <strong style={{ color: "#26392d" }}>{sp.nama}</strong> {isPulang ? "pulang lebih awal" : (isBelumHadir ? "belum melakukan absensi kehadiran" : "tidak hadir")}, Anda tidak bisa memilih peserta tersebut.
+                        </div>
+                        <button className="dm-btn dm-btn-disabled" disabled style={{ background: '#ede8de', color: '#8c9b90', cursor: 'not-allowed', border: '1px solid rgba(197, 160, 89, 0.3)' }}>
+                          <Heart size={18} />
+                          {isBelumHadir ? "Belum Hadir (Tidak Bisa Dipilih)" : "Tidak Tersedia"}
+                        </button>
                       </div>
                     );
                   }
 
                   if (currentUser?.status === "waiting") {
                     return (
-                      <div style={{ textAlign: "center", color: "#64748b", fontSize: "13px", fontWeight: "600", padding: "12px", background: "#f1f5f9", borderRadius: "14px", border: "1px solid #e2e8f0" }}>
-                        Anda belum melakukan absensi kehadiran. Silakan absen terlebih dahulu untuk dapat memilih peserta.
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div style={{ textAlign: "center", color: "#26392d", fontSize: "13px", fontWeight: "600", padding: "14px 18px", background: "#fcf6f4", borderRadius: "16px", border: "1px solid rgba(197, 160, 89, 0.4)", lineHeight: 1.5, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                          Anda belum melakukan absensi kehadiran. Silakan absen terlebih dahulu untuk dapat memilih peserta.
+                        </div>
+                        <button className="dm-btn dm-btn-disabled" disabled style={{ background: '#ede8de', color: '#8c9b90', cursor: 'not-allowed', border: '1px solid rgba(197, 160, 89, 0.3)' }}>
+                          <Heart size={18} />
+                          Absen Terlebih Dahulu
+                        </button>
                       </div>
                     );
                   }
@@ -3764,8 +3845,8 @@ export default function PublicKatalogPage() {
                   }
 
                   return (
-                    <button className="dm-btn" style={{ background: accentGrad }} onClick={() => handleConfirmSelection(String(sp.id), sp.nama)}>
-                      <Heart size={18} fill="white" />Pilih Peserta Ini
+                    <button className="dm-btn" style={{ background: "linear-gradient(135deg, #26392d, #3d5a45)", border: "1px solid #c5a059", color: "#faf7f2", boxShadow: "0 4px 15px rgba(38, 57, 45, 0.3)" }} onClick={() => handleConfirmSelection(String(sp.id), sp.nama)}>
+                      <Heart size={18} fill="#c5a059" color="#c5a059" />Pilih Peserta Ini
                     </button>
                   );
                 })()}
@@ -3846,42 +3927,42 @@ export default function PublicKatalogPage() {
         </div>
       )}
 
-
+      </div>
 
       <style jsx>{`
-        .container { max-width:1200px; margin:0 auto; padding:40px 20px; font-family:'Inter',sans-serif; color:#334155; overflow-x:hidden; }
+        .container { max-width:1200px; margin:0 auto; padding:24px 20px 80px; font-family:'Inter',sans-serif; color:#1f2922; overflow-x:hidden; position:relative; z-index:1; }
 
-        .page-header { text-align:center; margin-bottom:40px; display:flex; flex-direction:column; align-items:center; gap:8px; }
-        .badge-top { display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; color:#3b82f6; padding:6px 14px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:0.5px; }
-        .page-header h1 { font-size:42px; font-weight:900; letter-spacing:-1px; margin:0; color:#1e293b; line-height:1.1; }
-        .page-header h1 span { color:#3b82f6; }
-        .welcome-msg { color:#64748b; font-size:16px; margin:0; }
+        .page-header { text-align:center; margin-bottom:32px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .badge-top { display:inline-flex; align-items:center; gap:6px; background:rgba(197, 160, 89, 0.15); color:#c5a059; border:1px solid rgba(197, 160, 89, 0.35); padding:6px 16px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+        .page-header h1 { font-family:'Cormorant Garamond', Georgia, serif; font-size:42px; font-weight:700; letter-spacing:-0.5px; margin:0; color:#faf7f2; line-height:1.15; }
+        .page-header h1 span { color:#c5a059; }
+        .welcome-msg { color:#c4d4c8; font-size:15px; margin:0; font-weight:500; }
 
-        .toolbar { display:flex; flex-direction:column; gap:16px; background:white; padding:16px; border-radius:24px; box-shadow:0 4px 15px rgba(0,0,0,0.03); border:1px solid #f1f5f9; margin-bottom:24px; box-sizing:border-box; width:100%; overflow:hidden; }
+        .toolbar { display:flex; flex-direction:column; gap:16px; background:#faf7f2; padding:20px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.15); border:1px solid rgba(197, 160, 89, 0.4); margin-bottom:28px; box-sizing:border-box; width:100%; overflow:hidden; }
         .search-group { display:flex; gap:8px; width:100%; overflow:hidden; min-width:0; align-items:center; }
-        .search-bar { flex:1; min-width:0; overflow:hidden; position:relative; display:flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid #e2e8f0; padding:10px 14px; border-radius:14px; }
-        .search-bar input { border:none; background:transparent; outline:none; width:100%; min-width:0; font-size:14px; font-weight:500; }
-        .search-icon { color:#94a3b8; flex-shrink:0; }
-        .clear-search-btn { background:#e2e8f0; border:none; border-radius:50%; width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#64748b; transition:0.2s; margin-left:4px; }
-        .clear-search-btn:hover { background:#cbd5e1; color:#1e293b; }
-        .btn-advanced { display:flex; align-items:center; gap:8px; background:white; border:1px solid #e2e8f0; padding:0 20px; border-radius:16px; font-size:14px; font-weight:600; cursor:pointer; transition:0.2s; white-space:nowrap; }
-        .btn-advanced:hover { background:#f8fafc; }
+        .search-bar { flex:1; min-width:0; overflow:hidden; position:relative; display:flex; align-items:center; gap:8px; background:#ffffff; border:1px solid rgba(197, 160, 89, 0.4); padding:10px 14px; border-radius:14px; }
+        .search-bar input { border:none; background:transparent; outline:none; width:100%; min-width:0; font-size:14px; font-weight:500; color:#1f2922; }
+        .search-icon { color:#627265; flex-shrink:0; }
+        .clear-search-btn { background:#f4efe6; border:none; border-radius:50%; width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#627265; transition:0.2s; margin-left:4px; }
+        .clear-search-btn:hover { background:#e5cf9f; color:#17241b; }
+        .btn-advanced { display:flex; align-items:center; gap:8px; background:white; border:1px solid rgba(197, 160, 89, 0.4); padding:0 20px; border-radius:16px; font-size:14px; font-weight:600; cursor:pointer; transition:0.2s; white-space:nowrap; color:#26392d; }
+        .btn-advanced:hover { background:#f4efe6; }
         .filter-controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; align-items: start; width: 100%; }
         .filter-field-group { display: flex; flex-direction: column; gap: 6px; width: 100%; min-width: 0; }
-        .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 2px; }
-        .toggle-group { display:flex; background:#f1f5f9; padding:4px; border-radius:14px; width: 100%; }
-        .toggle-group button { border:none; background:transparent; padding:8px 18px; border-radius:10px; font-size:13px; font-weight:700; color:#64748b; cursor:pointer; transition:0.2s; flex: 1; }
-        .toggle-group button.active { background:#1e293b; color:white; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+        .filter-label { font-size: 11px; font-weight: 700; color: #26392d; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 2px; }
+        .toggle-group { display:flex; background:rgba(197, 160, 89, 0.12); padding:4px; border-radius:14px; width: 100%; }
+        .toggle-group button { border:none; background:transparent; padding:8px 18px; border-radius:10px; font-size:13px; font-weight:700; color:#627265; cursor:pointer; transition:0.2s; flex: 1; }
+        .toggle-group button.active { background:#26392d; color:#faf7f2; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
         .select-container { position:relative; display:flex; align-items:center; width:100%; min-width:0; }
-        .select-box { appearance:none; background:white; border:1px solid #e2e8f0; padding:10px 35px 10px 14px; border-radius:14px; font-size:13px; font-weight:600; cursor:pointer; outline:none; width:100%; min-width:0; color:#1e293b; transition:0.2s; box-sizing:border-box; }
-        .select-box:hover { border-color:#cbd5e1; }
-        .select-box:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+        .select-box { appearance:none; background:white; border:1px solid rgba(197, 160, 89, 0.4); padding:10px 35px 10px 14px; border-radius:14px; font-size:13px; font-weight:600; cursor:pointer; outline:none; width:100%; min-width:0; color:#1f2922; transition:0.2s; box-sizing:border-box; }
+        .select-box:hover { border-color:#c5a059; }
+        .select-box:focus { border-color:#3d5a45; box-shadow:0 0 0 3px rgba(197, 160, 89, 0.15); }
         .input-range-container { display:flex; gap:8px; width:100%; min-width:0; }
-        .filter-input-box { background:white; border:1px solid #e2e8f0; padding:10px 12px; border-radius:14px; font-size:13px; font-weight:600; outline:none; width:100%; min-width:0; flex:1; color:#1e293b; transition:0.2s; box-sizing:border-box; }
-        .filter-input-box:hover { border-color:#cbd5e1; }
-        .filter-input-box:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
-        .select-arrow { position:absolute; right:14px; pointer-events:none; color:#94a3b8; }
-        .status-badge { display:flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid #e2e8f0; padding:10px 18px; border-radius:14px; font-size:13px; font-weight:700; color:#475569; }
+        .filter-input-box { background:white; border:1px solid rgba(197, 160, 89, 0.4); padding:10px 12px; border-radius:14px; font-size:13px; font-weight:600; outline:none; width:100%; min-width:0; flex:1; color:#1f2922; transition:0.2s; box-sizing:border-box; }
+        .filter-input-box:hover { border-color:#c5a059; }
+        .filter-input-box:focus { border-color:#3d5a45; box-shadow:0 0 0 3px rgba(197, 160, 89, 0.15); }
+        .select-arrow { position:absolute; right:14px; pointer-events:none; color:#c5a059; }
+        .status-badge { display:flex; align-items:center; gap:8px; background:rgba(197, 160, 89, 0.12); border:1px solid rgba(197, 160, 89, 0.35); padding:10px 18px; border-radius:14px; font-size:13px; font-weight:700; color:#26392d; }
         .btn-logout { margin-left:auto; display:flex; align-items:center; gap:8px; background:#fef2f2; color:#ef4444; border:1px solid #fee2e2; padding:10px 18px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; transition:0.2s; }
         .btn-logout:hover { background:#fee2e2; }
 
@@ -3898,29 +3979,29 @@ export default function PublicKatalogPage() {
           height: 44px;
           flex-shrink: 0;
           background: white;
-          border: 1px solid #e2e8f0;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           border-radius: 14px;
           cursor: pointer;
           transition: 0.2s;
-          color: #475569;
+          color: #26392d;
         }
         .btn-filter-toggle:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
+          background: #f4efe6;
+          border-color: #c5a059;
         }
         .btn-filter-toggle.active {
-          background: #eff6ff;
-          border-color: #3b82f6;
-          color: #1d4ed8;
+          background: rgba(197, 160, 89, 0.15);
+          border-color: #c5a059;
+          color: #26392d;
         }
         .btn-reset-filters {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 6px;
-          background: #f1f5f9;
-          border: 1px solid #cbd5e1;
-          color: #475569;
+          background: rgba(197, 160, 89, 0.12);
+          border: 1px solid rgba(197, 160, 89, 0.4);
+          color: #26392d;
           padding: 10px 18px;
           border-radius: 14px;
           font-size: 13px;
@@ -3930,73 +4011,132 @@ export default function PublicKatalogPage() {
           grid-column: 1 / -1;
         }
         .btn-reset-filters:hover {
-          background: #e2e8f0;
+          background: #f4efe6;
+          border-color: #c5a059;
         }
 
 
-        .selection-banner { background:#232d3f; transition: all 0.2s ease; border: 2px solid transparent; }
-        .selection-banner:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(35,45,63,0.35); }
-        .selection-banner.active-filter { border-color: #3b82f6; background: #1e293b; }
-        .selection-banner { padding:24px 32px; border-radius:28px; display:flex; justify-content:space-between; align-items:center; color:white; margin-bottom:32px; box-shadow:0 15px 30px rgba(35,45,63,0.2); }
+        .selection-banner { background:linear-gradient(135deg, #1f2e24 0%, #26392d 100%); transition: all 0.2s ease; border: 1px solid rgba(197, 160, 89, 0.45); border-radius:24px; padding:22px 28px; display:flex; justify-content:space-between; align-items:center; color:#faf7f2; margin-bottom:32px; box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+        .selection-banner:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,0.3); border-color:#c5a059; }
+        .selection-banner.active-filter { border-color: #c5a059; background: #17241b; }
         .banner-left { display:flex; align-items:center; gap:20px; }
-        .banner-icon { background:rgba(255,255,255,0.1); padding:14px; border-radius:18px; color:#60a5fa; }
+        .banner-icon { background:rgba(197, 160, 89, 0.15); border:1px solid rgba(197, 160, 89, 0.4); padding:14px; border-radius:18px; color:#c5a059; }
         .banner-text { display:flex; flex-direction:column; gap:2px; }
-        .banner-label { font-size:11px; font-weight:800; color:#94a3b8; letter-spacing:1.5px; }
-        .banner-value { font-size:19px; font-weight:800; color:#ffffff; margin:0; }
-        .pilihan-pill { background:#3b82f6; color:white; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:800; transition:0.3s; white-space:nowrap; }
-        .pilihan-pill.full { background:#10b981; box-shadow:0 0 15px rgba(16,185,129,0.4); }
+        .banner-label { font-size:11px; font-weight:800; color:#c5a059; letter-spacing:1.5px; }
+        .banner-value { font-family:'Cormorant Garamond', Georgia, serif; font-size:22px; font-weight:700; color:#faf7f2; margin:0; }
+        .pilihan-pill { background:#c5a059; color:#17241b; padding:8px 18px; border-radius:999px; font-size:13px; font-weight:800; transition:0.3s; white-space:nowrap; }
+        .pilihan-pill.full { background:#10b981; color:white; box-shadow:0 0 15px rgba(16,185,129,0.4); }
 
         .user-title-context { margin-bottom:32px; }
-        .user-title-context h3 { font-size:22px; font-weight:800; margin:0 0 6px 0; color:#1e293b; }
-        .user-meta { display:flex; justify-content:space-between; color:#64748b; font-size:14px; font-weight:600; flex-wrap:wrap; gap:4px; }
+        .user-title-context h3 { font-family:'Cormorant Garamond', Georgia, serif; font-size:26px; font-weight:700; margin:0 0 6px 0; color:#faf7f2; }
+        .user-meta { display:flex; justify-content:space-between; color:#c4d4c8; font-size:14px; font-weight:600; flex-wrap:wrap; gap:4px; }
 
         .grid-container { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:24px; }
 
-        .participant-card { background:white; border-radius:32px; border:1px solid #f1f5f9; overflow:hidden; transition:0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:0 4px 20px rgba(0,0,0,0.02); }
-        .participant-card:hover { transform:translateY(-8px); box-shadow:0 20px 40px rgba(0,0,0,0.08); border-color:#3b82f644; }
-        .participant-card.is-pulang { opacity:0.65; filter:grayscale(0.3); background:#f8fafc; border-color:#cbd5e1; }
-        .participant-card.is-pulang:hover { transform:none; box-shadow:0 4px 20px rgba(0,0,0,0.02); border-color:#cbd5e1; }
+        .participant-card { background:#faf7f2; border-radius:24px; border:1px solid rgba(197, 160, 89, 0.4); overflow:hidden; transition:0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+        .participant-card:hover { transform:translateY(-6px); box-shadow:0 20px 40px rgba(0,0,0,0.2); border-color:#c5a059; }
+        .participant-card.is-pulang { opacity:0.65; filter:grayscale(0.3); background:#f4efe6; border-color:#d5c7b0; }
+        .participant-card.is-pulang:hover { transform:none; box-shadow:0 4px 20px rgba(0,0,0,0.02); border-color:#d5c7b0; }
         .participant-card.is-pulang .card-image { filter: grayscale(100%); -webkit-filter: grayscale(100%); }
         .pulang-badge { top:16px; right:16px; background:#64748b; color:white; box-shadow:0 4px 12px rgba(100,116,139,0.4); }
         .card-image-wrapper { height:380px; position:relative; overflow:hidden; }
         .card-image { width:100%; height:100%; object-fit:cover; transition:0.5s; }
         .participant-card:hover .card-image { transform:scale(1.05); }
         .floating-badge { position:absolute; padding:6px 12px; border-radius:12px; font-size:12px; font-weight:800; backdrop-filter:blur(8px); }
-        .id-badge { top:16px; left:16px; background:#3b82f6; color:white; }
+        .id-badge { top:16px; left:16px; background:#26392d; color:#faf7f2; border:1px solid #c5a059; }
         .full-badge { top:16px; right:16px; background:#ef4444; color:white; box-shadow:0 4px 12px rgba(239,68,68,0.4); animation:pulse-red 2s infinite; }
         @keyframes pulse-red { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
-        .label-badge { bottom:16px; right:16px; background:rgba(255,255,255,0.9); color:#334155; }
-        .label-badge.status-panitia { background:#1e293b; color:white; }
+        .label-badge { bottom:16px; right:16px; background:rgba(255,255,255,0.92); color:#26392d; border:1px solid rgba(197, 160, 89, 0.4); }
+        .label-badge.status-panitia { background:#26392d; color:#faf7f2; border-color:#c5a059; }
         .card-content { padding:24px; }
-        .card-name { font-size:20px; font-weight:800; color:#1e293b; margin:0 0 6px 0; }
-        .card-location { display:flex; align-items:center; gap:6px; color:#64748b; font-size:13px; font-weight:600; margin-bottom:20px; }
+        .card-name { font-family:'Cormorant Garamond', Georgia, serif; font-size:23px; font-weight:700; color:#26392d; margin:0 0 6px 0; }
+        .card-location { display:flex; align-items:center; gap:6px; color:#627265; font-size:13px; font-weight:600; margin-bottom:20px; }
         .card-stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-        .card-passions-mini { display:flex; flex-direction:column; gap:6px; margin-bottom:24px; padding:12px; background:#f8fafc; border-radius:12px; }
-        .pass-pill { display:flex; align-items:center; gap:8px; font-size:11px; font-weight:600; color:#475569; }
-        .pass-pill svg { color:#3b82f6; opacity:0.8; }
-        .stat-pill { background:#f8fafc; padding:10px 14px; border-radius:12px; display:flex; align-items:center; gap:10px; font-size:13px; font-weight:700; color:#475569; }
-        .stat-pill svg { color:#3b82f6; opacity:0.8; }
-        .stat-pill.selection-count { background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe; }
-        .stat-pill.selection-count svg { color:#2563eb; }
+        .card-passions-mini { display:flex; flex-direction:column; gap:6px; margin-bottom:24px; padding:12px; background:#ffffff; border:1px solid rgba(197, 160, 89, 0.25); border-radius:12px; }
+        .pass-pill { display:flex; align-items:center; gap:8px; font-size:11px; font-weight:600; color:#3d5a45; }
+        .pass-pill svg { color:#3d5a45; opacity:0.9; }
+        .stat-pill { background:#ffffff; border:1px solid rgba(197, 160, 89, 0.25); padding:10px 14px; border-radius:12px; display:flex; align-items:center; gap:10px; font-size:13px; font-weight:700; color:#1f2922; }
+        .stat-pill svg { color:#3d5a45; opacity:0.9; }
+        .stat-pill.selection-count { background:rgba(197, 160, 89, 0.12); color:#26392d; border:1px solid rgba(197, 160, 89, 0.4); }
+        .stat-pill.selection-count svg { color:#c5a059; }
         .card-instagram-link { color:inherit; text-decoration:none; }
-        .card-instagram-link:hover { color:#ec4899; text-decoration:underline; }
+        .card-instagram-link:hover { color:#c5a059; text-decoration:underline; }
         .card-actions { display:flex; gap:12px; }
-        .btn-secondary { flex:1; background:white; border:1px solid #e2e8f0; color:#334155; padding:12px; border-radius:14px; font-size:13px; font-weight:700; text-align:center; text-decoration:none; transition:0.2s; cursor:pointer; }
-        .btn-secondary:hover { background:#f8fafc; border-color:#cbd5e1; }
-        .btn-primary { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:#3b82f6; color:white; border:none; padding:12px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; transition:0.2s; }
-        .btn-primary:hover { background:#2563eb; transform:translateY(-2px); }
-        .btn-primary.selected { background:#10b981; }
-        .btn-primary.disabled { background:#f1f5f9; color:#94a3b8; cursor:not-allowed; border:1px solid #e2e8f0; }
-        .btn-primary.disabled:hover { transform:none; background:#f1f5f9; }
+        .btn-secondary { flex:1; background:white; border:1px solid rgba(197, 160, 89, 0.4); color:#26392d; padding:12px; border-radius:14px; font-size:13px; font-weight:700; text-align:center; text-decoration:none; transition:0.2s; cursor:pointer; }
+        .btn-secondary:hover { background:#f4efe6; border-color:#c5a059; }
+        .btn-primary { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:#3d5a45; color:white; border:none; padding:12px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; transition:0.2s; }
+        .btn-primary:hover { background:#4d7057; transform:translateY(-2px); }
+        .btn-primary.selected { background:#c5a059; color:#17241b; font-weight:800; }
+        .btn-primary.disabled { background:#ede8de; color:#8c9b90; cursor:not-allowed; border:1px solid rgba(197, 160, 89, 0.25); }
+        .btn-primary.disabled:hover { transform:none; background:#ede8de; }
         .btn-danger { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:#fef2f2; color:#ef4444; border:1px solid #fee2e2; padding:12px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; transition:0.2s; }
         .btn-danger:hover { background:#fee2e2; border-color:#fca5a5; transform:translateY(-2px); }
 
-        .pagination { margin-top:48px; display:flex; align-items:center; justify-content:center; gap:24px; }
-        .pagination button { background:white; border:1px solid #e2e8f0; padding:10px 20px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; }
-        .pagination button:disabled { opacity:0.5; cursor:not-allowed; }
-        .page-numbers { display:flex; gap:8px; }
-        .page-numbers button { width:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center; }
-        .page-numbers button.active { background:#1e293b; color:white; border-color:#1e293b; }
+        .pagination {
+          margin: 40px auto 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          flex-wrap: nowrap;
+        }
+        .pagination button {
+          background: #faf7f2;
+          border: 1px solid rgba(197, 160, 89, 0.4);
+          border-radius: 12px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          color: #26392d;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        .pagination button:hover:not(:disabled) {
+          border-color: #c5a059;
+          background: #f4efe6;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        .pagination button:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
+          background: rgba(250, 247, 242, 0.6);
+        }
+        .pagination-nav-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          height: 38px;
+          flex-shrink: 0;
+        }
+        .page-numbers {
+          display: flex;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+        .page-numbers button {
+          width: 38px;
+          height: 38px;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          font-family: inherit;
+        }
+        .page-numbers button.active {
+          background: linear-gradient(135deg, #26392d, #3d5a45);
+          color: #faf7f2;
+          border: 1px solid #c5a059;
+          box-shadow: 0 4px 15px rgba(38, 57, 45, 0.35);
+        }
+        @media (max-width: 480px) {
+          .pagination { gap: 6px; }
+          .pagination-nav-btn { padding: 8px 10px; width: 34px; height: 34px; justify-content: center; }
+          .pagination-text { display: none; }
+          .page-numbers button { width: 34px; height: 34px; font-size: 12px; }
+        }
 
         .skeleton-card { height:600px; background:#f1f5f9; border-radius:32px; animation:pulse 1.5s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
@@ -4025,8 +4165,8 @@ export default function PublicKatalogPage() {
         /* ── DETAIL MODAL ───────────────────────────────────────────── */
         .dm-overlay {
           position:fixed; inset:0; z-index:1000;
-          background:rgba(15,23,42,0.7);
-          backdrop-filter:blur(6px);
+          background:rgba(23,36,27,0.8);
+          backdrop-filter:blur(8px);
           display:flex; align-items:flex-end; justify-content:center;
           animation:fadeIn 0.2s ease;
         }
@@ -4034,13 +4174,14 @@ export default function PublicKatalogPage() {
           .dm-overlay { align-items:center; padding:20px; }
         }
         .dm-sheet {
-          background:white;
+          background:#faf7f2;
           width:100%; max-width:480px;
           border-radius:28px 28px 0 0;
           max-height:92dvh;
           display:flex; flex-direction:column;
           overflow:hidden;
-          box-shadow:0 -8px 40px rgba(0,0,0,0.2);
+          box-shadow:0 -8px 40px rgba(0,0,0,0.3);
+          border:1px solid rgba(197, 160, 89, 0.4);
           animation:slideUp 0.35s cubic-bezier(0.16,1,0.3,1);
         }
         @media(min-width:640px) {
@@ -4053,20 +4194,22 @@ export default function PublicKatalogPage() {
           padding:48px 20px 24px;
           display:flex; flex-direction:column; align-items:center;
           flex-shrink:0;
+          background:linear-gradient(180deg, #1f2e24 0%, #26392d 100%);
+          border-bottom:1px solid rgba(197, 160, 89, 0.35);
         }
         .dm-close {
           position:absolute; top:14px; right:14px;
           width:32px; height:32px; border-radius:50%;
-          background:rgba(255,255,255,0.25); border:none;
+          background:rgba(255,255,255,0.15); border:1px solid rgba(197, 160, 89, 0.35);
           color:white; display:flex; align-items:center; justify-content:center;
           cursor:pointer; transition:0.2s;
         }
-        .dm-close:hover { background:rgba(255,255,255,0.4); }
+        .dm-close:hover { background:rgba(255,255,255,0.25); color:#c5a059; }
         .dm-avatar-wrap {
           width:100px; height:100px; border-radius:50%;
-          border:4px solid rgba(255,255,255,0.5);
+          border:3px solid #c5a059;
           overflow:hidden; margin-bottom:14px;
-          box-shadow:0 8px 24px rgba(0,0,0,0.2);
+          box-shadow:0 8px 24px rgba(0,0,0,0.3);
           flex-shrink:0;
         }
         .dm-avatar-img { width:100%; height:100%; object-fit:cover; }
@@ -4076,24 +4219,27 @@ export default function PublicKatalogPage() {
           font-size:40px; font-weight:900; color:white;
         }
         .dm-hero-badge {
-          background:rgba(255,255,255,0.25);
-          color:white; font-size:11px; font-weight:800;
-          padding:3px 10px; border-radius:20px;
+          background:rgba(197, 160, 89, 0.15);
+          border:1px solid rgba(197, 160, 89, 0.4);
+          color:#c5a059; font-size:11px; font-weight:800;
+          padding:3px 12px; border-radius:999px;
           margin-bottom:8px; letter-spacing:0.5px;
         }
         .dm-name {
-          font-size:22px; font-weight:900; color:white;
+          font-family:'Cormorant Garamond', Georgia, serif;
+          font-size:24px; font-weight:700; color:#faf7f2;
           margin:0 0 6px; text-align:center; line-height:1.2;
         }
         .dm-loc {
           display:flex; align-items:center; gap:5px;
-          color:rgba(255,255,255,0.85); font-size:12px; font-weight:600;
+          color:#c4d4c8; font-size:12px; font-weight:600;
           margin-bottom:14px; text-align:center;
         }
         .dm-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
         .dm-chip {
-          background:rgba(255,255,255,0.2);
-          color:white; font-size:11px; font-weight:700;
+          background:rgba(255,255,255,0.12);
+          border:1px solid rgba(197, 160, 89, 0.3);
+          color:#faf7f2; font-size:11px; font-weight:700;
           padding:4px 12px; border-radius:20px;
           display:flex; align-items:center; gap:4px;
         }
@@ -4101,90 +4247,90 @@ export default function PublicKatalogPage() {
         /* body */
         .dm-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 20px 8px; }
         .dm-section-title {
-          font-size:11px; font-weight:800; color:#94a3b8;
+          font-size:11px; font-weight:800; color:#c5a059;
           letter-spacing:1px; text-transform:uppercase;
           margin-bottom:14px;
         }
         .dm-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
         .dm-field {
-          background:#f8fafc; border-radius:14px;
+          background:#ffffff; border-radius:14px;
+          border:1px solid rgba(197, 160, 89, 0.3);
           padding:12px 14px;
           display:flex; flex-direction:column; gap:4px;
         }
         .dm-field-full { grid-column:span 2; }
-        .dm-label { font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; }
-        .dm-val { font-size:13px; font-weight:700; color:#1e293b; line-height:1.4; }
+        .dm-label { font-size:10px; font-weight:800; color:#c5a059; text-transform:uppercase; letter-spacing:0.5px; }
+        .dm-val { font-size:13px; font-weight:700; color:#26392d; line-height:1.4; }
 
         /* cta */
         .dm-cta {
           padding:14px 20px 28px;
           flex-shrink:0;
-          background:white;
-          border-top:1px solid #f1f5f9;
+          background:#faf7f2;
+          border-top:1px solid rgba(197, 160, 89, 0.3);
         }
         .dm-btn {
           width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
           color:white; border:none; padding:16px;
           border-radius:18px; font-size:15px; font-weight:800;
           cursor:pointer; transition:all 0.25s;
+          background:#3d5a45;
         }
         .dm-btn:not(:disabled):active { transform:scale(0.98); }
-        .dm-btn-selected { background:#10b981 !important; cursor:default; }
-        .dm-btn-disabled { background:#e2e8f0 !important; color:#94a3b8 !important; cursor:not-allowed; }
-        .dm-btn-danger { background:#fef2f2 !important; color:#ef4444 !important; border:1px solid #fee2e2 !important; }
-        .dm-btn-danger:hover { background:#fee2e2 !important; border-color:#fca5a5 !important; transform:translateY(-2px); }
+        .dm-btn:hover:not(:disabled) { background:#4d7057; }
+        .dm-btn-selected { background:#c5a059 !important; color:#17241b !important; cursor:default; }
+        .dm-btn-disabled { background:#ede8de !important; color:#8c9b90 !important; cursor:not-allowed; }
+        .dm-btn-danger { background:#fcf4f2 !important; color:#842029 !important; border:1px solid rgba(197, 160, 89, 0.4) !important; }
+        .dm-btn-danger:hover { background:#f7e5e3 !important; border-color:#c5a059 !important; transform:translateY(-2px); }
 
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         @keyframes slideUp { from{transform:translateY(40px) scale(0.98);opacity:0} to{transform:translateY(0) scale(1);opacity:1} }
 
-        .status-queue-banner { margin-top:10px; background:#fff1f2; color:#f43f5e; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; border:1px dashed #fecdd3; animation:pulse-border 2s infinite; }
-        @keyframes pulse-border { 0%{border-color:#fecdd3} 50%{border-color:#f43f5e;box-shadow:0 0 10px rgba(244,63,94,0.1)} 100%{border-color:#fecdd3} }
+        .status-queue-banner { margin-top:10px; background:#fffdf5; color:#c5a059; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; border:1px dashed rgba(197,160,89,0.5); }
 
         /* ── BOX LOVE ─────────────────────────────────────────────────── */
-        .box-love-fab { position:fixed; bottom:32px; right:32px; display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,#f472b6,#ec4899,#be185d); color:white; border:none; padding:14px 22px; border-radius:50px; font-size:14px; font-weight:800; cursor:pointer; z-index:100; box-shadow:0 8px 24px rgba(236,72,153,0.4); transition:all 0.3s cubic-bezier(0.16,1,0.3,1); animation:fabPulse 2.5s ease-in-out infinite; }
-        .box-love-fab:hover { transform:translateY(-4px) scale(1.04); box-shadow:0 16px 32px rgba(236,72,153,0.5); }
-        @keyframes fabPulse { 0%,100%{box-shadow:0 8px 24px rgba(236,72,153,0.4)} 50%{box-shadow:0 8px 32px rgba(236,72,153,0.7)} }
+        .box-love-fab { position:fixed; bottom:32px; right:32px; display:flex; align-items:center; gap:10px; background:linear-gradient(135deg, #3d5a45 0%, #26392d 100%); color:#faf7f2; border:1px solid #c5a059; padding:14px 22px; border-radius:50px; font-size:14px; font-weight:800; cursor:pointer; z-index:100; box-shadow:0 8px 24px rgba(38,57,45,0.35); transition:all 0.3s cubic-bezier(0.16,1,0.3,1); }
+        .box-love-fab:hover { transform:translateY(-4px) scale(1.04); box-shadow:0 16px 32px rgba(38,57,45,0.5); border-color:#e5cf9f; }
 
-        .bl-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.55); backdrop-filter:blur(12px); z-index:900; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.2s ease; }
-        .bl-popup { background:white; border-radius:32px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; box-shadow:0 40px 80px rgba(0,0,0,0.2); animation:slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+        .bl-overlay { position:fixed; inset:0; background:rgba(23,36,27,0.75); backdrop-filter:blur(12px); z-index:900; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.2s ease; }
+        .bl-popup { background:#faf7f2; border:1px solid rgba(197,160,89,0.4); border-radius:32px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; box-shadow:0 40px 80px rgba(0,0,0,0.3); animation:slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
         .bl-header { display:flex; align-items:center; justify-content:space-between; padding:28px 28px 20px; }
         .bl-logo { display:flex; align-items:center; gap:14px; }
-        .bl-logo-icon { font-size:44px; line-height:1; filter:drop-shadow(0 4px 8px rgba(236,72,153,0.3)); }
-        .bl-title { font-size:26px; font-weight:900; margin:0; color:#1e293b; letter-spacing:-0.5px; }
-        .bl-subtitle { font-size:13px; color:#64748b; margin:0; font-weight:500; }
-        .bl-close { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:#f1f5f9; border-radius:50%; cursor:pointer; color:#64748b; transition:0.2s; flex-shrink:0; }
-        .bl-close:hover { background:#e2e8f0; }
-        .bl-notice { margin:0 28px 16px; background:#fff0f6; border:1px solid #fce7f3; border-radius:12px; padding:10px 16px; font-size:13px; color:#be185d; font-weight:600; display:flex; align-items:center; gap:6px; }
+        .bl-logo-icon { font-size:44px; line-height:1; }
+        .bl-title { font-family:'Cormorant Garamond', Georgia, serif; font-size:26px; font-weight:700; margin:0; color:#26392d; letter-spacing:-0.5px; }
+        .bl-subtitle { font-size:13px; color:#627265; margin:0; font-weight:500; }
+        .bl-close { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:#f4efe6; border-radius:50%; cursor:pointer; color:#627265; transition:0.2s; flex-shrink:0; }
+        .bl-close:hover { background:#e5cf9f; color:#17241b; }
+        .bl-notice { margin:0 28px 16px; background:#fffdf5; border:1px solid rgba(197,160,89,0.35); border-radius:12px; padding:10px 16px; font-size:13px; color:#26392d; font-weight:600; display:flex; align-items:center; gap:6px; }
         .bl-body { padding:0 28px; flex:1; }
         .bl-section { margin-bottom:20px; }
-        .bl-section-label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:#475569; margin-bottom:10px; }
-        .bl-my-info { display:flex; align-items:center; gap:14px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:16px; padding:14px 18px; position:relative; }
-        .bl-my-avatar { width:44px; height:44px; border-radius:50%; overflow:hidden; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#4f46e5; flex-shrink:0; }
+        .bl-section-label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:#26392d; margin-bottom:10px; }
+        .bl-my-info { display:flex; align-items:center; gap:14px; background:#ffffff; border:1.5px solid rgba(197,160,89,0.35); border-radius:16px; padding:14px 18px; position:relative; }
+        .bl-my-avatar { width:44px; height:44px; border-radius:50%; overflow:hidden; background:#e5cf9f; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#26392d; flex-shrink:0; }
         .bl-my-avatar img { width:100%; height:100%; object-fit:cover; }
-        .bl-my-name { font-size:15px; font-weight:800; color:#1e293b; }
-        .bl-my-loc { font-size:12px; color:#64748b; font-weight:600; margin-top:2px; }
-        .bl-check { margin-left:auto; color:#16a34a; flex-shrink:0; }
-        .bl-heart-divider { text-align:center; font-size:24px; margin:4px 0 16px; animation:heartBeat 1.5s ease-in-out infinite; }
-        @keyframes heartBeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+        .bl-my-name { font-size:15px; font-weight:800; color:#26392d; }
+        .bl-my-loc { font-size:12px; color:#627265; font-weight:600; margin-top:2px; }
+        .bl-check { margin-left:auto; color:#10b981; flex-shrink:0; }
+        .bl-heart-divider { text-align:center; font-size:24px; margin:4px 0 16px; }
         .bl-search-bar { position:relative; display:flex; align-items:center; }
-        .bl-search-bar input { width:100%; border:2px solid #e2e8f0; background:#f8fafc; padding:13px 44px 13px 18px; border-radius:14px; font-size:14px; font-weight:600; outline:none; transition:0.2s; color:#1e293b; }
-        .bl-search-bar input:focus { border-color:#f472b6; background:white; box-shadow:0 0 0 4px rgba(244,114,182,0.12); }
-        .bl-search-icon { position:absolute; right:14px; color:#94a3b8; pointer-events:none; }
-        .bl-results { margin-top:10px; border:1.5px solid #fce7f3; border-radius:16px; overflow:hidden; max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-        .bl-result-item { display:flex; align-items:center; gap:14px; padding:12px 16px; cursor:pointer; transition:0.15s; border-bottom:1px solid #fff0f6; }
+        .bl-search-bar input { width:100%; border:1px solid rgba(197,160,89,0.4); background:#ffffff; padding:13px 44px 13px 18px; border-radius:14px; font-size:14px; font-weight:600; outline:none; transition:0.2s; color:#1f2922; }
+        .bl-search-bar input:focus { border-color:#3d5a45; box-shadow:0 0 0 3px rgba(197,160,89,0.15); }
+        .bl-search-icon { position:absolute; right:14px; color:#627265; pointer-events:none; }
+        .bl-results { margin-top:10px; border:1px solid rgba(197,160,89,0.35); border-radius:16px; overflow:hidden; max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch; background:#ffffff; }
+        .bl-result-item { display:flex; align-items:center; gap:14px; padding:12px 16px; cursor:pointer; transition:0.15s; border-bottom:1px solid #f4efe6; }
         .bl-result-item:last-child { border-bottom:none; }
-        .bl-result-item:hover { background:#fff0f6; }
-        .bl-result-item.selected { background:#fdf2f8; }
-        .bl-result-avatar { width:40px; height:40px; border-radius:50%; overflow:hidden; background:#fce7f3; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:#be185d; flex-shrink:0; }
+        .bl-result-item:hover { background:#f4efe6; }
+        .bl-result-item.selected { background:rgba(197,160,89,0.15); }
+        .bl-result-avatar { width:40px; height:40px; border-radius:50%; overflow:hidden; background:rgba(197,160,89,0.2); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:#26392d; flex-shrink:0; }
         .bl-result-avatar img { width:100%; height:100%; object-fit:cover; }
-        .bl-result-name { font-size:14px; font-weight:800; color:#1e293b; }
-        .bl-result-loc { font-size:11px; color:#64748b; font-weight:600; margin-top:2px; }
-        .bl-loading,.bl-empty { text-align:center; padding:12px; color:#94a3b8; font-size:13px; font-weight:600; }
+        .bl-result-name { font-size:14px; font-weight:800; color:#26392d; }
+        .bl-result-loc { font-size:11px; color:#627265; font-weight:600; margin-top:2px; }
+        .bl-loading,.bl-empty { text-align:center; padding:12px; color:#627265; font-size:13px; font-weight:600; }
         .bl-footer { padding:20px 28px 28px; }
-        .bl-submit-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:linear-gradient(135deg,#f472b6,#ec4899,#be185d); color:white; border:none; padding:16px; border-radius:18px; font-size:16px; font-weight:800; cursor:pointer; transition:all 0.3s cubic-bezier(0.16,1,0.3,1); box-shadow:0 6px 20px rgba(236,72,153,0.3); }
-        .bl-submit-btn:not(:disabled):hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(236,72,153,0.45); }
-        .bl-submit-btn:disabled { opacity:0.5; cursor:not-allowed; background:#e2e8f0; color:#94a3b8; box-shadow:none; }
-        .bl-footer-note { text-align:center; font-size:12px; color:#94a3b8; font-weight:500; margin:12px 0 0; line-height:1.5; }
+        .bl-submit-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:linear-gradient(135deg, #3d5a45 0%, #26392d 100%); color:white; border:1px solid #c5a059; padding:16px; border-radius:18px; font-size:16px; font-weight:800; cursor:pointer; transition:all 0.3s cubic-bezier(0.16,1,0.3,1); box-shadow:0 6px 20px rgba(38,57,45,0.3); }
+        .bl-submit-btn:not(:disabled):hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(38,57,45,0.45); border-color:#e5cf9f; }
+        .bl-submit-btn:disabled { opacity:0.5; cursor:not-allowed; background:#ede8de; color:#8c9b90; box-shadow:none; border-color:transparent; }
+        .bl-footer-note { text-align:center; font-size:12px; color:#627265; font-weight:500; margin:12px 0 0; line-height:1.5; }
 
         /* FIX: Mobile Box Love — bottom sheet style on small screens */
         @media (max-width:480px) {
@@ -4194,49 +4340,49 @@ export default function PublicKatalogPage() {
         }
 
         /* ── Commentary ──────────────────────────────────────────────── */
-        .commentary-box { margin-top:20px; padding-top:16px; border-top:1px dashed #e2e8f0; }
+        .commentary-box { margin-top:20px; padding-top:16px; border-top:1px dashed rgba(197,160,89,0.35); }
         .commentary-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-        .anon-toggle { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; }
+        .anon-toggle { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#26392d; cursor:pointer; }
         .anon-toggle input { width:14px; height:14px; cursor:pointer; }
-        .comment-name-input { flex:1; border:1px solid #e2e8f0; background:#f8fafc; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; outline:none; }
-        .comment-name-input:focus { border-color:#3b82f6; background:white; }
-        .comment-tags-label { font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+        .comment-name-input { flex:1; border:1px solid rgba(197,160,89,0.35); background:#ffffff; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; outline:none; color:#1f2922; }
+        .comment-name-input:focus { border-color:#3d5a45; }
+        .comment-tags-label { font-size:10px; font-weight:800; color:#c5a059; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
         .comment-buttons { display:flex; flex-wrap:wrap; gap:6px; }
-        .btn-tag { background:white; border:1px solid #e2e8f0; padding:6px 12px; border-radius:100px; font-size:11px; font-weight:700; color:#475569; cursor:pointer; transition:all 0.2s; }
-        .btn-tag:hover { background:#eff6ff; border-color:#3b82f6; color:#3b82f6; transform:translateY(-1px); }
+        .btn-tag { background:white; border:1px solid rgba(197,160,89,0.35); padding:6px 12px; border-radius:100px; font-size:11px; font-weight:700; color:#26392d; cursor:pointer; transition:all 0.2s; }
+        .btn-tag:hover { background:rgba(197,160,89,0.15); border-color:#c5a059; color:#26392d; transform:translateY(-1px); }
         .btn-tag:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
         /* ── Notification ────────────────────────────────────────────── */
         .header-actions { display:flex; align-items:center; gap:12px; justify-content:center; margin-top:8px; }
-        .btn-notification { background:white; border:1px solid #e2e8f0; width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:all 0.2s; color:#64748b; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-notification:hover { background:#f8fafc; border-color:#3b82f6; color:#3b82f6; transform:translateY(-2px); }
-        .btn-notification.has-new { border-color:#3b82f6; color:#3b82f6; animation:pulse-ring 2s cubic-bezier(0.4,0,0.6,1) infinite; }
-        @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(59,130,246,0.4)} 70%{box-shadow:0 0 0 10px rgba(59,130,246,0)} 100%{box-shadow:0 0 0 0 rgba(59,130,246,0)} }
+        .btn-notification { background:#faf7f2; border:1px solid rgba(197, 160, 89, 0.4); width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; transition:all 0.2s; color:#26392d; box-shadow:0 4px 10px rgba(0,0,0,0.05); }
+        .btn-notification:hover { background:#f4efe6; border-color:#c5a059; color:#c5a059; transform:translateY(-2px); }
+        .btn-notification.has-new { border-color:#c5a059; color:#c5a059; animation:pulse-ring 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+        @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(197,160,89,0.4)} 70%{box-shadow:0 0 0 10px rgba(197,160,89,0)} 100%{box-shadow:0 0 0 0 rgba(197,160,89,0)} }
         .notification-dot { position:absolute; top:10px; right:10px; width:10px; height:10px; background:#ef4444; border-radius:50%; border:2px solid white; }
 
-        .comment-sent-indicator { display:flex; align-items:center; gap:8px; background:#fef2f2; color:#ef4444; padding:12px 16px; border-radius:12px; font-size:13px; font-weight:700; border:1px solid #fee2e2; animation:slideIn 0.3s ease-out; }
+        .comment-sent-indicator { display:flex; align-items:center; gap:8px; background:#fffdf5; color:#c5a059; padding:12px 16px; border-radius:12px; font-size:13px; font-weight:700; border:1px solid rgba(197,160,89,0.4); animation:slideIn 0.3s ease-out; }
         @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
 
         /* ── Comments Modal ──────────────────────────────────────────── */
-        .comments-modal-box { background:white; border-radius:32px; padding:40px; max-width:500px; width:95%; max-height:85vh; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); }
+        .comments-modal-box { background:#faf7f2; border:1px solid rgba(197, 160, 89, 0.45); border-radius:32px; padding:40px; max-width:500px; width:95%; max-height:85vh; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.3); }
         .comments-modal-box .modal-header { text-align:center; margin-bottom:32px; }
-        .comments-modal-box .icon-badge { width:64px; height:64px; background:#eff6ff; color:#3b82f6; display:flex; align-items:center; justify-content:center; border-radius:20px; margin:0 auto 20px; box-shadow:inset 0 0 0 1px rgba(59,130,246,0.1); }
-        .comments-modal-box h2 { font-size:26px; font-weight:800; color:#1e293b; margin-bottom:8px; letter-spacing:-0.025em; }
-        .comments-modal-box p { color:#64748b; font-size:15px; }
-        .modal-close-btn { position:absolute; top:20px; right:20px; background:none; border:none; cursor:pointer; color:#64748b; padding:8px; border-radius:50%; transition:all 0.2s; }
-        .modal-close-btn:hover { background:#f1f5f9; color:#1e293b; }
+        .comments-modal-box .icon-badge { width:64px; height:64px; background:rgba(197, 160, 89, 0.15); border:1px solid rgba(197, 160, 89, 0.4); color:#c5a059; display:flex; align-items:center; justify-content:center; border-radius:20px; margin:0 auto 20px; }
+        .comments-modal-box h2 { font-family:'Cormorant Garamond', Georgia, serif; font-size:28px; font-weight:700; color:#26392d; margin-bottom:8px; letter-spacing:-0.01em; }
+        .comments-modal-box p { color:#627265; font-size:14px; }
+        .modal-close-btn { position:absolute; top:20px; right:20px; background:none; border:none; cursor:pointer; color:#627265; padding:8px; border-radius:50%; transition:all 0.2s; }
+        .modal-close-btn:hover { background:#f4efe6; color:#17241b; }
         .comments-list { display:flex; flex-direction:column; gap:16px; padding:10px 0; }
         .comment-item { animation:slideUp 0.3s ease-out; }
-        .comment-bubble { background:linear-gradient(135deg,#ffffff,#f0f7ff); padding:24px; border-radius:28px; border-bottom-left-radius:4px; border:1px solid #e2e8f0; position:relative; box-shadow:0 10px 25px rgba(59,130,246,0.05); transition:0.3s; }
-        .comment-bubble:hover { transform:scale(1.02); box-shadow:0 15px 35px rgba(59,130,246,0.1); border-color:#3b82f6; }
-        .comment-icon { position:absolute; top:-12px; left:20px; background:white; width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); border:1px solid #e2e8f0; }
-        .comment-text { font-size:22px; font-weight:800; margin-bottom:20px; font-style:italic; line-height:1.4; background:linear-gradient(135deg,#1e293b,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.01em; }
-        .comment-meta { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#64748b; font-weight:700; border-top:1px solid #f1f5f9; padding-top:16px; flex-wrap:wrap; gap:8px; }
+        .comment-bubble { background:#ffffff; padding:24px; border-radius:24px; border-bottom-left-radius:4px; border:1px solid rgba(197, 160, 89, 0.35); position:relative; box-shadow:0 8px 24px rgba(0,0,0,0.06); transition:0.3s; }
+        .comment-bubble:hover { transform:scale(1.02); box-shadow:0 15px 35px rgba(0,0,0,0.1); border-color:#c5a059; }
+        .comment-icon { position:absolute; top:-12px; left:20px; background:#faf7f2; width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.08); border:1px solid rgba(197, 160, 89, 0.4); }
+        .comment-text { font-family:'Cormorant Garamond', Georgia, serif; font-size:22px; font-weight:700; margin-bottom:20px; font-style:italic; line-height:1.4; color:#26392d; letter-spacing:-0.01em; }
+        .comment-meta { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#627265; font-weight:700; border-top:1px solid rgba(197, 160, 89, 0.25); padding-top:16px; flex-wrap:wrap; gap:8px; }
         .author-info { display:flex; align-items:center; gap:6px; }
-        .author-label { color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:0.5px; }
-        .comment-author { color:#1e293b; font-weight:800; background:#f1f5f9; padding:4px 10px; border-radius:8px; }
-        .comment-date { font-size:11px; background:#eff6ff; color:#3b82f6; padding:4px 10px; border-radius:8px; }
-        .no-comments { text-align:center; padding:80px 20px; color:#94a3b8; display:flex; flex-direction:column; align-items:center; background:#f8fafc; border-radius:32px; border:2px dashed #e2e8f0; }
+        .author-label { color:#c5a059; font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:0.5px; }
+        .comment-author { color:#26392d; font-weight:800; background:rgba(197, 160, 89, 0.12); border:1px solid rgba(197, 160, 89, 0.3); padding:4px 10px; border-radius:8px; }
+        .comment-date { font-size:11px; background:rgba(197, 160, 89, 0.15); color:#26392d; border:1px solid rgba(197, 160, 89, 0.3); padding:4px 10px; border-radius:8px; }
+        .no-comments { text-align:center; padding:80px 20px; color:#627265; display:flex; flex-direction:column; align-items:center; background:#ffffff; border-radius:24px; border:2px dashed rgba(197, 160, 89, 0.35); }
 
         .tab-title { font-size:14px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
         .tab-title.sent { color:#ef4444; }
@@ -4258,33 +4404,35 @@ export default function PublicKatalogPage() {
           justify-content: center;
           gap: 12px;
           margin-bottom: 32px;
+          position: relative;
+          z-index: 2;
         }
         .desktop-tab-nav button {
           display: flex;
           align-items: center;
           gap: 8px;
-          background: white;
-          border: 1px solid #e2e8f0;
+          background: #faf7f2;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           padding: 10px 24px;
-          border-radius: 14px;
+          border-radius: 999px;
           font-size: 14px;
-          font-weight: 750;
-          color: #64748b;
+          font-weight: 700;
+          color: #26392d;
           cursor: pointer;
           transition: 0.2s;
         }
         .desktop-tab-nav button:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
+          background: #f4efe6;
+          border-color: #c5a059;
         }
         .desktop-tab-nav button.active {
-          background: #1e293b;
-          border-color: #1e293b;
-          color: white;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          background: #26392d;
+          border-color: #c5a059;
+          color: #faf7f2;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.25);
         }
         .desktop-tab-nav button.active :global(svg) {
-          color: white !important;
+          color: #c5a059 !important;
         }
         .badge-icon-wrapper {
           position: relative;
@@ -4296,8 +4444,8 @@ export default function PublicKatalogPage() {
           position: absolute;
           top: -6px;
           right: -10px;
-          background: #ef4444;
-          color: white;
+          background: #c5a059;
+          color: #17241b;
           font-size: 9px;
           font-weight: 900;
           border-radius: 50%;
@@ -4306,7 +4454,7 @@ export default function PublicKatalogPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1.5px solid white;
+          border: 1.5px solid #26392d;
           padding: 0 2px;
         }
         .mobile-nav-bar {
@@ -4324,15 +4472,15 @@ export default function PublicKatalogPage() {
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(23, 36, 27, 0.95);
             backdrop-filter: blur(12px);
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid rgba(197, 160, 89, 0.35);
             display: flex;
             align-items: center;
             justify-content: space-around;
             z-index: 500;
             padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
           }
           .nav-bar-item {
             display: flex;
@@ -4342,7 +4490,7 @@ export default function PublicKatalogPage() {
             gap: 4px;
             border: none;
             background: transparent;
-            color: #64748b;
+            color: #a3b8aa;
             font-size: 10px;
             font-weight: 700;
             cursor: pointer;
@@ -4351,7 +4499,7 @@ export default function PublicKatalogPage() {
             height: 100%;
           }
           .nav-bar-item.active {
-            color: #3b82f6;
+            color: #c5a059;
           }
           .pb-24 {
             padding-bottom: 96px !important;
@@ -4442,20 +4590,21 @@ export default function PublicKatalogPage() {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: #fff1f2;
-          color: #e11d48;
+          background: #faf7f2;
+          color: #26392d;
           padding: 16px 20px;
           border-radius: 16px;
           font-weight: 800;
           font-size: 15px;
-          border: 1px solid #ffe4e6;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           margin-bottom: 20px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
         .empty-cart-state {
           text-align: center;
           padding: 60px 20px;
-          background: #f8fafc;
-          border: 2px dashed #e2e8f0;
+          background: #faf7f2;
+          border: 2px dashed rgba(197, 160, 89, 0.4);
           border-radius: 24px;
           display: flex;
           flex-direction: column;
@@ -4468,31 +4617,32 @@ export default function PublicKatalogPage() {
           filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.05));
         }
         .empty-cart-state h3 {
-          font-size: 18px;
-          font-weight: 800;
-          color: #1e293b;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 22px;
+          font-weight: 700;
+          color: #26392d;
           margin: 0 0 8px 0;
         }
         .empty-cart-state p {
           font-size: 13px;
-          color: #64748b;
+          color: #627265;
           margin: 0 0 20px 0;
           line-height: 1.5;
           max-width: 280px;
         }
         .goto-catalog-btn {
-          background: #3b82f6;
+          background: #3d5a45;
           color: white;
           font-weight: 700;
           font-size: 13px;
           padding: 10px 24px;
-          border-radius: 12px;
-          border: none;
+          border-radius: 999px;
+          border: 1px solid #c5a059;
           cursor: pointer;
           transition: 0.2s;
         }
         .goto-catalog-btn:hover {
-          background: #2563eb;
+          background: #4d7057;
           transform: translateY(-2px);
         }
         .cart-list {
@@ -4502,19 +4652,19 @@ export default function PublicKatalogPage() {
           margin-bottom: 24px;
         }
         .cart-item-card {
-          background: white;
-          border: 1px solid #e2e8f0;
+          background: #faf7f2;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           border-radius: 20px;
           padding: 16px 20px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           transition: 0.2s;
         }
         .cart-item-card:hover {
-          border-color: #cbd5e1;
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+          border-color: #c5a059;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
         .cart-item-info {
           display: flex;
@@ -4525,16 +4675,17 @@ export default function PublicKatalogPage() {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          background: #fff1f2;
+          background: rgba(197, 160, 89, 0.15);
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #ffe4e6;
+          border: 1px solid rgba(197, 160, 89, 0.4);
         }
         .cart-item-name {
-          font-size: 14px;
-          font-weight: 800;
-          color: #1e293b;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 18px;
+          font-weight: 700;
+          color: #26392d;
           margin-bottom: 4px;
         }
         .status-badge-pill {
@@ -4545,16 +4696,16 @@ export default function PublicKatalogPage() {
           text-transform: capitalize;
         }
         .status-badge-pill.menunggu {
-          background: #fef3c7;
-          color: #d97706;
+          background: rgba(197, 160, 89, 0.15);
+          color: #c5a059;
         }
         .status-badge-pill.diterima {
           background: #d1fae5;
           color: #065f46;
         }
         .status-badge-pill.selesai {
-          background: #dbeafe;
-          color: #1e40af;
+          background: rgba(61, 90, 69, 0.15);
+          color: #3d5a45;
         }
         .cart-btn-danger {
           display: flex;
@@ -4577,9 +4728,9 @@ export default function PublicKatalogPage() {
           display: flex;
           align-items: center;
           gap: 6px;
-          background: #f1f5f9;
-          color: #94a3b8;
-          border: 1px solid #e2e8f0;
+          background: #ede8de;
+          color: #8c9b90;
+          border: 1px solid rgba(197, 160, 89, 0.25);
           padding: 8px 14px;
           border-radius: 10px;
           font-size: 12px;
@@ -4588,11 +4739,11 @@ export default function PublicKatalogPage() {
         }
 
         .box-love-section-card {
-          background: linear-gradient(135deg, #fff0f6, #fff5f5);
-          border: 1px solid #fce7f3;
+          background: #faf7f2;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           border-radius: 24px;
           padding: 24px;
-          box-shadow: 0 4px 15px rgba(252, 231, 243, 0.3);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         .box-love-section-header {
           display: flex;
@@ -4604,14 +4755,15 @@ export default function PublicKatalogPage() {
           line-height: 1;
         }
         .box-love-section-header h4 {
-          font-size: 15px;
-          font-weight: 800;
-          color: #be185d;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 20px;
+          font-weight: 700;
+          color: #26392d;
           margin: 0 0 4px 0;
         }
         .box-love-section-header p {
           font-size: 12px;
-          color: #9d174d;
+          color: #627265;
           margin: 0;
           line-height: 1.5;
         }
@@ -4621,20 +4773,21 @@ export default function PublicKatalogPage() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: linear-gradient(135deg,#f472b6,#ec4899,#be185d);
+          background: linear-gradient(135deg, #3d5a45 0%, #26392d 100%);
           color: white;
-          border: none;
+          border: 1px solid #c5a059;
           padding: 12px;
           border-radius: 14px;
           font-size: 13px;
           font-weight: 800;
           cursor: pointer;
-          box-shadow: 0 4px 12px rgba(236,72,153,0.25);
+          box-shadow: 0 4px 12px rgba(38,57,45,0.3);
           transition: 0.2s;
         }
         .box-love-section-btn:hover {
           transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(236,72,153,0.35);
+          box-shadow: 0 6px 16px rgba(38,57,45,0.45);
+          border-color: #e5cf9f;
         }
 
         /* ── PROFILE TAB STYLE ─────────────────────────────────────────── */
@@ -4645,16 +4798,16 @@ export default function PublicKatalogPage() {
         }
         .skeleton-profile {
           height: 400px;
-          background: #f1f5f9;
+          background: rgba(197, 160, 89, 0.15);
           border-radius: 24px;
           animation: pulse 1.5s infinite;
         }
         .profile-details-card {
-          background: white;
-          border: 1px solid #e2e8f0;
+          background: #faf7f2;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           border-radius: 28px;
           padding: 24px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
         }
         .profile-header-main {
           display: flex;
@@ -4668,16 +4821,16 @@ export default function PublicKatalogPage() {
           height: 90px;
           border-radius: 50%;
           overflow: hidden;
-          background: #eff6ff;
-          color: #3b82f6;
+          background: rgba(197, 160, 89, 0.2);
+          color: #26392d;
           font-size: 32px;
           font-weight: 900;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-bottom: 12px;
-          border: 3px solid #dbeafe;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+          border: 3px solid #c5a059;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
         }
         .profile-avatar-large img {
           width: 100%;
@@ -4685,18 +4838,20 @@ export default function PublicKatalogPage() {
           object-fit: cover;
         }
         .profile-header-main h2 {
-          font-size: 18px;
-          font-weight: 900;
-          color: #1e293b;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 26px;
+          font-weight: 700;
+          color: #26392d;
           margin: 0 0 6px 0;
         }
         .profile-role-badge {
-          background: #1e293b;
-          color: white;
-          font-size: 9px;
+          background: #26392d;
+          color: #faf7f2;
+          border: 1px solid #c5a059;
+          font-size: 10px;
           font-weight: 800;
-          padding: 3px 8px;
-          border-radius: 6px;
+          padding: 3px 10px;
+          border-radius: 999px;
           letter-spacing: 0.5px;
         }
         .profile-info-grid {
@@ -4706,18 +4861,19 @@ export default function PublicKatalogPage() {
           margin-bottom: 28px;
         }
         .profile-info-section {
-          background: #f8fafc;
+          background: #ffffff;
+          border: 1px solid rgba(197, 160, 89, 0.3);
           border-radius: 16px;
           padding: 16px;
         }
         .profile-info-section h4 {
           font-size: 11px;
           font-weight: 800;
-          color: #94a3b8;
+          color: #c5a059;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           margin: 0 0 12px 0;
-          border-bottom: 1px dashed #e2e8f0;
+          border-bottom: 1px dashed rgba(197, 160, 89, 0.35);
           padding-bottom: 6px;
         }
         .profile-info-row {
@@ -4729,30 +4885,50 @@ export default function PublicKatalogPage() {
           font-size: 13px;
         }
         .profile-info-row .label {
-          color: #64748b;
+          color: #627265;
           font-weight: 600;
           flex-shrink: 0;
           max-width: 120px;
         }
         .profile-info-row .value {
-          color: #1e293b;
-          font-weight: 750;
+          color: #1f2922;
+          font-weight: 700;
           text-align: right;
           flex: 1;
           word-break: break-word;
           line-height: 1.5;
         }
         .profile-insta-link {
-          color: #3b82f6;
+          color: #3d5a45;
           text-decoration: none;
+          font-weight: 750;
         }
         .profile-insta-link:hover {
-          color: #ec4899;
+          color: #c5a059;
           text-decoration: underline;
         }
         .profile-actions-bottom {
-          border-top: 1px solid #f1f5f9;
+          border-top: 1px solid rgba(197, 160, 89, 0.3);
           padding-top: 20px;
+        }
+        .profile-edit-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: #3d5a45;
+          color: white;
+          border: 1px solid #c5a059;
+          padding: 14px;
+          border-radius: 16px;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: 0.2s;
+        }
+        .profile-edit-btn:hover {
+          background: #4d7057;
         }
         .profile-pulang-btn {
           width: 100%;
@@ -4779,9 +4955,9 @@ export default function PublicKatalogPage() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: #f8fafc;
-          color: #64748b;
-          border: 1px solid #e2e8f0;
+          background: #ffffff;
+          color: #26392d;
+          border: 1px solid rgba(197, 160, 89, 0.4);
           padding: 14px;
           border-radius: 16px;
           font-size: 14px;
@@ -4790,7 +4966,8 @@ export default function PublicKatalogPage() {
           transition: 0.2s;
         }
         .profile-logout-btn:hover {
-          background: #e2e8f0;
+          background: #f4efe6;
+          border-color: #c5a059;
         }
 
         /* SweetAlert2 z-index override */

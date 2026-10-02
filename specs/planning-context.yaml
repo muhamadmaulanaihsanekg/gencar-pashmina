@@ -1,0 +1,23 @@
+# specs/planning-context.yaml — written by elaborate-spec; consumed by scope-work and slice-tasks
+feature_name: "port-full-spa-hono-d1"
+problem_statement: "Eliminasi compute overhead dan render berlebih dari Next.js SSR runtime di Cloudflare dengan memindahkan frontend ke static export murni (Cloudflare Pages) dan memusatkan seluruh API ke Hono Worker dengan Cloudflare D1 serta direct upload Cloudflare R2."
+constraints:
+  - "Frontend 100% statis via next build output export (0% SSR compute)."
+  - "Backend Hono API berjalan di Cloudflare Workers."
+  - "Database menggunakan Cloudflare D1 via Drizzle ORM."
+  - "Storage menggunakan Cloudflare R2 direct-upload via presigned URL."
+  - "Single domain routing: /* ke Cloudflare Pages, /api/* ke Hono Worker."
+  - "Ubah 7 server component yang tersisa di app/ menjadi client-side fetch."
+out_of_scope:
+  - "Server Actions dan React Server Components."
+  - "Cloudinary dan Turso setelah migrasi selesai."
+  - "Rewrite ke framework baru selain Next.js (Vite diabaikan demi kompatibilitas 59 halaman eksisting)."
+key_decisions:
+  - decision: "Next.js Static Export (output export) dipertahankan sebagai basis frontend"
+    rationale: "59 dari 66 halaman sudah use client dan memanggil fetch; mempertahankan Next.js export menjamin 100% fitur sama persis tanpa resiko rewrite router."
+  - decision: "Backend dipisah total ke Hono di Cloudflare Workers"
+    rationale: "Menghapus overhead runtime Next.js server dan mengoptimalkan latensi serta cold start."
+  - decision: "Migrasi database dari Turso ke Cloudflare D1"
+    rationale: "Integrasi native dengan Cloudflare Workers tanpa koneksi HTTP eksternal ke Turso."
+  - decision: "Direct upload ke Cloudflare R2"
+    rationale: "Mengurangi CPU/bandwidth compute di Worker untuk pemrosesan file media."

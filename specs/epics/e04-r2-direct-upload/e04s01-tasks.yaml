@@ -1,0 +1,13 @@
+story_id: e04s01
+title: "Endpoint Presigned URL R2 di Hono"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Tambahkan konfigurasi r2_buckets binding di wrangler.toml"
+    verify: "grep -q 'r2_buckets' wrangler.toml"
+    status: completed
+  - id: 2
+    description: "Implementasi handler /api/upload/sign di Hono worker"
+    verify: "grep -q 'upload' worker/index.ts"
+    status: completed

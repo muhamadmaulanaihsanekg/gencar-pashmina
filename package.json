@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n \"API,WEB\" -c \"cyan,magenta\" \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:web": "rimraf .next && next dev -p 3012",
+    "dev:api": "wrangler dev",
+    "dev:all": "concurrently -n \"API,WEB\" -c \"cyan,magenta\" \"npm run dev:api\" \"npm run dev:web\"",
     "dev:reset": "rimraf .next && npm run dev",
     "build": "next build",
     "start": "next start",
@@ -12,9 +15,9 @@
     "db:studio": "drizzle-kit studio",
     "seed": "npx tsx scripts/seed.ts",
     "build:cf": "npx @opennextjs/cloudflare build --dangerouslyUseUnsupportedNextVersion --node-externals @libsql/isomorphic-ws && mkdir -p open-next-assets && rsync -a --delete .open-next/assets/ open-next-assets/",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:dev": "npm run pages:build && wrangler pages dev .vercel/output/static",
-    "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static"
+    "pages:build": "next build",
+    "deploy:pages": "wrangler pages deploy out --project-name=gencar-pages",
+    "deploy:worker": "wrangler deploy"
   },
   "dependencies": {
     "@libsql/client": "^0.17.2",
@@ -53,6 +56,7 @@
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
+    "@cloudflare/workers-types": "^5.20261001.1",
     "@opennextjs/cloudflare": "^1.19.11",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
@@ -61,6 +65,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.8",
+    "concurrently": "^10.0.5",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^8",

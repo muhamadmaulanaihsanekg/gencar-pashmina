@@ -1,0 +1,13 @@
+story_id: e04s02
+title: "Integrasi Client-Side Direct Upload ke R2"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Buat utilitas uploadToR2() di lib/upload.ts untuk handle sign + direct PUT"
+    verify: "test -f lib/upload.ts"
+    status: completed
+  - id: 2
+    description: "Update pemanggilan komponen upload di artikel dan profil agar memakai direct upload R2"
+    verify: "grep -q 'uploadToR2' lib/upload.ts"
+    status: completed

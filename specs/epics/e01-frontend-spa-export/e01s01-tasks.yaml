@@ -1,0 +1,21 @@
+story_id: e01s01
+title: "Konversi 7 Server Components ke Client-Side Fetch"
+status: todo
+bcps: 3
+tasks:
+  - id: 1
+    description: "Tambahkan use client dan ganti direct DB queries di app/page.tsx dengan fetch /api/public/landing"
+    verify: "grep -q '\"use client\"' app/page.tsx && ! grep -q 'import { db } from \"@/lib/db\"' app/page.tsx"
+    status: todo
+  - id: 2
+    description: "Konversi app/(dashboard)/dashboard/page.tsx menjadi client component dengan fetch /api/dashboard"
+    verify: "grep -q '\"use client\"' 'app/(dashboard)/dashboard/page.tsx'"
+    status: todo
+  - id: 3
+    description: "Konversi app/agenda/page.tsx, app/anggota/page.tsx, dan app/organisasi/page.tsx menjadi client component"
+    verify: "grep -q '\"use client\"' app/agenda/page.tsx && grep -q '\"use client\"' app/anggota/page.tsx && grep -q '\"use client\"' app/organisasi/page.tsx"
+    status: todo
+  - id: 4
+    description: "Konversi dynamic routes app/artikel/[id]/page.tsx dan app/(dashboard)/berita/[id]/page.tsx menggunakan client useParams"
+    verify: "grep -q '\"use client\"' 'app/artikel/[id]/page.tsx' && grep -q '\"use client\"' 'app/(dashboard)/berita/[id]/page.tsx'"
+    status: todo

@@ -24,28 +24,12 @@ export default function HomeNav() {
 
           <div className={`nav-links ${isOpen ? "active" : ""}`}>
             <Link href="/" className="nav-link nav-link-active" onClick={() => setIsOpen(false)}>Beranda</Link>
-            <Link href="/#artikel" className="nav-link" onClick={() => setIsOpen(false)}>Artikel</Link>
-            <Link href="/#berita" className="nav-link" onClick={() => setIsOpen(false)}>Berita</Link>
-            <div className="nav-item">
-              <Link href="/anggota" className="nav-link nav-dropdown-trigger" style={{ display: 'flex', alignItems: 'center' }}>
-                Organisasi
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginLeft: 6 }}><path d="m6 9 6 6 6-6" /></svg>
-              </Link>
-              <div className="nav-dropdown">
-                <Link href="/anggota" className="nav-dropdown-link" onClick={() => setIsOpen(false)}>Profil Anggota</Link>
-                <Link href="/kegiatan" className="nav-dropdown-link" onClick={() => setIsOpen(false)}>Kegiatan</Link>
-              </div>
-            </div>
-            <Link href="/login" className="nav-link" onClick={() => setIsOpen(false)}>Masuk</Link>
-            <Link href="/register" className="nav-link" onClick={() => setIsOpen(false)}>Daftar</Link>
-          </div>
-          <div className="nav-search">
-            <svg width="14" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-            <input type="text" placeholder="Cari di Web ini..." />
+            <Link href="/mandiri/katalog" className="nav-link" onClick={() => setIsOpen(false)}>Katalog Ta'aruf</Link>
+            <Link href="/mandiri/daftar" className="nav-link" onClick={() => setIsOpen(false)}>Daftar Peserta</Link>
+            <Link href="/mandiri/katalog/login" className="nav-link" onClick={() => setIsOpen(false)}>Masuk Katalog</Link>
           </div>
         </div>
       </div>
-
     </nav>
   );
 }

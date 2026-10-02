@@ -8,11 +8,33 @@ import { eq, sql, and, desc } from "drizzle-orm";
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
+    const { searchParams } = new URL(request.url);
+    const nUnik = searchParams.get("nomorUnik");
     
     // 1. Check Public Access Status
     const publicStatus = await db.select().from(settings).where(eq(settings.key, "mandiri_katalog_public_status"));
-    if (!publicStatus[0] || publicStatus[0].value !== "open") {
-      return NextResponse.json({ error: "Katalog sedang tidak dibuka untuk publik." }, { status: 403 });
+    const isPublicOpen = publicStatus[0]?.value === "open";
+
+    if (!isPublicOpen) {
+      let isAllowed = false;
+      try {
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session && ["admin", "admin_romantic_room", "tim_pnkb", "tim_pnkb_gambuh"].includes(session.role)) {
+          isAllowed = true;
+        }
+      } catch (e) {}
+
+      if (!isAllowed && nUnik) {
+        const participantCheck = await db.select({ id: generus.id }).from(generus).where(eq(generus.nomorUnik, nUnik)).limit(1);
+        if (participantCheck.length > 0) {
+          isAllowed = true;
+        }
+      }
+
+      if (!isAllowed) {
+        return NextResponse.json({ error: "Katalog sedang tidak dibuka untuk publik." }, { status: 403 });
+      }
     }
 
     // 2. Get active activity to filter by attendance

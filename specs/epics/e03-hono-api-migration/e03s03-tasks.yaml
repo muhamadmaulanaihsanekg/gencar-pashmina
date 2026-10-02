@@ -1,0 +1,13 @@
+story_id: e03s03
+title: "Porting Endpoint CRUD Master Data & Laporan"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Porting endpoint /api/generus dan master wilayah ke Hono"
+    verify: "npx tsc --project worker/tsconfig.json"
+    status: completed
+  - id: 2
+    description: "Porting endpoint artikel, berita, dan laporan ke Hono"
+    verify: "npx tsc --project worker/tsconfig.json"
+    status: completed

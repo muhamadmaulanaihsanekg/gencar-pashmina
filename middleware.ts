@@ -26,7 +26,41 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const PUBLIC_PATHS = ["/login", "/register", "/api/auth/login", "/api/auth/register", "/api/auth/desa", "/api/auth/kelompok", "/api/auth/reset-password", "/api/settings", "/api/public", "/api/sholat", "/mandiri/katalog", "/mandiri/daftar", "/api/mandiri/pilih", "/api/mandiri/komentar", "/api/mandiri/box-love", "/api/mandiri/rooms", "/api/mandiri/hasil-rr", "/api/webhook/fonnte", "/api/upload", "/api/download"];
+  // ── Allow static assets immediately ──
+  if (
+    pathname.startsWith("/img/") ||
+    pathname.startsWith("/uploads/") ||
+    /\.(png|jpe?g|svg|webp|gif|ico|woff2?|css|js|map)$/i.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
+  const PUBLIC_PATHS = [
+    "/login",
+    "/register",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/api/auth/desa",
+    "/api/auth/kelompok",
+    "/api/auth/reset-password",
+    "/api/settings",
+    "/api/public",
+    "/api/sholat",
+    "/mandiri/katalog",
+    "/mandiri/daftar",
+    "/mandiri/romantic-room-tv",
+    "/mandiri/daftar-tim-gambuh",
+    "/mandiri/daftar-tim-penunggu",
+    "/mandiri/daftar-wilayah",
+    "/api/mandiri/pilih",
+    "/api/mandiri/komentar",
+    "/api/mandiri/box-love",
+    "/api/mandiri/rooms",
+    "/api/mandiri/hasil-rr",
+    "/api/webhook/fonnte",
+    "/api/upload",
+    "/api/download"
+  ];
 
   // ── Rate limit sensitive auth endpoints ──
   if (pathname === "/api/auth/login" || pathname === "/api/auth/register") {
@@ -214,5 +248,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|img/|uploads/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };

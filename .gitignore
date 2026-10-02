@@ -55,3 +55,8 @@ diff.txt
 *.mjs.bak
 scratch/
 pages_list.txt
+
+# local runtime artifacts
+.dev.log
+local.db-shm
+local.db-wal

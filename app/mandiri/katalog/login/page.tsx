@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Lock, User, ShieldCheck, Calendar } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { User, ShieldCheck, Calendar, ArrowLeft, ArrowRight, Heart } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function KatalogLoginPage() {
@@ -25,7 +26,7 @@ export default function KatalogLoginPage() {
       p.set("nomorUnik", unik.trim());
       p.set("deviceId", deviceId);
       const qs = p.toString();
-      
+
       const res = await fetch(`/api/public/mandiri/katalog/check-status?${qs}`);
       const contentType = res.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
@@ -46,8 +47,16 @@ export default function KatalogLoginPage() {
           }).catch((e) => console.error("FCM login registration failed:", e));
         }
 
-        Swal.fire({ title: `Selamat Datang, ${resData.nama}!`, text: "Berhasil masuk ke Katalog Peserta.", icon: "success", timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
-        
+        Swal.fire({
+          title: `Selamat Datang, ${resData.nama}!`,
+          text: "Berhasil masuk ke Katalog Peserta.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+          toast: true,
+          position: "top-end"
+        });
+
         setTimeout(() => {
           window.location.href = "/mandiri/katalog";
         }, 1500);
@@ -73,107 +82,108 @@ export default function KatalogLoginPage() {
   };
 
   return (
-    <div className="login-backdrop">
-      <div className="lm-box">
-        <div className="lm-header">
-          <div className="lm-icon-badge">
-            <Lock size={28} className="text-blue-500" />
-          </div>
-          <h2>Login Katalog</h2>
-          <p>Masukkan Nomor Unik atau Nomor Peserta Anda</p>
+    <div className="portal-root katalog-login-root">
+      <div className="kl-arabesque-layer" aria-hidden="true" />
+      <div className="kl-ambient-glow" aria-hidden="true" />
+
+      <div className="kl-container">
+        {/* Top return navigation */}
+        <div className="kl-top-nav">
+          <Link href="/" className="kl-back-btn">
+            <ArrowLeft size={15} />
+            <span>Kembali ke Beranda</span>
+          </Link>
         </div>
 
-        <div className="lm-body">
-          <div className="input-field">
-            <User size={18} className="input-icon" />
-            <input
-              type="text"
-              inputMode="text"
-              autoCapitalize="characters"
-              autoCorrect="off"
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="Contoh: MND123456 atau PNB123456"
-              value={unik}
-              onChange={(e) => setUnik(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && verify()}
-              autoFocus
-            />
+        <div className="kl-card">
+          <div className="kl-header">
+            <div className="kl-logo-badge">
+              <img
+                src="/img/pashmina-logo.png?v=8"
+                alt="Logo Pashmina 8.0"
+                className="kl-logo-img"
+              />
+            </div>
+            <div className="kl-pretitle">Portal Ta&apos;aruf Mandiri</div>
+            <h1 className="kl-title">Masuk Katalog Peserta</h1>
+            <p className="kl-subtitle">
+              Gunakan <strong>Nomor Unik / ID Login</strong> yang tercetak pada tiket barcode pendaftaran Anda.
+            </p>
           </div>
 
-          <button
-            className={`login-btn ${status === "verifying" ? "loading" : ""}`}
-            onClick={verify}
-            disabled={status === "verifying" || !unik.trim()}
-          >
-            {status === "verifying" ? (
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span className="spinner-small"></span> Memproses...
-              </span>
-            ) : "Masuk"}
-          </button>
-
-          {status === "error" && (
-            <div className="error-alert">
-              <ShieldCheck size={16} />
-              <span>{errorMsg}</span>
+          <div className="kl-body">
+            <div className="kl-input-group">
+              <label htmlFor="nomorUnikInput" className="kl-label">
+                Nomor Peserta / ID Login
+              </label>
+              <div className="kl-field-wrap">
+                <User size={18} className="kl-input-icon" />
+                <input
+                  id="nomorUnikInput"
+                  type="text"
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Contoh: MND123456"
+                  value={unik}
+                  onChange={(e) => setUnik(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && verify()}
+                  autoFocus
+                  className="kl-input"
+                />
+              </div>
             </div>
-          )}
 
-          {status === "waiting" && (
-            <div className="warning-alert">
-              <Calendar size={16} />
-              <span>{errorMsg}</span>
+            <button
+              type="button"
+              className={`kl-submit-btn ${status === "verifying" ? "loading" : ""}`}
+              onClick={verify}
+              disabled={status === "verifying" || !unik.trim()}
+            >
+              {status === "verifying" ? (
+                <span className="kl-btn-content">
+                  <span className="kl-spinner" /> Memverifikasi Data...
+                </span>
+              ) : (
+                <span className="kl-btn-content">
+                  <Heart size={16} fill="currentColor" />
+                  <span>Buka Katalog Ta&apos;aruf</span>
+                  <ArrowRight size={16} />
+                </span>
+              )}
+            </button>
+
+            {status === "error" && (
+              <div className="kl-error-box">
+                <ShieldCheck size={18} style={{ flexShrink: 0 }} />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {status === "waiting" && (
+              <div className="kl-warning-box">
+                <Calendar size={18} style={{ flexShrink: 0 }} />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            <div className="kl-footer-links">
+              <div className="kl-register-prompt">
+                <span>Belum terdaftar sebagai peserta?</span>
+                <Link href="/mandiri/daftar" className="kl-register-link">
+                  Daftar Peserta Baru &rarr;
+                </Link>
+              </div>
+
+              <div className="kl-admin-link">
+                <Link href="/login?admin=1">Akses Panitia / Pengurus</Link>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .login-backdrop {
-          min-height: 100vh;
-          background: #f1f5f9;
-          background-image:
-            radial-gradient(at 0% 0%, rgba(59,130,246,0.1) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, rgba(236,72,153,0.1) 0px, transparent 50%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-        }
-        .lm-box {
-          background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(10px);
-          width: 100%;
-          max-width: 420px;
-          padding: 40px;
-          border-radius: 32px;
-          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
-          border: 1px solid rgba(255,255,255,0.5);
-          animation: modalFadeIn 0.5s cubic-bezier(0.16,1,0.3,1);
-        }
-        @keyframes modalFadeIn { from { opacity:0; transform:translateY(20px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
-        .lm-header { text-align:center; margin-bottom:32px; display: block; }
-        .lm-icon-badge { width:64px; height:64px; background:#eff6ff; color:#3b82f6; display:flex; align-items:center; justify-content:center; border-radius:20px; margin:0 auto 20px; box-shadow:inset 0 0 0 1px rgba(59,130,246,0.1); }
-        h2 { font-size:26px; font-weight:800; color:#1e293b; margin-bottom:8px; letter-spacing:-0.025em; }
-        p { color:#64748b; font-size:15px; margin:0; line-height:1.5; }
-        .lm-body { display:flex; flex-direction:column; gap:20px; }
-        .input-field { position:relative; }
-        .input-icon { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; }
-        input {
-          width:100%; background:#f8fafc; border:2px solid #e2e8f0; border-radius:16px;
-          font-size:16px; font-weight:600; transition:all 0.2s; color:#1e293b;
-          padding: 16px 16px 16px 44px; box-sizing: border-box;
-        }
-        input:focus { background:white; border-color:#3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,0.1); outline:none; }
-        .login-btn { background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; padding:16px; border-radius:16px; font-size:16px; font-weight:700; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center; width:100%; }
-        .login-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 20px -5px rgba(59,130,246,0.4); }
-        .login-btn:disabled { opacity:0.6; cursor:not-allowed; }
-        .error-alert { padding:14px; background:#fef2f2; border-radius:12px; color:#b91c1c; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid #fee2e2; }
-        .warning-alert { padding:14px; background:#fffbeb; border-radius:12px; color:#92400e; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid #fef3c7; }
-        .spinner-small { width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-      `}</style>
     </div>
   );
 }

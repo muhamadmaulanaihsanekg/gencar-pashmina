@@ -49,42 +49,33 @@ const navItems = [
   {
     section: "Menu Utama",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: "grid" },
+      { href: "/dashboard", label: "Dashboard Ta'aruf", icon: "grid" },
     ],
   },
   {
-    section: "Data & Konten",
+    section: "Usia Mandiri & Ta'aruf",
     items: [
-      { href: "/generus", label: "Data Generus", icon: "users" },
-      { href: "/kegiatan", label: "Kegiatan", icon: "calendar" },
-      { href: "/absensi", label: "Absensi", icon: "check-square" },
-      { href: "/rundown", label: "Rundown Acara", icon: "list", roles: ["admin_kegiatan"] },
-      { href: "/artikel", label: "Artikel", icon: "book-open" },
-      { href: "/berita", label: "Berita", icon: "file-text" },
+      { href: "/mandiri", label: "Registrasi Peserta", icon: "sparkles" },
+      { href: "/mandiri/absensi", label: "Absensi Mandiri", icon: "absensi" },
+      { href: "/mandiri/pulang", label: "Daftar Pulang", icon: "logout" },
+      { href: "/admin/katalog", label: "Katalog Peserta", icon: "katalog" },
+      { href: "/mandiri/romantic-room", label: "Romantic Room", icon: "romantic" },
+      { href: "/mandiri/desa", label: "Kelola Daerah / Desa", icon: "desa" },
+      { href: "/admin/tim-gambuh", label: "Tim PNKB & Ibu Gambuh", icon: "users" },
+      { href: "/mandiri/saran", label: "Saran & Masukan", icon: "message-square" },
     ],
   },
   {
-    section: "Admin",
-    roles: ["admin", "pengurus_daerah", "kmm_daerah", "admin_romantic_room", "admin_kegiatan"],
+    section: "Pengaturan & Sistem",
+    roles: ["admin", "pengurus_daerah"],
     items: [
+      { href: "/admin/users", label: "Kelola User / Panitia", icon: "users-cog", roles: ["admin", "pengurus_daerah"] },
       { href: "/admin/logo", label: "Logo & Tema", icon: "logo", roles: ["admin"] },
-      { href: "/admin/users", label: "Kelola User", icon: "users-cog", roles: ["admin", "pengurus_daerah", "kmm_daerah"] },
-      { href: "/admin/pengurus", label: "Kelola Pengurus", icon: "users", roles: ["admin", "pengurus_daerah", "kmm_daerah"] },
-      { href: "/admin/desa", label: "Kelola Desa", icon: "map", roles: ["admin", "pengurus_daerah", "kmm_daerah"] },
-      { href: "/admin/tim-gambuh", label: "Tim PNKB & Ibu Gambuh", icon: "users", roles: ["pengurus_daerah", "kmm_daerah", "admin_romantic_room"] },
-      { href: "/admin/berita", label: "Moderasi Berita", icon: "news", roles: ["admin", "pengurus_daerah", "kmm_daerah"] },
-      { href: "/admin/artikel", label: "Moderasi Artikel", icon: "artikel", roles: ["admin", "pengurus_daerah", "kmm_daerah"] },
-      { href: "/admin/saran", label: "Saran & Masukan", icon: "message-square", roles: ["admin", "pengurus_daerah", "kmm_daerah"] },
       { href: "/admin/maintenance", label: "Mode Maintenance", icon: "settings", roles: ["admin"] },
-      { href: "/katalog", label: "Katalog Mandiri", icon: "katalog", roles: ["admin_romantic_room"] },
-      { href: "/mandiri/romantic-room", label: "Romantic Room", icon: "romantic", roles: ["admin_romantic_room"] },
-      { href: "/mandiri/haid", label: "Sedang Haid / Berhalangan", icon: "heart", roles: ["admin_romantic_room"] },
-      { href: "/mandiri/saran", label: "Saran / Masukkan", icon: "message-square", roles: ["admin_romantic_room", "admin"] },
     ],
   },
   {
     section: "Menu Pribadi",
-    roles: ["admin", "pengurus_daerah", "kmm_daerah", "desa", "kelompok", "admin_kegiatan"],
     items: [
       { href: "/profile", label: "Profil Saya (QR)", icon: "user" },
     ],
@@ -113,8 +104,6 @@ const userNavs: Record<string, any[]> = {
       section: "Menu Utama",
       items: [
         { href: "/dashboard", label: "Dashboard", icon: "grid" },
-        { href: "/artikel", label: "Artikel", icon: "book-open" },
-        { href: "/berita", label: "Berita", icon: "file-text" },
       ],
     },
     {
@@ -149,13 +138,10 @@ const userNavs: Record<string, any[]> = {
       section: "Usia Mandiri/Nikah",
       items: [
         { href: "/mandiri", label: "Registrasi Peserta", icon: "sparkles" },
-        { href: "/mandiri/panitia", label: "Pendaftaran Panitia", icon: "users" },
-        { href: "/mandiri/kegiatan", label: "Kegiatan", icon: "calendar" },
         { href: "/mandiri/absensi", label: "Absensi", icon: "absensi" },
         { href: "/mandiri/pulang", label: "Daftar Pulang", icon: "logout" },
         { href: "/admin/katalog", label: "Katalog Peserta", icon: "katalog" },
         { href: "/mandiri/romantic-room", label: "Romantic Room", icon: "romantic" },
-        { href: "/mandiri/haid", label: "Sedang Haid / Berhalangan", icon: "heart" },
         { href: "/mandiri/saran", label: "Saran / Masukkan", icon: "message-square" },
         { href: "/mandiri/desa", label: "Kelola Daerah / Desa", icon: "desa" },
         { href: "/admin/tim-gambuh", label: "Tim PNKB & Ibu Gambuh", icon: "users" },
@@ -241,7 +227,6 @@ const icons: Record<string, React.ReactNode> = {
   user: <User size={18} />,
   "book-open": <BookOpen size={18} />,
   sparkles: <Sparkles size={18} />,
-  heart: <Heart size={18} />,
   "dollar-sign": <CircleDollarSign size={18} />,
   camera: <Camera size={18} />,
 };
@@ -338,13 +323,15 @@ export default function Sidebar({ user }: SidebarProps) {
       )}
 
       <aside className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="sidebar-logo" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {siteLogo && (
-            <img src={siteLogo} alt="Logo" className="sidebar-logo-img" />
-          )}
-          <div>
-            <h1>GENCAR</h1>
-            <p style={{ fontSize: "9px" }}>Sistem Manajemen Generus JB2</p>
+        <div className="sidebar-logo">
+          <img
+            src="/img/pashmina-logo.png"
+            alt="Logo PNKB"
+            className="sidebar-logo-img"
+          />
+          <div className="sidebar-logo-text">
+            <h1 className="sidebar-brand">Pashmina 8.0</h1>
+            <p className="sidebar-tagline">Portal Ta'aruf & Usia Mandiri</p>
           </div>
         </div>
 

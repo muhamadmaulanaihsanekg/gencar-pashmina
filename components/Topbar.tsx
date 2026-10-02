@@ -94,18 +94,16 @@ export default function Topbar({ title, role, className = "", children, userName
     <>
       {loggingOut && <GlobalLoading />}
       <div className={`topbar ${className}`}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {siteLogo && (
-            <img 
-              src={siteLogo} 
-              alt="Logo" 
-              style={{ width: "28px", height: "28px", objectFit: "contain" }} 
-            />
-          )}
+        <div className="topbar-brand">
+          <img 
+            src="/img/pashmina-logo.png" 
+            alt="Logo PNKB" 
+            className="topbar-brand-logo" 
+          />
           <span className="topbar-title">{title}</span>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div className="topbar-right">
           {children && (
             <div className="topbar-actions" style={{ display: "flex", gap: "12px" }}>
               {children}

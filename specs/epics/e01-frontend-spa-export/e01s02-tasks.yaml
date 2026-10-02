@@ -1,0 +1,13 @@
+story_id: e01s02
+title: "Konfigurasi output export & Verifikasi Build Statis"
+status: todo
+bcps: 3
+tasks:
+  - id: 1
+    description: "Update next.config.mjs dengan output: 'export' dan unoptimized images"
+    verify: "grep -q 'output: \"export\"' next.config.mjs || grep -q \"output: 'export'\" next.config.mjs"
+    status: todo
+  - id: 2
+    description: "Jalankan build statis dan pastikan folder out/ terbentuk"
+    verify: "test -d out && test -f out/index.html"
+    status: todo

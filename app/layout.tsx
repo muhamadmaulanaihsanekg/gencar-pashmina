@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans, Merriweather, Montserrat } from "next/font/google";
 import "./globals.css";
+import "./landing.css";
 import PageTransition from "@/components/PageTransition";
 import ThemeConfig from "@/components/ThemeConfig";
 import { Suspense } from "react";
@@ -33,21 +34,21 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   metadataBase: new URL("https://gencar.my.id"),
   title: {
-    template: "%s | GENCAR",
-    default: "GENCAR - Sistem Manajemen Generus Cengkareng",
+    template: "%s | Pashmina 8.0",
+    default: "Pashmina 8.0 - Portal Ta'aruf & Usia Mandiri",
   },
-  description: "Sistem Manajemen Generus Cengkareng, Kegiatan, dan Absensi",
+  description: "Portal Ta'aruf & Usia Mandiri - Pashmina 8.0",
   openGraph: {
-    title: "GENCAR - Sistem Manajemen Generus Cengkareng",
-    description: "Sistem Manajemen Generus Cengkareng, Kegiatan, dan Absensi",
+    title: "Pashmina 8.0 - Portal Ta'aruf & Usia Mandiri",
+    description: "Portal Ta'aruf & Usia Mandiri - Pashmina 8.0",
     url: "https://gencar.my.id",
-    siteName: "GENCAR",
+    siteName: "Pashmina 8.0",
     images: [
       {
-        url: "https://gencar.my.id/img/logo-jb2.png",
+        url: "https://gencar.my.id/img/pashmina-logo.png",
         width: 800,
         height: 600,
-        alt: "Logo GENCAR",
+        alt: "Logo Pashmina 8.0",
       },
     ],
     locale: "id_ID",
@@ -55,9 +56,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GENCAR - Sistem Manajemen Generus Cengkareng",
-    description: "Sistem Manajemen Generus Cengkareng, Kegiatan, dan Absensi",
-    images: ["https://gencar.my.id/img/logo-jb2.png"],
+    title: "Pashmina 8.0 - Portal Ta'aruf & Usia Mandiri",
+    description: "Portal Ta'aruf & Usia Mandiri - Pashmina 8.0",
+    images: ["https://gencar.my.id/img/pashmina-logo.png"],
   },
 };
 

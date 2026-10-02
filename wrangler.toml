@@ -3,25 +3,34 @@ main = "worker/index.ts"
 compatibility_date = "2025-05-05"
 compatibility_flags = [ "nodejs_compat" ]
 
-# Next.js frontend (SPA) dibuild ke frontend/dist — Hono Worker serve via assets binding
+# Next.js frontend (SPA) static export directory
 [assets]
-directory = "frontend/dist"
+directory = "out"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-# D1 — isi database_id setelah `wrangler d1 create gencar-db`
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "gencar-db"
-# database_id = "REPLACE_ME"
+[[d1_databases]]
+binding = "DB"
+database_name = "gencar-db"
+database_id = "gencar-d1-db"
 
-# KV untuk magic_tokens rate-limit & session (buat via `wrangler kv namespace create`)
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "gencar-media"
+
+# KV untuk magic_tokens rate-limit & session
 # [[kv_namespaces]]
 # binding = "KV"
 # id = "REPLACE_ME"
 
 [vars]
 DAERAH_NAMA = "Cengkareng"
+R2_PUBLIC_URL = "https://media.gencar.my.id"
 
-[build]
-command = "npm run build"
+# Single-domain routing configuration:
+# routes = [
+#   { pattern = "gencar.my.id/api/*", zone_name = "gencar.my.id" }
+# ]
+
+# NOTE: no [build] block — `wrangler dev` must not trigger a Next build (it fights `next dev`).
+# Production builds happen in the deploy script instead.

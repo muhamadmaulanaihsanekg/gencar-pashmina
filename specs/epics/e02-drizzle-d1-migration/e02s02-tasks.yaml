@@ -1,0 +1,13 @@
+story_id: e02s02
+title: "Eksekusi Migrasi Data Turso ke D1"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Verifikasi skrip migrasi scripts/migrate-jb2id-to-d1.ts lulus uji sintaks dan pemetaan data"
+    verify: "npx tsx scripts/migrate-jb2id-to-d1.ts"
+    status: completed
+  - id: 2
+    description: "Siapkan file template import SQL untuk wrangler d1 execute"
+    verify: "test -f scripts/migrate-jb2id-to-d1.ts"
+    status: completed

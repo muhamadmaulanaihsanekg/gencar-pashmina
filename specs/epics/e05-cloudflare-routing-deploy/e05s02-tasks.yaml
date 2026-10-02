@@ -1,0 +1,13 @@
+story_id: e05s02
+title: "Routing Single Domain Cloudflare Pages & Worker"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Update routes di wrangler.toml atau dokumentasikan mapping Cloudflare custom domain"
+    verify: "test -f wrangler.toml"
+    status: completed
+  - id: 2
+    description: "Verifikasi health endpoint Worker merespons sukses saat diakses dari origin"
+    verify: "grep -q 'api/health' worker/index.ts"
+    status: completed

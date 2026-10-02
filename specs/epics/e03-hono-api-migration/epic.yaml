@@ -1,0 +1,24 @@
+id: e03
+title: "Hono API Migration"
+wsjf: 7.2
+total_bcps: 9
+status: done
+stories:
+  - id: e03s01
+    title: "Porting Auth & Session Middleware ke Hono"
+    bcps: 3
+    status: done
+    spec: e03s01-auth-core-endpoints.md
+    tasks: e03s01-tasks.yaml
+  - id: e03s02
+    title: "Porting Endpoint Absensi, Scanner, & Kegiatan"
+    bcps: 3
+    status: done
+    spec: e03s02-absensi-kegiatan-endpoints.md
+    tasks: e03s02-tasks.yaml
+  - id: e03s03
+    title: "Porting Endpoint CRUD Master Data & Laporan"
+    bcps: 3
+    status: done
+    spec: e03s03-crud-modules-endpoints.md
+    tasks: e03s03-tasks.yaml

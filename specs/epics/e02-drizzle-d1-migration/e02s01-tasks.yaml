@@ -1,0 +1,13 @@
+story_id: e02s01
+title: "Adaptasi Skema Drizzle untuk Cloudflare D1"
+status: done
+bcps: 3
+tasks:
+  - id: 1
+    description: "Update drizzle.config.ts untuk mendukung target Cloudflare D1"
+    verify: "grep -q 'dialect: \"sqlite\"' drizzle.config.ts || grep -q \"dialect: 'sqlite'\" drizzle.config.ts"
+    status: completed
+  - id: 2
+    description: "Audit dan sesuaikan skema di shared/schema.ts agar kompatibel dengan D1 SQLite"
+    verify: "npx tsc --noEmit --skipLibCheck shared/schema.ts"
+    status: completed
