@@ -58,7 +58,7 @@ export default function SaranRomanticRoom() {
 
     const filteredSaran = saranList.filter(s => {
         if (filterKepada === "Semua") return true;
-        const standardOptions = ["Tim Acara", "Tim Romantic Room", "Tim PNKB dan Ibu Gambuh"];
+        const standardOptions = ["Tim Acara", "Tim Panggilan Ta'aruf", "Tim PNKB dan Ibu Gambuh"];
         if (filterKepada === "Lainnya") return s.kepada && !standardOptions.includes(s.kepada);
         return s.kepada === filterKepada;
     });
@@ -67,12 +67,12 @@ export default function SaranRomanticRoom() {
         <div className="saran-layout">
             <header className="page-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <Link href="/mandiri/romantic-room" className="back-button">
+                    <Link href="/mandiri/panggilan" className="back-button">
                         <ArrowLeft size={20} />
                     </Link>
                     <div>
                         <h1>Saran & Masukan</h1>
-                        <p>Kumpulan saran dan masukan dari peserta Romantic Room</p>
+                        <p>Kumpulan saran dan masukan dari peserta sesi Ta&apos;aruf</p>
                     </div>
                 </div>
             </header>
@@ -82,7 +82,7 @@ export default function SaranRomanticRoom() {
                     <div className="card-header">
                         <div className="header-title">
                             <MessageSquare size={18} color="#3b82f6" />
-                            <h3>Saran & Masukan Romantic Room</h3>
+                            <h3>Saran & Masukan Sesi Ta&apos;aruf</h3>
                         </div>
                         <span className="queue-badge" style={{ margin: 0 }}>
                             {filteredSaran.length} Masukan
@@ -98,7 +98,7 @@ export default function SaranRomanticRoom() {
                         >
                             <option value="Semua">Semua</option>
                             <option value="Tim Acara">Tim Acara</option>
-                            <option value="Tim Romantic Room">Tim Romantic Room</option>
+                            <option value="Tim Panggilan Ta'aruf">Tim Panggilan Ta&apos;aruf</option>
                             <option value="Tim PNKB dan Ibu Gambuh">Tim PNKB dan Ibu Gambuh</option>
                             <option value="Lainnya">Lainnya</option>
                         </select>

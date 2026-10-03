@@ -12,7 +12,7 @@ import {
   Sparkles, Search, User, MapPin, Phone, GraduationCap,
   Briefcase, Heart, Globe, Calendar, Lock, Star,
   Music, Utensils, ClipboardList, Download, EyeOff,
-  ChevronDown, Settings2, Users, Instagram
+  ChevronDown, Settings2, Users, Instagram, X
 } from "lucide-react";
 
 export default function GenerusKatalogPage() {
@@ -36,6 +36,7 @@ export default function GenerusKatalogPage() {
   const [publicStatus, setPublicStatus] = useState<string>("closed");
   const [kegiatanList, setKegiatanList] = useState<{ id: string; judul: string; kota: string }[]>([]);
   const [selectedKegiatanId, setSelectedKegiatanId] = useState("");
+  const [selectedDetail, setSelectedDetail] = useState<GenerusItem | null>(null);
 
   const limit = 12;
   const router = useRouter();
@@ -139,6 +140,16 @@ export default function GenerusKatalogPage() {
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedDetail(null);
+    };
+    if (selectedDetail) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [selectedDetail]);
+
+  useEffect(() => {
     const timer = setTimeout(fetchData, 300);
     return () => clearTimeout(timer);
   }, [fetchData]);
@@ -171,13 +182,13 @@ export default function GenerusKatalogPage() {
 
       await Swal.fire({
         title: "Berhasil!",
-        text: "Peserta berhasil dipilih. Mari beralih ke Romantic Room.",
+        text: "Peserta berhasil dipilih. Mari beralih ke Antrean Panggilan.",
         icon: "success",
         timer: 1500,
         showConfirmButton: false
       });
 
-      router.push("/mandiri/romantic-room");
+      router.push("/mandiri/panggilan");
     } catch (err: any) {
       Swal.fire("Gagal", err.message, "error");
     }
@@ -322,7 +333,12 @@ export default function GenerusKatalogPage() {
           [...Array(6)].map((_, i) => <div key={i} className="skeleton-card" />)
         ) : (
           data.filter(item => item.id !== myProfile?.generusId && item.id !== myProfile?.id).map((item) => (
-            <div key={item.id} className={`participant-card gender-${item.jenisKelamin?.toLowerCase()}`}>
+            <div
+              key={item.id}
+              className={`participant-card gender-${item.jenisKelamin?.toLowerCase()}`}
+              onClick={() => setSelectedDetail(item)}
+              style={{ cursor: "pointer" }}
+            >
               <div className="card-top">
                 <div className="avatar-side">
                   {item.foto ? <img src={item.foto} alt={item.nama} /> : <div className="initials">{item.nama.charAt(0)}</div>}
@@ -451,13 +467,18 @@ export default function GenerusKatalogPage() {
                 </div>
               </div>
 
-              <div className="card-actions">
-                <Link href={`/katalog/${item.id}`} className="btn-detail">
+              <div className="card-actions" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="btn-detail"
+                  onClick={() => setSelectedDetail(item)}
+                >
                   <ClipboardList size={14} />
                   <span>Detail</span>
-                </Link>
+                </button>
                 {item.id !== myProfile?.generusId && (
                   <button
+                    type="button"
                     className={`btn-pilih ${selections.some(s => s.penerimaId === item.id) ? 'selected' : ''}`}
                     onClick={() => handlePilih(item.id)}
                   >
@@ -470,6 +491,179 @@ export default function GenerusKatalogPage() {
           ))
         )}
       </div>
+
+      {selectedDetail && (
+        <div className="modal-overlay" onClick={() => setSelectedDetail(null)}>
+          <div className="modal-content profile-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="close-modal"
+              onClick={() => setSelectedDetail(null)}
+              aria-label="Tutup"
+            >
+              <X size={20} />
+            </button>
+            <div
+              className="pd-header"
+              style={{
+                background:
+                  selectedDetail.jenisKelamin === "P"
+                    ? "linear-gradient(135deg, #422830, #613946)"
+                    : "linear-gradient(135deg, #17241b, #26392d)",
+              }}
+            >
+              <div className="pd-photo">
+                {selectedDetail.foto ? (
+                  <img src={selectedDetail.foto} alt={selectedDetail.nama} />
+                ) : (
+                  <div className="pd-initials">{selectedDetail.nama.charAt(0)}</div>
+                )}
+              </div>
+              <div className="pd-header-info">
+                <div className="pd-status-badge">
+                  {["admin", "tim_pnkb", "admin_romantic_room"].includes(selectedDetail.role || "")
+                    ? "Panitia"
+                    : "Peserta"}{" "}
+                  #{selectedDetail.nomorUrut || "-"}
+                </div>
+                <h2 className="pd-name">{selectedDetail.nama}</h2>
+                <div className="pd-region">
+                  <MapPin size={12} /> {selectedDetail.mandiriDesaKota || "-"} &bull;{" "}
+                  {selectedDetail.mandiriDesaNama || selectedDetail.desaNama || "-"}
+                </div>
+              </div>
+            </div>
+            <div className="pd-body">
+              <div className="pd-grid">
+                <div className="pd-item">
+                  <span className="pd-label">ID Peserta</span>
+                  <span className="pd-value">{selectedDetail.nomorUnik || "-"}</span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">Jenis Kelamin</span>
+                  <span className="pd-value">
+                    {selectedDetail.jenisKelamin === "L"
+                      ? "Laki-laki"
+                      : selectedDetail.jenisKelamin === "P"
+                      ? "Perempuan"
+                      : "-"}
+                  </span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">Usia</span>
+                  <span className="pd-value">
+                    {calculateAge(selectedDetail.tanggalLahir ?? undefined)} tahun
+                  </span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">TTL</span>
+                  <span className="pd-value">
+                    {selectedDetail.tempatLahir || "-"}, {selectedDetail.tanggalLahir || "-"}
+                  </span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">Status Nikah</span>
+                  <span className="pd-value">{selectedDetail.statusNikah || "Belum Menikah"}</span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">Suku Bangsa</span>
+                  <span className="pd-value">{selectedDetail.suku || "-"}</span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">Pendidikan</span>
+                  <span className="pd-value">{selectedDetail.pendidikan || "-"}</span>
+                </div>
+                <div className="pd-item">
+                  <span className="pd-label">Pekerjaan</span>
+                  <span className="pd-value">{selectedDetail.pekerjaan || "-"}</span>
+                </div>
+                {selectedDetail.noTelp && (
+                  <div className="pd-item">
+                    <span className="pd-label">WhatsApp</span>
+                    <a
+                      href={`https://wa.me/${selectedDetail.noTelp.replace(/\D/g, "").replace(/^0/, "62")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pd-link pd-link-wa"
+                    >
+                      {selectedDetail.noTelp}
+                    </a>
+                  </div>
+                )}
+                {selectedDetail.instagram && (
+                  <div className="pd-item">
+                    <span className="pd-label">Instagram</span>
+                    <a
+                      href={`https://instagram.com/${selectedDetail.instagram.replace("@", "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pd-link pd-link-ig"
+                    >
+                      @{selectedDetail.instagram.replace("@", "")}
+                    </a>
+                  </div>
+                )}
+                {selectedDetail.hobi && (
+                  <div className="pd-item pd-item-full">
+                    <span className="pd-label">Hobi</span>
+                    <span className="pd-value">{selectedDetail.hobi}</span>
+                  </div>
+                )}
+                {selectedDetail.makananMinumanFavorit && (
+                  <div className="pd-item pd-item-full">
+                    <span className="pd-label">Makanan / Minuman Favorit</span>
+                    <span className="pd-value">{selectedDetail.makananMinumanFavorit}</span>
+                  </div>
+                )}
+                {selectedDetail.kriteriaPasangan && (
+                  <div className="pd-item pd-item-full">
+                    <span className="pd-label">Kriteria Pasangan</span>
+                    <span className="pd-value">{selectedDetail.kriteriaPasangan}</span>
+                  </div>
+                )}
+                {selectedDetail.alamat && (
+                  <div className="pd-item pd-item-full">
+                    <span className="pd-label">Alamat Domisili</span>
+                    <span className="pd-value">{selectedDetail.alamat}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="pd-footer">
+              <button
+                type="button"
+                className="btn-modal-close"
+                onClick={() => setSelectedDetail(null)}
+              >
+                Tutup
+              </button>
+              {selectedDetail.id !== myProfile?.generusId && selectedDetail.id !== myProfile?.id && (
+                <button
+                  type="button"
+                  className={`btn-modal-pilih ${
+                    selections.some((s) => s.penerimaId === selectedDetail.id) ? "selected" : ""
+                  }`}
+                  onClick={() => handlePilih(selectedDetail.id)}
+                >
+                  <Heart
+                    size={15}
+                    fill={
+                      selections.some((s) => s.penerimaId === selectedDetail.id)
+                        ? "currentColor"
+                        : "none"
+                    }
+                  />
+                  <span>
+                    {selections.some((s) => s.penerimaId === selectedDetail.id)
+                      ? "Batalkan Pilihan"
+                      : "Pilih Generus"}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .pdkt-admin-container {
@@ -814,7 +1008,7 @@ export default function GenerusKatalogPage() {
           border-radius: 16px;
           font-size: 13px;
           font-weight: 700;
-          text-decoration: none;
+          cursor: pointer;
           transition: 0.2s;
         }
         .btn-detail:hover { background: #f8fafc; }
@@ -841,6 +1035,229 @@ export default function GenerusKatalogPage() {
 
         .skeleton-card { height: 600px; background: white; border-radius: 32px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Modal Overlay & Profile Detail */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.6);
+          backdrop-filter: blur(4px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .modal-content {
+          position: relative;
+          max-width: 100%;
+          max-height: 92vh;
+          overflow-y: auto;
+        }
+        .profile-detail-modal {
+          background: #ffffff;
+          border-radius: 24px;
+          width: 520px;
+          max-width: 100%;
+          overflow: hidden;
+          padding: 0;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+          animation: scaleUp 0.2s ease-out;
+        }
+        @keyframes scaleUp {
+          from { transform: scale(0.96); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        .close-modal {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          cursor: pointer;
+          z-index: 10;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+          transition: 0.15s;
+        }
+        .close-modal:hover {
+          background: rgba(255, 255, 255, 0.35);
+          transform: scale(1.05);
+        }
+        .pd-header {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 24px;
+          color: #ffffff;
+        }
+        .pd-photo {
+          width: 76px;
+          height: 76px;
+          border-radius: 18px;
+          overflow: hidden;
+          border: 2px solid rgba(255, 255, 255, 0.6);
+          flex-shrink: 0;
+          background: rgba(255, 255, 255, 0.1);
+        }
+        .pd-photo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .pd-initials {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 32px;
+          font-weight: 700;
+          background: rgba(255, 255, 255, 0.2);
+        }
+        .pd-header-info {
+          flex: 1;
+          min-width: 0;
+        }
+        .pd-status-badge {
+          display: inline-block;
+          background: rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          color: #ffffff;
+          padding: 2px 10px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 6px;
+        }
+        .pd-name {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 22px;
+          font-weight: 700;
+          margin: 0 0 4px;
+          line-height: 1.2;
+          color: #ffffff;
+        }
+        .pd-region {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 12px;
+          font-weight: 500;
+          opacity: 0.92;
+        }
+        .pd-body {
+          padding: 22px 24px;
+          max-height: 55vh;
+          overflow-y: auto;
+        }
+        .pd-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+        .pd-item {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+        .pd-item-full {
+          grid-column: 1 / -1;
+        }
+        .pd-label {
+          font-size: 10px;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .pd-value {
+          font-size: 13px;
+          font-weight: 600;
+          color: #1e293b;
+          line-height: 1.4;
+        }
+        .pd-link {
+          font-size: 13px;
+          font-weight: 600;
+          text-decoration: none;
+        }
+        .pd-link-wa {
+          color: #16a34a;
+        }
+        .pd-link-wa:hover {
+          text-decoration: underline;
+        }
+        .pd-link-ig {
+          color: #e11d48;
+        }
+        .pd-link-ig:hover {
+          text-decoration: underline;
+        }
+        .pd-footer {
+          padding: 14px 24px;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 12px;
+          border-top: 1px solid #f1f5f9;
+          background: #f8fafc;
+        }
+        .btn-modal-close {
+          padding: 10px 18px;
+          border-radius: 12px;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          color: #475569;
+          font-weight: 700;
+          font-size: 13px;
+          cursor: pointer;
+          transition: 0.15s;
+        }
+        .btn-modal-close:hover {
+          background: #f1f5f9;
+          color: #1e293b;
+        }
+        .btn-modal-pilih {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          border-radius: 12px;
+          background: #fdf2f8;
+          border: 1px solid #fce7f3;
+          color: #db2777;
+          font-weight: 700;
+          font-size: 13px;
+          cursor: pointer;
+          transition: 0.15s;
+        }
+        .btn-modal-pilih:hover {
+          background: #fce7f3;
+        }
+        .btn-modal-pilih.selected {
+          background: #db2777;
+          color: #ffffff;
+          border-color: #db2777;
+        }
+        .btn-modal-pilih.selected:hover {
+          background: #be185d;
+        }
 
         @media (max-width: 1024px) {
            .pdkt-admin-container { padding: 20px; }

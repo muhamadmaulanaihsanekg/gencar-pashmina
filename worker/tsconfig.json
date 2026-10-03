@@ -10,8 +10,12 @@
     "noEmit": true,
     "baseUrl": "..",
     "paths": {
-      "@/*": ["../*"]
+      "@/*": ["./*"],
+      "next/server": ["./server/shims/next-server.ts"],
+      "next/headers": ["./server/shims/next-headers.ts"],
+      "next/cache": ["./server/shims/next-cache.ts"]
     }
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts", "../server/api-router.ts", "../server/shims/**/*.ts"],
+  "exclude": ["../node_modules", "../.next", "../server/api/**"]
 }

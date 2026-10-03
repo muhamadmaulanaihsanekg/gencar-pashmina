@@ -549,9 +549,9 @@ function AdminDashboard({
           </svg>
         </div>
         <div>
-          <h2 className="db-section-title">Hasil Pertemuan Romantic Room</h2>
+          <h2 className="db-section-title">Hasil Pertemuan Ta&apos;aruf</h2>
           <p className="db-section-sub">
-            Rekap keputusan pertemuan ta'aruf
+            Rekap keputusan pertemuan ta&apos;aruf
           </p>
         </div>
       </div>
@@ -562,49 +562,49 @@ function AdminDashboard({
           color="pink"
           label="Total Pertemuan Selesai"
           value={stats?.sessionStats?.totalSelesai ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="heart"
           color="emerald"
           label="Lanjut — Lanjut"
           value={stats?.sessionStats?.lanjutLanjut ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="heart-off"
           color="red"
           label="Tidak — Tidak"
           value={stats?.sessionStats?.tidakTidak ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="help-circle"
           color="indigo"
           label="Ragu — Ragu"
           value={stats?.sessionStats?.raguRagu ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="shuffle"
           color="orange"
           label="Lanjut — Tidak"
           value={stats?.sessionStats?.lanjutTidak ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="shuffle"
           color="blue"
           label="Lanjut — Ragu"
           value={stats?.sessionStats?.lanjutRagu ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="shuffle"
           color="gray"
           label="Tidak — Ragu"
           value={stats?.sessionStats?.tidakRagu ?? 0}
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
       </div>
 
@@ -651,9 +651,9 @@ function AdminDashboard({
         <StatCard
           icon="heart"
           color="pink"
-          label="Romantic Room"
+          label="Antrean Panggilan"
           value="Kelola"
-          href="/mandiri/romantic-room"
+          href="/mandiri/panggilan"
         />
         <StatCard
           icon="check-square"

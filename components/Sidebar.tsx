@@ -31,7 +31,8 @@ import {
   CreditCard,
   MessageSquare,
   Camera,
-  BarChart3
+  BarChart3,
+  PhoneCall
 } from "lucide-react";
 
 interface SidebarProps {
@@ -59,7 +60,7 @@ const navItems = [
       { href: "/mandiri/absensi", label: "Absensi Mandiri", icon: "absensi" },
       { href: "/mandiri/pulang", label: "Daftar Pulang", icon: "logout" },
       { href: "/admin/katalog", label: "Katalog Peserta", icon: "katalog" },
-      { href: "/mandiri/romantic-room", label: "Romantic Room", icon: "romantic" },
+      { href: "/mandiri/panggilan", label: "Antrean Panggilan", icon: "panggilan" },
       { href: "/mandiri/desa", label: "Kelola Daerah / Desa", icon: "desa" },
       { href: "/admin/tim-gambuh", label: "Tim PNKB & Ibu Gambuh", icon: "users" },
       { href: "/mandiri/saran", label: "Saran & Masukan", icon: "message-square" },
@@ -141,7 +142,7 @@ const userNavs: Record<string, any[]> = {
         { href: "/mandiri/absensi", label: "Absensi", icon: "absensi" },
         { href: "/mandiri/pulang", label: "Daftar Pulang", icon: "logout" },
         { href: "/admin/katalog", label: "Katalog Peserta", icon: "katalog" },
-        { href: "/mandiri/romantic-room", label: "Romantic Room", icon: "romantic" },
+        { href: "/mandiri/panggilan", label: "Antrean Panggilan", icon: "panggilan" },
         { href: "/mandiri/saran", label: "Saran / Masukkan", icon: "message-square" },
         { href: "/mandiri/desa", label: "Kelola Daerah / Desa", icon: "desa" },
         { href: "/admin/tim-gambuh", label: "Tim PNKB & Ibu Gambuh", icon: "users" },
@@ -210,6 +211,7 @@ const icons: Record<string, React.ReactNode> = {
   absensi: <QrCode size={18} />,
   katalog: <BookUser size={18} />,
   antrean: <ListOrdered size={18} />,
+  panggilan: <PhoneCall size={18} />,
   romantic: <Heart size={18} />,
   desa: <Map size={18} />,
   money: <CircleDollarSign size={18} />,
@@ -348,7 +350,7 @@ export default function Sidebar({ user }: SidebarProps) {
               const isMandiriItem = item.href.startsWith("/mandiri") ||
                 item.label.includes("Mandiri") ||
                 item.label === "Antrean" ||
-                item.label === "Romantic Room" ||
+                item.label === "Antrean Panggilan" ||
                 item.label === "Saran / Masukkan" ||
                 item.href === "/katalog";
 
@@ -397,7 +399,7 @@ export default function Sidebar({ user }: SidebarProps) {
                       user.role === "desa" ? "Pengurus Desa" :
                         user.role === "kelompok" ? "Pengurus Kelompok" :
                           user.role === "tim_pnkb" ? "Tim PNKB" :
-                            user.role === "admin_romantic_room" ? "Admin Romantic Room" :
+                            user.role === "admin_romantic_room" ? "Admin Panggilan" :
                               user.role === "admin_keuangan" ? "Admin Keuangan" :
                                 user.role === "admin_kegiatan" ? "Admin Kegiatan" :
                                   user.role === "tim_pnkb_gambuh" ? "Tim PNKB & Ibu Gambuh" :

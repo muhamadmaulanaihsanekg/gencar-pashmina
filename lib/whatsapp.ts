@@ -22,16 +22,6 @@ export const sendWhatsApp = async (target: string, msg: string) => {
     return;
   }
 
-  // Trigger FCM push notification concurrently (simultaneous dual dispatch)
-  try {
-    const { sendFCMNotification } = await import("./fcm");
-    const cleanBody = msg.replace(/\*/g, "");
-    sendFCMNotification(cleanTarget, "Panggilan Taaruf! 📢", cleanBody)
-      .catch((err) => console.error("Background FCM sending error:", err));
-  } catch (fcmErr) {
-    console.error("Failed to import FCM utility:", fcmErr);
-  }
-
   // 1. Primary Priority: WhatsApp Business API (Meta Cloud API)
   const waApiKey = process.env.WHATSAPP_API_KEY;
   const waPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || "1123675760836996";

@@ -44,6 +44,7 @@ export async function middleware(request: NextRequest) {
     "/api/auth/kelompok",
     "/api/auth/reset-password",
     "/api/settings",
+    "/api/health",
     "/api/public",
     "/api/sholat",
     "/mandiri/katalog",

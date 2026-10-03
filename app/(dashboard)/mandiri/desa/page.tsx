@@ -404,31 +404,21 @@ export default function MandiriDesaTreePage() {
   return (
     <div>
       <Topbar title="Usia Mandiri/Nikah - Kelola Wilayah" role={userRole} />
-      <div className="page-content" style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px" }}>
+      <div className="desa-page-content">
         
-        <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "28px" }}>
+        {/* Header Title & Actions */}
+        <div className="desa-page-header">
           <div className="page-header-left">
-            <h2 style={{ fontSize: "24px", fontWeight: 700, color: "#0f172a", marginBottom: "6px" }}>Kelola Wilayah & Kelompok (Tree View)</h2>
-            <p style={{ color: "#64748b", fontSize: "14px" }}>Kelola daerah rujukan, desa, dan kelompok peserta dalam satu peta hirarki struktur</p>
+            <h2 className="desa-title">Kelola Wilayah & Kelompok (Tree View)</h2>
+            <p className="desa-subtitle">Kelola daerah rujukan, desa, dan kelompok peserta dalam satu peta hirarki struktur</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "#f8fafc", padding: "8px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-              <span style={{ fontSize: "14px", fontWeight: 600, color: "#475569" }}>Filter Kegiatan:</span>
+          <div className="desa-header-actions">
+            <div className="desa-kegiatan-filter">
+              <span className="desa-kegiatan-label">Filter Kegiatan:</span>
               <select
                 value={selectedKegiatan}
                 onChange={(e) => setSelectedKegiatan(e.target.value)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #cbd5e1",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1e293b",
-                  backgroundColor: "#fff",
-                  outline: "none",
-                  minWidth: "200px",
-                  cursor: "pointer"
-                }}
+                className="desa-kegiatan-select"
               >
                 <option value="">Pilih Kegiatan</option>
                 {kegiatanList.map(k => (
@@ -437,15 +427,13 @@ export default function MandiriDesaTreePage() {
               </select>
               {selectedKegiatan && (
                 selectedKegiatan === activeKegiatanId ? (
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#166534", background: "#dcfce7", border: "1px solid #bbf7d0", padding: "5px 10px", borderRadius: "8px", whiteSpace: "nowrap" }}>
+                  <span className="badge-kegiatan-aktif">
                     ✓ Kegiatan Utama Aktif
                   </span>
                 ) : (
                   <button
                     onClick={() => handleSetSystemActiveKegiatan(selectedKegiatan)}
-                    style={{
-                      fontSize: "12px", fontWeight: 700, color: "#2563eb", background: "#eff6ff", border: "1px solid #bfdbfe", padding: "5px 10px", borderRadius: "8px", cursor: "pointer", whiteSpace: "nowrap"
-                    }}
+                    className="btn-jadikan-aktif"
                     title="Klik untuk menjadikan kegiatan yang dipilih ini sebagai kegiatan aktif utama di sistem"
                   >
                     ⭐ Jadikan Aktif Utama
@@ -453,38 +441,21 @@ export default function MandiriDesaTreePage() {
                 )
               )}
             </div>
+
             <button
               onClick={handleShowAllLinks}
-              style={{
-                display: "flex", alignItems: "center", gap: "6px",
-                padding: "10px 16px", borderRadius: "12px",
-                border: "1px solid #e2e8f0", background: "#fff",
-                color: "#475569", fontSize: "14px", fontWeight: 600,
-                cursor: "pointer", transition: "all 0.2s",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#6366f1'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}
+              className="btn-link-pendaftaran"
             >
               <Link2 size={15} /> Link Pendaftaran
             </button>
-            <div style={{
-              display: "flex", alignItems: "center", gap: "10px",
-              padding: "8px 12px", borderRadius: "12px",
-              background: daftarWilayahStatus === "open" ? "#f0fdf4" : "#fef2f2",
-              border: `1px solid ${daftarWilayahStatus === "open" ? "#bbf7d0" : "#fecaca"}`
-            }}>
-              <span style={{ fontSize: "12.5px", fontWeight: 700, color: daftarWilayahStatus === "open" ? "#166534" : "#991b1b" }}>
+
+            <div className={`status-pendaftaran-box ${daftarWilayahStatus === "open" ? "status-open" : "status-closed"}`}>
+              <span className="status-text">
                 Status: {daftarWilayahStatus === "open" ? "BUKA" : "TUTUP"}
               </span>
               <button
                 onClick={handleToggleDaftarWilayah}
-                style={{
-                  display: "flex", alignItems: "center", gap: "4px",
-                  padding: "4px 10px", borderRadius: "8px",
-                  background: daftarWilayahStatus === "open" ? "#dc2626" : "#16a34a",
-                  color: "#fff", fontSize: "12px", fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.2s"
-                }}
+                className={`btn-toggle-status ${daftarWilayahStatus === "open" ? "btn-close-daftar" : "btn-open-daftar"}`}
                 title={`Klik untuk ${daftarWilayahStatus === "open" ? "menutup" : "membuka"} pendaftaran`}
               >
                 {daftarWilayahStatus === "open" ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
@@ -495,37 +466,36 @@ export default function MandiriDesaTreePage() {
         </div>
 
         {error && (
-          <div className="alert alert-error" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px", padding: "12px 16px", borderRadius: "10px" }}>
+          <div className="alert alert-error desa-alert-error">
             <Info size={18} />
             <span>{error}</span>
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 2.5fr", gap: "24px", alignItems: "start" }}>
+        <div className="desa-main-grid">
           
           {/* Left Panel: Form Tambah Daerah */}
-          <div className="card" style={{ padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", background: "#fff", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-              <div style={{ background: "#eff6ff", color: "#2563eb", padding: "10px", borderRadius: "10px" }}>
+          <div className="card desa-card-left">
+            <div className="card-left-header">
+              <div className="icon-wrap-map">
                 <MapPin size={20} />
               </div>
-              <h3 style={{ fontSize: "17px", fontWeight: 700, color: "#0f172a", margin: 0 }}>Tambah Daerah Rujukan</h3>
+              <h3 className="card-left-title">Tambah Daerah Rujukan</h3>
             </div>
             
             <form onSubmit={handleAddDaerah}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="form-group-wrap">
                 <div>
-                  <label style={{ fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "6px", display: "block" }}>Nama Daerah</label>
+                  <label className="form-label-daerah">Nama Daerah</label>
                   <input
-                    className="form-control"
+                    className="form-control form-input-daerah"
                     placeholder="Nama daerah rujukan baru (misal: Cengkareng)..."
                     value={newDaerahName}
                     onChange={(e) => setNewDaerahName(e.target.value)}
                     required
-                    style={{ borderRadius: "8px", padding: "10px 12px", width: "100%" }}
                   />
                 </div>
-                <button type="submit" className="btn btn-primary btn-full" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "8px", padding: "12px", fontSize: "14px", fontWeight: 600 }}>
+                <button type="submit" className="btn btn-primary btn-full btn-submit-daerah">
                   <Plus size={16} /> Tambah Daerah
                 </button>
               </div>
@@ -533,7 +503,7 @@ export default function MandiriDesaTreePage() {
           </div>
 
           {/* Right Panel: Tree View Map */}
-          <div className="card" style={{ padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", background: "#fff", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)", minHeight: "500px" }}>
+          <div className="card desa-card-right">
             {(() => {
               const activeDaerahs = daerahList.filter(d => d.isActive !== 0);
               const visibleDaerahIds = new Set(daerahList.map(d => d.id));
@@ -564,55 +534,35 @@ export default function MandiriDesaTreePage() {
 
               return (
                 <>
-                  <div style={{ paddingBottom: "16px", borderBottom: "1px solid #f1f5f9", marginBottom: "20px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "12px" }}>
+                  <div className="tree-top-section">
+                    <div className="tree-header-top">
                       <div>
-                        <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#0f172a", margin: 0 }}>Peta Hirarki Wilayah</h3>
+                        <h3 className="tree-title">Peta Hirarki Wilayah</h3>
                         {selectedKegiatan && (
-                          <p style={{ fontSize: "12px", color: "#64748b", margin: "2px 0 0 0" }}>
+                          <p className="tree-subtitle">
                             Status Keaktifan Wilayah untuk Kegiatan: <b>{kegiatanList.find(k => k.id === selectedKegiatan)?.judul || selectedKegiatan}</b>
                           </p>
                         )}
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                        <div style={{ display: "flex", gap: "12px", fontSize: "12.5px", color: "#64748b" }}>
-                          <span>Daerah: <b>{daerahList.length}</b> <span style={{ color: "#16a34a", fontWeight: 700 }}>({activeDaerahs.length} Aktif)</span></span>
-                          <span>Desa: <b>{visibleDesas.length}</b> <span style={{ color: "#16a34a", fontWeight: 700 }}>({activeDesas.length} Aktif)</span></span>
-                          <span>Kelompok: <b>{visibleKelompoks.length}</b> <span style={{ color: "#16a34a", fontWeight: 700 }}>({activeKelompoks.length} Aktif)</span></span>
+                      <div className="tree-stats-actions">
+                        <div className="tree-stats-counts">
+                          <span>Daerah: <b>{daerahList.length}</b> <span className="stat-aktif">({activeDaerahs.length} Aktif)</span></span>
+                          <span>Desa: <b>{visibleDesas.length}</b> <span className="stat-aktif">({activeDesas.length} Aktif)</span></span>
+                          <span>Kelompok: <b>{visibleKelompoks.length}</b> <span className="stat-aktif">({activeKelompoks.length} Aktif)</span></span>
                         </div>
 
-                        <div style={{ display: "flex", gap: "6px" }}>
+                        <div className="tree-stats-buttons">
                           <button
                             onClick={() => handleToggleAllDaerahActive(true)}
-                            style={{
-                              padding: "6px 10px",
-                              borderRadius: "8px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              border: "1px solid #bbf7d0",
-                              background: "#f0fdf4",
-                              color: "#166534",
-                              cursor: "pointer",
-                              transition: "all 0.2s"
-                            }}
+                            className="btn-toggle-all btn-all-active"
                             title="Aktifkan semua daerah untuk kegiatan ini"
                           >
                             ✓ Aktifkan Semua
                           </button>
                           <button
                             onClick={() => handleToggleAllDaerahActive(false)}
-                            style={{
-                              padding: "6px 10px",
-                              borderRadius: "8px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              border: "1px solid #fecaca",
-                              background: "#fef2f2",
-                              color: "#991b1b",
-                              cursor: "pointer",
-                              transition: "all 0.2s"
-                            }}
+                            className="btn-toggle-all btn-all-inactive"
                             title="Non-aktifkan semua daerah untuk kegiatan ini"
                           >
                             ✕ Non-Aktifkan Semua
@@ -622,23 +572,13 @@ export default function MandiriDesaTreePage() {
                     </div>
 
                     {/* Filter Daerah Bar */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", background: "#f8fafc", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#475569" }}>Filter Daerah:</span>
+                    <div className="tree-filter-bar">
+                      <div className="filter-select-group">
+                        <span className="filter-label">Filter Daerah:</span>
                         <select
                           value={selectedFilterDaerah}
                           onChange={(e) => setSelectedFilterDaerah(e.target.value)}
-                          style={{
-                            padding: "6px 12px",
-                            borderRadius: "8px",
-                            border: "1px solid #cbd5e1",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#1e293b",
-                            backgroundColor: "#fff",
-                            outline: "none",
-                            cursor: "pointer"
-                          }}
+                          className="filter-select"
                         >
                           <option value="all">Semua Daerah ({daerahList.length})</option>
                           <option value="active">Hanya Daerah Aktif ({activeDaerahs.length})</option>
@@ -652,21 +592,13 @@ export default function MandiriDesaTreePage() {
                         </select>
                       </div>
 
-                      <div style={{ flex: 1, minWidth: "200px" }}>
+                      <div className="filter-search-group">
                         <input
                           type="text"
                           placeholder="Cari nama daerah, desa, atau kelompok..."
                           value={searchDaerahQuery}
                           onChange={(e) => setSearchDaerahQuery(e.target.value)}
-                          style={{
-                            width: "100%",
-                            padding: "6px 12px",
-                            borderRadius: "8px",
-                            border: "1px solid #cbd5e1",
-                            fontSize: "13px",
-                            backgroundColor: "#fff",
-                            outline: "none"
-                          }}
+                          className="filter-search-input"
                         />
                       </div>
 
@@ -676,16 +608,7 @@ export default function MandiriDesaTreePage() {
                             setSelectedFilterDaerah("all");
                             setSearchDaerahQuery("");
                           }}
-                          style={{
-                            fontSize: "12px",
-                            color: "#64748b",
-                            background: "#e2e8f0",
-                            border: "none",
-                            padding: "6px 10px",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontWeight: 600
-                          }}
+                          className="btn-reset-filter"
                         >
                           Reset Filter
                         </button>
@@ -694,20 +617,20 @@ export default function MandiriDesaTreePage() {
                   </div>
 
                   {loading ? (
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px" }}>
+                    <div className="tree-loading-box">
                       <div className="spinner" />
                     </div>
                   ) : filteredTreeData.length === 0 ? (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "300px", color: "#94a3b8" }}>
-                      <Info size={36} style={{ marginBottom: "12px", color: "#cbd5e1" }} />
-                      <span style={{ fontSize: "14px" }}>
+                    <div className="tree-empty-box">
+                      <Info size={36} className="tree-empty-icon" />
+                      <span className="tree-empty-text">
                         {selectedFilterDaerah !== "all" || searchDaerahQuery
                           ? "Tidak ada daerah yang cocok dengan filter."
                           : "Belum ada data struktur wilayah."}
                       </span>
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div className="tree-list-container">
                       {filteredTreeData.map(daerah => {
                         const isDaerahCollapsed = !!collapsedDaerahs[daerah.id];
                         const isDaerahActive = daerah.isActive !== 0;
@@ -715,254 +638,987 @@ export default function MandiriDesaTreePage() {
                         return (
                           <div 
                             key={daerah.id} 
-                            style={{ 
-                              borderRadius: "12px", 
-                              border: isDaerahActive ? "1px solid #e2e8f0" : "1px dashed #cbd5e1", 
-                              background: isDaerahActive ? "#fafafa" : "#f8fafc",
-                              opacity: isDaerahActive ? 1 : 0.8,
-                              overflow: "hidden"
-                            }}
+                            className={`daerah-tree-card ${isDaerahActive ? "is-active" : "is-inactive"}`}
                           >
                             {/* Daerah Node */}
-                            <div 
-                              style={{ 
-                                display: "flex", 
-                                justifyContent: "space-between", 
-                                alignItems: "center", 
-                                padding: "12px 16px",
-                                background: isDaerahActive ? "#fff" : "#f1f5f9",
-                                borderBottom: isDaerahCollapsed ? "none" : "1px solid #f1f5f9",
-                              }}
-                            >
-                        <div 
-                          onClick={() => toggleDaerahCollapse(daerah.id)}
-                          style={{ 
-                            display: "flex", 
-                            alignItems: "center", 
-                            gap: "8px", 
-                            cursor: "pointer",
-                            userSelect: "none"
-                          }}
-                        >
-                          {isDaerahCollapsed ? <ChevronRight size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
-                          <MapPin size={16} className="text-blue-500" />
-                          <span style={{ fontWeight: 700, color: "#1e293b", fontSize: "15px" }}>{daerah.nama}</span>
-                          <span style={{ fontSize: "11px", color: "#94a3b8", background: "#f1f5f9", padding: "2px 6px", borderRadius: "10px" }}>
-                            {daerah.desas.length} Desa
-                          </span>
-                        </div>
-                        
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          {/* Toggle Active Button */}
-                          <button
-                            onClick={() => handleToggleDaerahActive(daerah.id, daerah.isActive !== 0)}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              padding: "4px 8px",
-                              borderRadius: "6px",
-                              fontSize: "11.5px",
-                              fontWeight: 600,
-                              border: "none",
-                              cursor: "pointer",
-                              backgroundColor: daerah.isActive !== 0 ? "#dcfce7" : "#fee2e2",
-                              color: daerah.isActive !== 0 ? "#166534" : "#991b1b",
-                              transition: "all 0.2s"
-                            }}
-                            title={`Toggle keaktifan daerah untuk kegiatan ini`}
-                          >
-                            {daerah.isActive !== 0 ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-                            {daerah.isActive !== 0 ? "Aktif" : "Non-Aktif"}
-                          </button>
-
-                          {/* Add Desa Button */}
-                          <button
-                            onClick={() => handleAddDesa(daerah.id, daerah.nama)}
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: "6px",
-                              fontSize: "11.5px",
-                              fontWeight: 600,
-                              background: "#eff6ff",
-                              color: "#2563eb",
-                              border: "none",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px"
-                            }}
-                          >
-                            <Plus size={12} /> Desa
-                          </button>
-
-                          {/* Delete Button */}
-                          <button
-                            onClick={() => handleDeleteDaerah(daerah.id, daerah.nama)}
-                            style={{
-                              padding: "6px",
-                              background: "transparent",
-                              color: "#ef4444",
-                              border: "none",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              borderRadius: "6px"
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Desas List (Child of Daerah) */}
-                      {!isDaerahCollapsed && (
-                        <div style={{ padding: "8px 16px 12px 28px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                          {daerah.desas.length === 0 ? (
-                            <div style={{ fontSize: "13px", color: "#94a3b8", padding: "4px 8px" }}>Belum ada data desa di daerah ini.</div>
-                          ) : (
-                            daerah.desas.map(desa => {
-                              const isDesaCollapsed = !!collapsedDesas[desa.id];
+                            <div className="tree-node-header daerah-node-header">
+                              <div 
+                                onClick={() => toggleDaerahCollapse(daerah.id)}
+                                className="node-title-group"
+                              >
+                                {isDaerahCollapsed ? <ChevronRight size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                                <MapPin size={16} className="text-blue-500" />
+                                <span className="node-name-daerah">{daerah.nama}</span>
+                                <span className="node-pill">
+                                  {daerah.desas.length} Desa
+                                </span>
+                              </div>
                               
-                              return (
-                                <div 
-                                  key={desa.id} 
-                                  style={{ 
-                                    background: "#fff", 
-                                    borderRadius: "10px", 
-                                    border: "1px solid #f1f5f9"
-                                  }}
+                              <div className="node-actions-group">
+                                {/* Toggle Active Button */}
+                                <button
+                                  onClick={() => handleToggleDaerahActive(daerah.id, daerah.isActive !== 0)}
+                                  className={`btn-node-toggle ${daerah.isActive !== 0 ? "active" : "inactive"}`}
+                                  title="Toggle keaktifan daerah untuk kegiatan ini"
                                 >
-                                  {/* Desa Node */}
-                                  <div 
-                                    style={{ 
-                                      display: "flex", 
-                                      justifyContent: "space-between", 
-                                      alignItems: "center", 
-                                      padding: "10px 14px",
-                                      borderBottom: isDesaCollapsed ? "none" : "1px solid #f1f5f9"
-                                    }}
-                                  >
-                                    <div 
-                                      onClick={() => toggleDesaCollapse(desa.id)}
-                                      style={{ 
-                                        display: "flex", 
-                                        alignItems: "center", 
-                                        gap: "6px", 
-                                        cursor: "pointer",
-                                        userSelect: "none"
-                                      }}
-                                    >
-                                      {isDesaCollapsed ? <ChevronRight size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
-                                      <Map size={14} className="text-purple-500" />
-                                      <span style={{ fontWeight: 600, color: "#334155", fontSize: "14px" }}>{desa.nama}</span>
-                                      <span style={{ fontSize: "10.5px", color: "#94a3b8", background: "#f8fafc", padding: "1px 5px", borderRadius: "8px" }}>
-                                        {desa.kelompoks.length} Kelompok
-                                      </span>
-                                    </div>
+                                  {daerah.isActive !== 0 ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                                  <span>{daerah.isActive !== 0 ? "Aktif" : "Non-Aktif"}</span>
+                                </button>
 
-                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                      {/* Add Kelompok Button */}
-                                      <button
-                                        onClick={() => handleAddKelompok(desa.id, desa.nama)}
-                                        style={{
-                                          padding: "3px 6px",
-                                          borderRadius: "5px",
-                                          fontSize: "11px",
-                                          fontWeight: 600,
-                                          background: "#faf5ff",
-                                          color: "#7e22ce",
-                                          border: "none",
-                                          cursor: "pointer",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          gap: "3px"
-                                        }}
+                                {/* Add Desa Button */}
+                                <button
+                                  onClick={() => handleAddDesa(daerah.id, daerah.nama)}
+                                  className="btn-add-child btn-add-desa"
+                                >
+                                  <Plus size={12} /> <span>Desa</span>
+                                </button>
+
+                                {/* Delete Button */}
+                                <button
+                                  onClick={() => handleDeleteDaerah(daerah.id, daerah.nama)}
+                                  className="btn-delete-node"
+                                  title="Hapus Daerah"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Desas List (Child of Daerah) */}
+                            {!isDaerahCollapsed && (
+                              <div className="daerah-children-container">
+                                {daerah.desas.length === 0 ? (
+                                  <div className="empty-child-text">Belum ada data desa di daerah ini.</div>
+                                ) : (
+                                  daerah.desas.map(desa => {
+                                    const isDesaCollapsed = !!collapsedDesas[desa.id];
+                                    
+                                    return (
+                                      <div 
+                                        key={desa.id} 
+                                        className="desa-tree-card"
                                       >
-                                        <Plus size={10} /> Kelompok
-                                      </button>
-
-                                      {/* Delete Button */}
-                                      <button
-                                        onClick={() => handleDeleteDesa(desa.id, desa.nama)}
-                                        style={{
-                                          padding: "5px",
-                                          background: "transparent",
-                                          color: "#ef4444",
-                                          border: "none",
-                                          cursor: "pointer",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          borderRadius: "5px"
-                                        }}
-                                        onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
-                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* Kelompoks List (Child of Desa) */}
-                                  {!isDesaCollapsed && (
-                                    <div style={{ padding: "8px 12px 10px 24px", display: "flex", flexDirection: "column", gap: "6px", background: "#fafafa", borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px" }}>
-                                      {desa.kelompoks.length === 0 ? (
-                                        <div style={{ fontSize: "12.5px", color: "#94a3b8", padding: "2px 6px" }}>Belum ada data kelompok di desa ini.</div>
-                                      ) : (
-                                        desa.kelompoks.map(kelompok => (
+                                        {/* Desa Node */}
+                                        <div className="tree-node-header desa-node-header">
                                           <div 
-                                            key={kelompok.id} 
-                                            style={{ 
-                                              display: "flex", 
-                                              justifyContent: "space-between", 
-                                              alignItems: "center", 
-                                              padding: "6px 10px",
-                                              background: "#fff",
-                                              borderRadius: "6px",
-                                              border: "1px solid #f1f5f9"
-                                            }}
+                                            onClick={() => toggleDesaCollapse(desa.id)}
+                                            className="node-title-group"
                                           >
-                                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                              <Users size={12} className="text-green-500" />
-                                              <span style={{ fontSize: "13.5px", color: "#475569", fontWeight: 500 }}>{kelompok.nama}</span>
-                                            </div>
-
-                                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                              {/* Delete Button */}
-                                              <button
-                                                onClick={() => handleDeleteKelompok(kelompok.id, kelompok.nama)}
-                                                style={{ padding: "4px", background: "transparent", color: "#ef4444", border: "none", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: "4px" }}
-                                                onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                              >
-                                                <Trash2 size={13} />
-                                              </button>
-                                            </div>
+                                            {isDesaCollapsed ? <ChevronRight size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
+                                            <Map size={14} className="text-purple-500" />
+                                            <span className="node-name-desa">{desa.nama}</span>
+                                            <span className="node-pill">
+                                              {desa.kelompoks.length} Kelompok
+                                            </span>
                                           </div>
-                                        ))
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-                      )}
+
+                                          <div className="node-actions-group">
+                                            {/* Add Kelompok Button */}
+                                            <button
+                                              onClick={() => handleAddKelompok(desa.id, desa.nama)}
+                                              className="btn-add-child btn-add-kelompok"
+                                            >
+                                              <Plus size={10} /> <span>Kelompok</span>
+                                            </button>
+
+                                            {/* Delete Button */}
+                                            <button
+                                              onClick={() => handleDeleteDesa(desa.id, desa.nama)}
+                                              className="btn-delete-node"
+                                              title="Hapus Desa"
+                                            >
+                                              <Trash2 size={14} />
+                                            </button>
+                                          </div>
+                                        </div>
+
+                                        {/* Kelompoks List (Child of Desa) */}
+                                        {!isDesaCollapsed && (
+                                          <div className="desa-children-container">
+                                            {desa.kelompoks.length === 0 ? (
+                                              <div className="empty-child-text">Belum ada data kelompok di desa ini.</div>
+                                            ) : (
+                                              desa.kelompoks.map(kelompok => (
+                                                <div 
+                                                  key={kelompok.id} 
+                                                  className="kelompok-node-item"
+                                                >
+                                                  <div className="kelompok-name-group">
+                                                    <Users size={12} className="text-green-500" />
+                                                    <span className="node-name-kelompok">{kelompok.nama}</span>
+                                                  </div>
+
+                                                  <button
+                                                    onClick={() => handleDeleteKelompok(kelompok.id, kelompok.nama)}
+                                                    className="btn-delete-node btn-delete-kelompok"
+                                                    title="Hapus Kelompok"
+                                                  >
+                                                    <Trash2 size={13} />
+                                                  </button>
+                                                </div>
+                                              ))
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        );
-      })()}
-    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
 
         </div>
       </div>
+
+      <style jsx>{`
+        .desa-page-content {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 24px 32px 60px;
+          color: #26392d;
+        }
+
+        .desa-page-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+
+        .desa-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 6px 0;
+          letter-spacing: -0.01em;
+        }
+
+        .desa-subtitle {
+          color: #64748b;
+          font-size: 14px;
+          margin: 0;
+        }
+
+        .desa-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .desa-kegiatan-filter {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #f8fafc;
+          padding: 8px 14px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          flex-wrap: wrap;
+        }
+
+        .desa-kegiatan-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: #475569;
+        }
+
+        .desa-kegiatan-select {
+          padding: 8px 12px;
+          border-radius: 8px;
+          border: 1px solid #cbd5e1;
+          font-size: 14px;
+          font-weight: 600;
+          color: #1e293b;
+          background-color: #fff;
+          outline: none;
+          min-width: 200px;
+          cursor: pointer;
+        }
+
+        .badge-kegiatan-aktif {
+          font-size: 12px;
+          font-weight: 700;
+          color: #166534;
+          background: #dcfce7;
+          border: 1px solid #bbf7d0;
+          padding: 5px 10px;
+          border-radius: 8px;
+          white-space: nowrap;
+        }
+
+        .btn-jadikan-aktif {
+          font-size: 12px;
+          font-weight: 700;
+          color: #2563eb;
+          background: #eff6ff;
+          border: 1px solid #bfdbfe;
+          padding: 5px 10px;
+          border-radius: 8px;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s;
+        }
+
+        .btn-jadikan-aktif:hover {
+          background: #dbeafe;
+        }
+
+        .btn-link-pendaftaran {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 10px 16px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          background: #fff;
+          color: #475569;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-link-pendaftaran:hover {
+          background: #f8fafc;
+          border-color: #6366f1;
+          color: #6366f1;
+        }
+
+        .status-pendaftaran-box {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 12px;
+          border-radius: 12px;
+        }
+
+        .status-pendaftaran-box.status-open {
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
+        }
+
+        .status-pendaftaran-box.status-closed {
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+        }
+
+        .status-text {
+          font-size: 12.5px;
+          font-weight: 700;
+        }
+
+        .status-open .status-text {
+          color: #166534;
+        }
+
+        .status-closed .status-text {
+          color: #991b1b;
+        }
+
+        .btn-toggle-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 10px;
+          border-radius: 8px;
+          color: #fff;
+          font-size: 12px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-close-daftar {
+          background: #dc2626;
+        }
+
+        .btn-close-daftar:hover {
+          background: #b91c1c;
+        }
+
+        .btn-open-daftar {
+          background: #16a34a;
+        }
+
+        .btn-open-daftar:hover {
+          background: #15803d;
+        }
+
+        .desa-alert-error {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 20px;
+          padding: 12px 16px;
+          border-radius: 10px;
+        }
+
+        /* Main Grid */
+        .desa-main-grid {
+          display: grid;
+          grid-template-columns: 320px 1fr;
+          gap: 24px;
+          align-items: start;
+        }
+
+        .desa-card-left,
+        .desa-card-right {
+          padding: 24px;
+          border-radius: 16px;
+          border: 1px solid #e6dfd3;
+          background: #fff;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .desa-card-right {
+          min-height: 500px;
+        }
+
+        /* Left Card Content */
+        .card-left-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 16px;
+        }
+
+        .icon-wrap-map {
+          background: #eff6ff;
+          color: #2563eb;
+          padding: 10px;
+          border-radius: 10px;
+          display: inline-flex;
+        }
+
+        .card-left-title {
+          font-size: 17px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0;
+        }
+
+        .form-group-wrap {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .form-label-daerah {
+          font-size: 13px;
+          font-weight: 600;
+          color: #475569;
+          margin-bottom: 6px;
+          display: block;
+        }
+
+        .form-input-daerah {
+          border-radius: 8px;
+          padding: 10px 12px;
+          width: 100%;
+          border: 1px solid #cbd5e1;
+          outline: none;
+        }
+
+        .form-input-daerah:focus {
+          border-color: #2563eb;
+        }
+
+        .btn-submit-daerah {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          border-radius: 8px;
+          padding: 12px;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        /* Right Card / Tree Header */
+        .tree-top-section {
+          padding-bottom: 16px;
+          border-bottom: 1px solid #f1f5f9;
+          margin-bottom: 20px;
+        }
+
+        .tree-header-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+
+        .tree-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0;
+        }
+
+        .tree-subtitle {
+          font-size: 12px;
+          color: #64748b;
+          margin: 2px 0 0 0;
+        }
+
+        .tree-stats-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .tree-stats-counts {
+          display: flex;
+          gap: 12px;
+          font-size: 12.5px;
+          color: #64748b;
+          flex-wrap: wrap;
+        }
+
+        .stat-aktif {
+          color: #16a34a;
+          font-weight: 700;
+        }
+
+        .tree-stats-buttons {
+          display: flex;
+          gap: 6px;
+        }
+
+        .btn-toggle-all {
+          padding: 6px 10px;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-all-active {
+          border: 1px solid #bbf7d0;
+          background: #f0fdf4;
+          color: #166534;
+        }
+
+        .btn-all-active:hover {
+          background: #dcfce7;
+        }
+
+        .btn-all-inactive {
+          border: 1px solid #fecaca;
+          background: #fef2f2;
+          color: #991b1b;
+        }
+
+        .btn-all-inactive:hover {
+          background: #fee2e2;
+        }
+
+        /* Tree Filter Bar */
+        .tree-filter-bar {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          background: #f8fafc;
+          padding: 10px 14px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+        }
+
+        .filter-select-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .filter-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #475569;
+          white-space: nowrap;
+        }
+
+        .filter-select {
+          padding: 6px 12px;
+          border-radius: 8px;
+          border: 1px solid #cbd5e1;
+          font-size: 13px;
+          font-weight: 600;
+          color: #1e293b;
+          background-color: #fff;
+          outline: none;
+          cursor: pointer;
+        }
+
+        .filter-search-group {
+          flex: 1;
+          min-width: 200px;
+        }
+
+        .filter-search-input {
+          width: 100%;
+          padding: 6px 12px;
+          border-radius: 8px;
+          border: 1px solid #cbd5e1;
+          font-size: 13px;
+          background-color: #fff;
+          outline: none;
+        }
+
+        .filter-search-input:focus {
+          border-color: #2563eb;
+        }
+
+        .btn-reset-filter {
+          font-size: 12px;
+          color: #64748b;
+          background: #e2e8f0;
+          border: none;
+          padding: 6px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+          white-space: nowrap;
+          transition: all 0.2s;
+        }
+
+        .btn-reset-filter:hover {
+          background: #cbd5e1;
+          color: #1e293b;
+        }
+
+        .tree-loading-box,
+        .tree-empty-box {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 300px;
+        }
+
+        .tree-empty-box {
+          flex-direction: column;
+          color: #94a3b8;
+        }
+
+        .tree-empty-icon {
+          margin-bottom: 12px;
+          color: #cbd5e1;
+        }
+
+        .tree-empty-text {
+          font-size: 14px;
+          text-align: center;
+        }
+
+        .tree-list-container {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        /* Tree Nodes */
+        .daerah-tree-card {
+          border-radius: 12px;
+          overflow: hidden;
+          transition: all 0.2s;
+        }
+
+        .daerah-tree-card.is-active {
+          border: 1px solid #e2e8f0;
+          background: #fafafa;
+          opacity: 1;
+        }
+
+        .daerah-tree-card.is-inactive {
+          border: 1px dashed #cbd5e1;
+          background: #f8fafc;
+          opacity: 0.85;
+        }
+
+        .tree-node-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .daerah-node-header {
+          padding: 12px 16px;
+          background: #fff;
+        }
+
+        .daerah-tree-card.is-inactive .daerah-node-header {
+          background: #f1f5f9;
+        }
+
+        .node-title-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          user-select: none;
+          min-width: 0;
+          flex: 1;
+        }
+
+        .node-name-daerah {
+          font-weight: 700;
+          color: #1e293b;
+          font-size: 15px;
+          word-break: break-word;
+        }
+
+        .node-pill {
+          font-size: 11px;
+          color: #94a3b8;
+          background: #f1f5f9;
+          padding: 2px 6px;
+          border-radius: 10px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        .node-actions-group {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .btn-node-toggle {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 11.5px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .btn-node-toggle.active {
+          background-color: #dcfce7;
+          color: #166534;
+        }
+
+        .btn-node-toggle.inactive {
+          background-color: #fee2e2;
+          color: #991b1b;
+        }
+
+        .btn-add-child {
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 11.5px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .btn-add-desa {
+          background: #eff6ff;
+          color: #2563eb;
+        }
+
+        .btn-add-desa:hover {
+          background: #dbeafe;
+        }
+
+        .btn-add-kelompok {
+          padding: 3px 6px;
+          font-size: 11px;
+          background: #faf5ff;
+          color: #7e22ce;
+        }
+
+        .btn-add-kelompok:hover {
+          background: #f3e8ff;
+        }
+
+        .btn-delete-node {
+          padding: 6px;
+          background: transparent;
+          color: #ef4444;
+          border: none;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          border-radius: 6px;
+          transition: all 0.2s;
+        }
+
+        .btn-delete-node:hover {
+          background: #fef2f2;
+        }
+
+        /* Desas List Container */
+        .daerah-children-container {
+          padding: 8px 16px 12px 28px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .desa-tree-card {
+          background: #fff;
+          border-radius: 10px;
+          border: 1px solid #f1f5f9;
+          overflow: hidden;
+        }
+
+        .desa-node-header {
+          padding: 10px 14px;
+        }
+
+        .node-name-desa {
+          font-weight: 600;
+          color: #334155;
+          font-size: 14px;
+          word-break: break-word;
+        }
+
+        /* Kelompoks List Container */
+        .desa-children-container {
+          padding: 8px 12px 10px 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          background: #fafafa;
+          border-bottom-left-radius: 10px;
+          border-bottom-right-radius: 10px;
+        }
+
+        .kelompok-node-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 6px 10px;
+          background: #fff;
+          border-radius: 6px;
+          border: 1px solid #f1f5f9;
+        }
+
+        .kelompok-name-group {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+          flex: 1;
+        }
+
+        .node-name-kelompok {
+          font-size: 13px;
+          color: #475569;
+          font-weight: 500;
+          word-break: break-word;
+        }
+
+        .btn-delete-kelompok {
+          padding: 4px;
+        }
+
+        .empty-child-text {
+          font-size: 12.5px;
+          color: #94a3b8;
+          padding: 4px 8px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+          .desa-main-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .desa-page-content {
+            padding: 16px 12px 40px;
+          }
+
+          .desa-page-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+            margin-bottom: 18px;
+          }
+
+          .desa-title {
+            font-size: 20px;
+          }
+
+          .desa-subtitle {
+            font-size: 13px;
+          }
+
+          .desa-header-actions {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+          }
+
+          .desa-kegiatan-filter {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+          }
+
+          .desa-kegiatan-select {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .badge-kegiatan-aktif,
+          .btn-jadikan-aktif {
+            text-align: center;
+            justify-content: center;
+          }
+
+          .btn-link-pendaftaran {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .status-pendaftaran-box {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          .desa-card-left,
+          .desa-card-right {
+            padding: 16px 14px;
+            border-radius: 14px;
+          }
+
+          .tree-header-top {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+          }
+
+          .tree-stats-actions {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 10px;
+          }
+
+          .tree-stats-counts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            gap: 4px;
+          }
+
+          .tree-stats-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+          }
+
+          .btn-toggle-all {
+            text-align: center;
+            justify-content: center;
+            padding: 8px;
+          }
+
+          .tree-filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px;
+            gap: 10px;
+          }
+
+          .filter-select-group {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 4px;
+          }
+
+          .filter-select {
+            width: 100%;
+          }
+
+          .filter-search-group {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .btn-reset-filter {
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+          }
+
+          .daerah-node-header {
+            flex-wrap: wrap;
+            padding: 10px 12px;
+            gap: 8px;
+          }
+
+          .daerah-children-container {
+            padding: 8px 6px 10px 10px;
+          }
+
+          .desa-children-container {
+            padding: 6px 6px 8px 8px;
+          }
+
+          .desa-node-header {
+            padding: 8px 10px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .node-actions-group {
+            gap: 4px;
+          }
+
+          .btn-node-toggle span,
+          .btn-add-child span {
+            display: none;
+          }
+
+          .btn-node-toggle,
+          .btn-add-child {
+            padding: 4px 6px;
+          }
+        }
+      `}</style>
     </div>
   );
 }

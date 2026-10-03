@@ -70,7 +70,7 @@ export default function MandiriPage() {
    const [page, setPage] = useState(1);
    const [userRole, setUserRole] = useState("");
    const [regStatus, setRegStatus] = useState("1");
-   const [regTitle, setRegTitle] = useState("");
+   const [regTitle, setRegTitle] = useState("Pashmina 8.0");
    const [regDesc, setRegDesc] = useState("");
    const [regStatusPeserta, setRegStatusPeserta] = useState("Utusan Daerah");
    const [regGender, setRegGender] = useState("Semua");
@@ -1032,7 +1032,7 @@ export default function MandiriPage() {
             }
          ` }} />
          <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-            <Topbar title={regTitle || "Usia Mandiri / Persiapan Nikah"} role={userRole} />
+            <Topbar title={regTitle || "Pashmina 8.0"} role={userRole} />
 
             <div className="page-content">
 
@@ -1056,10 +1056,10 @@ export default function MandiriPage() {
 
                <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "20px" }}>
                   <div className="page-header-left">
-                     <h2>{regTitle || "Pengelolaan Peserta Mandiri"}</h2>
+                     <h2>{regTitle || "Pashmina 8.0"}</h2>
                      <p>Kelola data peserta yang memasuki usia mandiri / persiapan nikah</p>
                   </div>
-                  {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && kegiatanList.length > 0 && (
+                  {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && kegiatanList.length > 1 && (
                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <label style={{ fontWeight: 600, fontSize: 13, color: "#475569", whiteSpace: "nowrap" }}>Kegiatan:</label>
                         <select

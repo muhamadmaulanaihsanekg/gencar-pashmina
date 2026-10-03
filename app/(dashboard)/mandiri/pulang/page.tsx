@@ -1,7 +1,7 @@
 "use client";
 
 import Topbar from "@/components/Topbar";
-import { RefreshCw, Search, Download, Undo } from "lucide-react";
+import { RefreshCw, Search, Download, Undo, Clock, MapPin } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 import { useState, useEffect, useCallback, Suspense } from "react";
@@ -298,60 +298,290 @@ function PulangContent() {
                 Tidak ada data peserta pulang yang ditemukan.
               </div>
             ) : (
-              <div className="table-responsive">
-                <table className="table responsive-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "80px" }}>No. Urut</th>
-                      <th>Nama</th>
-                      <th style={{ width: "60px" }}>L/P</th>
-                      <th>Desa / Kota</th>
-                      <th>Jam Pulang</th>
-                      <th>Alasan Pulang</th>
-                      <th style={{ width: "100px", textAlign: "center" }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredList.map((item) => (
-                      <tr key={item.id}>
-                        <td data-label="No. Urut" style={{ fontWeight: 700 }}>#{item.nomorPeserta || "-"}</td>
-                        <td data-label="Nama">
-                          <div style={{ fontWeight: 600 }}>{item.generusNama}</div>
-                          <div className="text-xs text-muted" style={{ fontSize: "10px" }}>{item.generusNomorUnik}</div>
-                        </td>
-                        <td data-label="L/P">{item.generusJenisKelamin || "-"}</td>
-                        <td data-label="Desa / Kota">
-                          <div>{item.desaNama || "Umum"}</div>
-                          <div className="text-xs text-muted" style={{ fontSize: "10px" }}>{item.desaKota || "-"}</div>
-                        </td>
-                        <td data-label="Jam Pulang">
-                          {item.waktuPulang ? new Date(item.waktuPulang).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "-"}
-                        </td>
-                        <td data-label="Alasan Pulang">
-                          <span style={{ fontStyle: "italic", color: "var(--text-muted)" }}>
-                            {item.alasanPulang || "Tidak ada alasan"}
-                          </span>
-                        </td>
-                        <td data-label="Aksi" style={{ textAlign: "center" }}>
-                          <button
-                            className="btn-secondary" 
-                            style={{ padding: "6px 12px", display: "inline-flex", alignItems: "center", gap: 6, fontSize: "12px", border: "1px solid #dbeafe", background: "#eff6ff", color: "#2563eb" }}
-                            title="Kembalikan Hadir"
-                            onClick={() => restoreParticipant(item.id, item.generusNama || "Peserta")}
-                          >
-                            <Undo size={14} />
-                            <span>Hadirkan</span>
-                          </button>
-                        </td>
+              <>
+                {/* Desktop Table View */}
+                <div className="table-responsive desktop-only-table">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: "80px" }}>No. Urut</th>
+                        <th>Nama</th>
+                        <th style={{ width: "60px" }}>L/P</th>
+                        <th>Desa / Kota</th>
+                        <th>Jam Pulang</th>
+                        <th>Alasan Pulang</th>
+                        <th style={{ width: "100px", textAlign: "center" }}>Aksi</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredList.map((item) => (
+                        <tr key={item.id}>
+                          <td style={{ fontWeight: 700 }}>#{item.nomorPeserta || "-"}</td>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{item.generusNama}</div>
+                            <div className="text-xs text-muted" style={{ fontSize: "10px" }}>{item.generusNomorUnik}</div>
+                          </td>
+                          <td>{item.generusJenisKelamin || "-"}</td>
+                          <td>
+                            <div>{item.desaNama || "Umum"}</div>
+                            <div className="text-xs text-muted" style={{ fontSize: "10px" }}>{item.desaKota || "-"}</div>
+                          </td>
+                          <td>
+                            {item.waktuPulang ? new Date(item.waktuPulang).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "-"}
+                          </td>
+                          <td>
+                            <span style={{ fontStyle: "italic", color: "var(--text-muted)" }}>
+                              {item.alasanPulang || "Tidak ada alasan"}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <button
+                              className="btn-secondary" 
+                              style={{ padding: "6px 12px", display: "inline-flex", alignItems: "center", gap: 6, fontSize: "12px", border: "1px solid #dbeafe", background: "#eff6ff", color: "#2563eb" }}
+                              title="Kembalikan Hadir"
+                              onClick={() => restoreParticipant(item.id, item.generusNama || "Peserta")}
+                            >
+                              <Undo size={14} />
+                              <span>Hadirkan</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards View */}
+                <div className="mobile-only-cards">
+                  {filteredList.map((item) => (
+                    <div key={item.id} className="pulang-mobile-card">
+                      <div className="card-top">
+                        <div className="top-badges">
+                          <span className="badge-no-urut">#{item.nomorPeserta || "-"}</span>
+                          <span className={`badge-gender ${item.generusJenisKelamin === 'P' ? 'gender-p' : 'gender-l'}`}>
+                            {item.generusJenisKelamin === 'P' ? 'P' : 'L'}
+                          </span>
+                        </div>
+                        <div className="badge-jam">
+                          <Clock size={12} />
+                          <span>
+                            {item.waktuPulang ? new Date(item.waktuPulang).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' }) : "-"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="card-main">
+                        <div className="nama-row">
+                          <span className="nama-text">{item.generusNama}</span>
+                          {item.generusNomorUnik && (
+                            <span className="unik-tag">{item.generusNomorUnik}</span>
+                          )}
+                        </div>
+                        <div className="lokasi-row">
+                          <MapPin size={13} className="text-muted" />
+                          <span>{item.desaNama || "Umum"}{item.desaKota ? ` • ${item.desaKota}` : ""}</span>
+                        </div>
+                      </div>
+
+                      <div className="card-alasan">
+                        <div className="alasan-label">Alasan Pulang</div>
+                        <div className="alasan-text">
+                          {item.alasanPulang || "Tidak ada alasan spesifik"}
+                        </div>
+                      </div>
+
+                      <div className="card-footer-action">
+                        <button
+                          className="btn-hadirkan-mobile"
+                          onClick={() => restoreParticipant(item.id, item.generusNama || "Peserta")}
+                        >
+                          <Undo size={14} />
+                          <span>Kembalikan ke Hadir</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .desktop-only-table {
+          display: block;
+        }
+
+        .mobile-only-cards {
+          display: none;
+        }
+
+        @media (max-width: 768px) {
+          .desktop-only-table {
+            display: none;
+          }
+
+          .mobile-only-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+          }
+
+          .pulang-mobile-card {
+            background: #ffffff;
+            border: 1px solid #e6dfd3;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f4efe6;
+            padding-bottom: 8px;
+          }
+
+          .top-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+
+          .badge-no-urut {
+            background: #f4efe6;
+            color: #26392d;
+            font-weight: 700;
+            font-size: 12.5px;
+            padding: 3px 8px;
+            border-radius: 6px;
+          }
+
+          .badge-gender {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 6px;
+          }
+
+          .gender-l {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+          }
+
+          .gender-p {
+            background: #fdf2f8;
+            color: #db2777;
+            border: 1px solid #fbcfe8;
+          }
+
+          .badge-jam {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-weight: 600;
+          }
+
+          .card-main {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+          }
+
+          .nama-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+          }
+
+          .nama-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-word;
+          }
+
+          .unik-tag {
+            font-family: monospace;
+            font-size: 11px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+          }
+
+          .lokasi-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            color: #64748b;
+          }
+
+          .card-alasan {
+            background: #fdfaf6;
+            border: 1px solid #f4efe6;
+            border-radius: 8px;
+            padding: 8px 10px;
+          }
+
+          .alasan-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #8c7b6b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+          }
+
+          .alasan-text {
+            font-size: 13px;
+            color: #334155;
+            font-style: italic;
+            word-break: break-word;
+          }
+
+          .card-footer-action {
+            margin-top: 2px;
+          }
+
+          .btn-hadirkan-mobile {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 14px;
+            border-radius: 8px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .btn-hadirkan-mobile:hover {
+            background: #dbeafe;
+          }
+        }
+      `}</style>
     </div>
   );
 }

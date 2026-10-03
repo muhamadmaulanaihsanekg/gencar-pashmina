@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import GlobalLoading from "@/app/loading";
@@ -18,15 +18,7 @@ import {
 } from "lucide-react";
 
 function LoginContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const isAdmin = searchParams.get("admin") === "1";
-
-  useEffect(() => {
-    if (!isAdmin) {
-      window.location.replace("/mandiri/katalog/login");
-    }
-  }, [isAdmin]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -112,10 +104,6 @@ function LoginContent() {
       setLoading(false);
     }
   };
-
-  if (!isAdmin) {
-    return <GlobalLoading />;
-  }
 
   return (
     <div className="portal-root katalog-login-root">

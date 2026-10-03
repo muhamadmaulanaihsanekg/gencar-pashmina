@@ -3,11 +3,23 @@ main = "worker/index.ts"
 compatibility_date = "2025-05-05"
 compatibility_flags = [ "nodejs_compat" ]
 
-# Next.js frontend (SPA) static export directory
+# Frontend SPA hasil `next build` (output: 'export')
+# run_worker_first: request masuk ke Worker dulu agar guard (RBAC/rate-limit)
+# berjalan sebelum aset statis dilayani. Lihat worker/middleware/request-guard.ts.
 [assets]
 directory = "out"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
+# Semua request ke Worker dulu agar guard (RBAC/rate-limit) berjalan
+# sebelum aset dilayani. Worker meneruskan ke ASSETS lewat app.all("*").
+run_worker_first = true
+
+# Route lama di server/api/**/route.ts ditulis dengan API Next.js.
+# Alias ini menggantinya dengan shim Cloudflare saat bundling.
+[alias]
+"next/server" = "./server/shims/next-server.ts"
+"next/headers" = "./server/shims/next-headers.ts"
+"next/cache" = "./server/shims/next-cache.ts"
 
 [[d1_databases]]
 binding = "DB"
@@ -18,19 +30,19 @@ database_id = "gencar-d1-db"
 binding = "BUCKET"
 bucket_name = "gencar-media"
 
-# KV untuk magic_tokens rate-limit & session
-# [[kv_namespaces]]
-# binding = "KV"
-# id = "REPLACE_ME"
+# RealtimeHub — pengganti Pusher (WebSocket + hibernation).
+[durable_objects]
+bindings = [
+  { name = "REALTIME", class_name = "RealtimeHub" },
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RealtimeHub"]
 
 [vars]
 DAERAH_NAMA = "Cengkareng"
 R2_PUBLIC_URL = "https://media.gencar.my.id"
-
-# Single-domain routing configuration:
-# routes = [
-#   { pattern = "gencar.my.id/api/*", zone_name = "gencar.my.id" }
-# ]
 
 # NOTE: no [build] block — `wrangler dev` must not trigger a Next build (it fights `next dev`).
 # Production builds happen in the deploy script instead.

@@ -61,6 +61,9 @@ export class LRUCache<T> {
 // ── Rate Limiter Instance ──────────────────────────────────────────
 // Cache maksimal 5000 IP address untuk mencegah Memory Leak dari bot.
 // TTL default bisa bervariasi bergantung pemanggilan.
+// ponytail: state ini per-isolate (in-memory), jadi limit/revoke tidak global di
+// Cloudflare Workers. Cukup untuk meredam brute-force; upgrade ke Durable Object
+// atau KV bila butuh limit yang benar-benar konsisten antar-isolate.
 const rateLimitCache = new LRUCache<{ count: number }>(5000);
 
 export function checkRateLimit(

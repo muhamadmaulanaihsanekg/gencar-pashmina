@@ -7,11 +7,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import QRCode from "qrcode";
 import Swal from "sweetalert2";
 import Link from "next/link";
+import Topbar from "@/components/Topbar";
 import { GenerusItem } from "@/lib/types";
 import {
   Sparkles, Search, User, MapPin, Phone, GraduationCap,
   Briefcase, Heart, Globe, Calendar, Lock, ClipboardList,
-  Download, Eye, EyeOff, ChevronDown, ChevronUp, Settings2, Users, Share2, Music, Utensils, Printer, Home, Instagram, QrCode, FileSpreadsheet, FileText, X, ArrowUpDown, Copy, Fingerprint
+  Download, Eye, EyeOff, ChevronDown, ChevronUp, Settings2, Users, Share2, Music, Utensils, Printer, Home, Instagram, QrCode, FileSpreadsheet, FileText, X, ArrowUpDown, Copy, Fingerprint, PhoneCall
 } from "lucide-react";
 import { getPusherClient } from "@/lib/pusher-client";
 import jsPDF from "jspdf";
@@ -177,10 +178,11 @@ export default function AdminKatalogPage() {
     let interval: any;
     const fetchRooms = async () => {
       try {
-        const r = await fetch("/api/mandiri/rooms", { cache: "no-store" });
+        const r = await fetch("/api/mandiri/pilih?all=true", { cache: "no-store" });
         if (r.ok) {
           const rJson = await r.json();
-          setActiveRooms(Array.isArray(rJson) ? rJson : []);
+          const called = (Array.isArray(rJson) ? rJson : []).filter((p: any) => p.statusTunggu === "dipanggil");
+          setActiveRooms(called);
         }
       } catch (e) {}
     };
@@ -639,7 +641,7 @@ export default function AdminKatalogPage() {
           doc.setFontSize(8);
           doc.setTextColor(100, 116, 139);
           doc.text(`Halaman ${data.pageNumber} dari ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: "center" });
-          doc.text("Sistem Informasi Katalog Peserta - gencar.com", 15, doc.internal.pageSize.height - 10);
+          doc.text("Sistem Informasi Katalog Peserta - Pashmina", 15, doc.internal.pageSize.height - 10);
         }
       });
 
@@ -730,73 +732,87 @@ export default function AdminKatalogPage() {
   }
 
   return (
-    <div className="pdkt-admin-container">
-      <header
-        className="page-header"
-        style={{ textAlign: 'center', display: 'block' }}
-      >
-        <h1>
-          KATALOG <span style={{ color: 'inherit' }}>PESERTA</span>
-        </h1>
-        <span className="subtitle">{kegiatanList.find(k => k.id === selectedKegiatanId)?.judul || latestActivity?.judul || "Daftar Peserta Aktif"}</span>
-
-      </header>
-      <div className="toolbar-section">
-        <div className="toolbar-top-row">
-          <div className="search-box">
-            <Search size={18} className="icon-muted" />
-            <input
-              type="text"
-              placeholder="Cari nama, nomor, desa, atau alamat..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <button 
-                className="clear-search-btn-admin"
-                onClick={() => setSearchTerm("")}
-              >
-                <X size={14} />
-              </button>
+    <>
+      <Topbar title="Katalog Peserta" role={myProfile?.role || "admin"} />
+      <div className="pdkt-admin-container">
+        <header className="page-header">
+          <div className="page-header-row">
+            <div>
+              <h1>Katalog Peserta</h1>
+              <p className="subtitle">{kegiatanList.find(k => k.id === selectedKegiatanId)?.judul || latestActivity?.judul || "Daftar Peserta Aktif"}</p>
+            </div>
+            {kegiatanList.length > 1 && (
+              <div className="kegiatan-header-select">
+                <label>Kegiatan:</label>
+                <select
+                  value={selectedKegiatanId}
+                  onChange={(e) => { setSelectedKegiatanId(e.target.value); setPage(1); }}
+                >
+                  {kegiatanList.map(k => (
+                    <option key={k.id} value={k.id}>{k.judul} ({k.kota})</option>
+                  ))}
+                </select>
+              </div>
             )}
           </div>
-          <div className="main-actions">
-            <button className={`btn-toggle-public ${publicStatus === "open" ? "active" : ""}`} onClick={handleTogglePublic}>
-              {publicStatus === "open" ? <Eye size={16} /> : <EyeOff size={16} />}
-              <span>Public View</span>
-            </button>
-            {publicStatus === "open" && (
-              <button className="btn-icon-sq" onClick={copyPublicLink} title="Salin Link Publik">
-                <Share2 size={16} />
-              </button>
-            )}
-            <button className={`btn-box-love ${boxLoveStatus === "open" ? "active" : ""}`} onClick={handleToggleBoxLove}>
-              <Heart size={16} />
-              <span>Box Love {boxLoveStatus === "open" ? "(ON)" : "(OFF)"}</span>
-            </button>
-          </div>
-        </div>
+        </header>
 
-        <div className="export-actions-bar">
-          <div className="export-group">
-            <button className="btn-export-id-cards" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }} onClick={() => setShowAccessQR(true)}>
-              <QrCode size={16} />
-              <span>QR Akses</span>
-            </button>
-            <button className="btn-export-id-cards" style={{ background: 'linear-gradient(135deg, #059669, #047857)' }} onClick={handleExportExcel}>
-              <FileSpreadsheet size={16} />
-              <span>Export Excel</span>
-            </button>
-            <button className="btn-export-id-cards" style={{ background: 'linear-gradient(135deg, #4f46e5, #4338ca)' }} onClick={handleExportKatalogPDF}>
-              <FileText size={16} />
-              <span>Export PDF</span>
-            </button>
-            <button className="btn-export-id-cards" onClick={handleExportIDCards} disabled={isExporting}>
-              <Printer size={16} />
-              <span>Cetak ID Card</span>
-            </button>
+        <div className="toolbar-section">
+          <div className="toolbar-top-row">
+            <div className="search-box">
+              <Search size={18} className="icon-muted" />
+              <input
+                type="text"
+                placeholder="Cari nama, nomor, desa, atau alamat..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button 
+                  className="clear-search-btn-admin"
+                  onClick={() => setSearchTerm("")}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div className="main-actions">
+              <button className={`btn-toggle-public ${publicStatus === "open" ? "active" : ""}`} onClick={handleTogglePublic}>
+                {publicStatus === "open" ? <Eye size={16} /> : <EyeOff size={16} />}
+                <span>Public View {publicStatus === "open" ? "(ON)" : "(OFF)"}</span>
+              </button>
+              {publicStatus === "open" && (
+                <button className="btn-icon-sq" onClick={copyPublicLink} title="Salin Link Publik">
+                  <Share2 size={16} />
+                </button>
+              )}
+              <button className={`btn-box-love ${boxLoveStatus === "open" ? "active" : ""}`} onClick={handleToggleBoxLove}>
+                <Heart size={16} />
+                <span>Box Love {boxLoveStatus === "open" ? "(ON)" : "(OFF)"}</span>
+              </button>
+            </div>
           </div>
-        </div>
+
+          <div className="export-actions-bar">
+            <div className="export-group">
+              <button className="btn-export-id-cards btn-qr-access" onClick={() => setShowAccessQR(true)}>
+                <QrCode size={16} />
+                <span>QR Akses</span>
+              </button>
+              <button className="btn-export-id-cards btn-export-excel" onClick={handleExportExcel}>
+                <FileSpreadsheet size={16} />
+                <span>Export Excel</span>
+              </button>
+              <button className="btn-export-id-cards btn-export-pdf" onClick={handleExportKatalogPDF}>
+                <FileText size={16} />
+                <span>Export PDF</span>
+              </button>
+              <button className="btn-export-id-cards btn-print-id" onClick={handleExportIDCards} disabled={isExporting}>
+                <Printer size={16} />
+                <span>Cetak ID Card</span>
+              </button>
+            </div>
+          </div>
 
         <div className="filters-container">
           <div className="filters-header">
@@ -905,7 +921,7 @@ export default function AdminKatalogPage() {
               </div>
             </div>
 
-            {kegiatanList.length > 0 && (
+            {kegiatanList.length > 1 && (
               <div className="filter-group">
                 <label>Kegiatan</label>
                 <div className="select-box-wrapper">
@@ -931,21 +947,6 @@ export default function AdminKatalogPage() {
                   setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
                   setPage(1);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  borderRadius: '12px',
-                  fontSize: '12px',
-                  fontWeight: '700',
-                  transition: '0.2s',
-                  border: '1.5px solid #f1f5f9',
-                  background: sortOrder === 'asc' ? '#f0fdf4' : '#fef2f2',
-                  color: sortOrder === 'asc' ? '#166534' : '#991b1b',
-                  height: '38px',
-                  cursor: 'pointer'
-                }}
               >
                 <ArrowUpDown size={14} />
                 <span>{sortOrder === 'asc' ? 'Terkecil' : 'Terbesar'}</span>
@@ -959,13 +960,13 @@ export default function AdminKatalogPage() {
         {data.map((item) => {
           const isPulang = item.keterangan === "pulang";
           return (
-          <div key={item.id} className={`participant-card gender-${item.jenisKelamin?.toLowerCase()} ${isPulang ? "disabled" : ""}`} style={{ position: "relative" }}>
+          <div key={item.id} className={`participant-card gender-${item.jenisKelamin?.toLowerCase()} ${isPulang ? "disabled" : ""}`}>
             <div className="card-inner" style={{ filter: isPulang ? "blur(3px)" : "none", pointerEvents: isPulang ? "none" : "auto" }}>
               <div className="card-main">
                 <div className="card-photo-col">
                   <div className="photo-wrapper photo-clickable" onClick={() => setZoomPhoto(item)} title="Lihat foto">
                     {item.foto ? <img src={item.foto} alt={item.nama} /> : <div className="photo-placeholder">{item.nama.charAt(0)}</div>}
-                    <div className={`status-badge ${item.panitiaStatus || item.role === 'admin' ? 'panitia' : 'peserta'}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <div className={`status-badge ${item.panitiaStatus || item.role === 'admin' ? 'panitia' : 'peserta'}`}>
                       {siteLogo && <img src={siteLogo} alt="" style={{ width: '10px', height: '10px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />}
                       <span>{item.panitiaStatus || item.role === 'admin' ? "Panitia" : "Peserta"}</span>
                     </div>
@@ -978,13 +979,12 @@ export default function AdminKatalogPage() {
                   <div className="info-header">
                     <h3 className="participant-name">{item.nama}</h3>
                     <div className="region-tag">
-                      <MapPin size={10} />
+                      <MapPin size={11} />
                       <span>{item.mandiriDesaKota || "Tanpa Kota"} &bull; {item.mandiriDesaNama || item.desaNama || "Desa"}</span>
                     </div>
                     {item.nomorUnik && (
                       <div 
-                        className="region-tag" 
-                        style={{ marginTop: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: '#6366f1', background: '#e0e7ff', width: 'fit-content' }}
+                        className="nomor-unik-badge" 
                         onClick={(e) => {
                           e.stopPropagation();
                           navigator.clipboard.writeText(item.nomorUnik || '');
@@ -992,16 +992,16 @@ export default function AdminKatalogPage() {
                         }}
                         title="Klik untuk menyalin"
                       >
-                        <Fingerprint size={10} />
-                        <span style={{ fontWeight: '700' }}>{item.nomorUnik}</span>
-                        <Copy size={10} style={{ marginLeft: '2px' }} />
+                        <Fingerprint size={12} />
+                        <span>{item.nomorUnik}</span>
+                        <Copy size={11} />
                       </div>
                     )}
                   </div>
 
                   <div className="tags-row">
-                    <div className="info-pill"><User size={10} /> <span>{calculateAge(item.tanggalLahir ?? undefined)} thn &bull; {item.jenisKelamin === 'L' ? 'Laki-laki' : item.jenisKelamin === 'P' ? 'Perempuan' : item.jenisKelamin || '-'}</span></div>
-                    <div className="info-pill"><GraduationCap size={10} /> <span>{item.pendidikan || "-"}</span></div>
+                    <div className="info-pill"><User size={11} /> <span>{calculateAge(item.tanggalLahir ?? undefined)} thn &bull; {item.jenisKelamin === 'L' ? 'Laki-laki' : item.jenisKelamin === 'P' ? 'Perempuan' : item.jenisKelamin || '-'}</span></div>
+                    <div className="info-pill"><GraduationCap size={11} /> <span>{item.pendidikan || "-"}</span></div>
                   </div>
 
                   <div className="contact-info">
@@ -1041,20 +1041,18 @@ export default function AdminKatalogPage() {
                 </div>
               </div>
 
-              {/* Active Room Badge */}
+              {/* Active Call Badge */}
               {(() => {
-                const room = activeRooms.find(r => r.status === "Terisi" && (r.pengirimNama === item.nama || r.penerimaNama === item.nama));
-                if (room) {
+                const call = activeRooms.find(r => r.pengirimNama === item.nama || r.penerimaNama === item.nama);
+                if (call) {
+                  const partner = item.nama === call.pengirimNama ? call.penerimaNama : call.pengirimNama;
                   return (
-                    <div style={{ marginTop: '20px', padding: '20px', background: '#fdf4ff', border: '2px solid #fbcfe8', borderRadius: '16px', fontSize: '14px', color: '#831843', width: '100%' }}>
-                      <div style={{ fontWeight: '800', fontSize: '18px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Heart size={20} className="text-pink-500" /> Sedang di {room.nama}
+                    <div className="active-room-card">
+                      <div className="active-room-title">
+                        <PhoneCall size={15} /> Sedang Dipanggil Ta&apos;aruf
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
-                        <div><span style={{ fontWeight: '700' }}>Bersama:</span> {item.nama === room.pengirimNama ? room.penerimaNama : room.pengirimNama}</div>
-                        <div><span style={{ fontWeight: '700' }}>Pemanggil 1:</span> {room.assignedCallerNama || '-'}</div>
-                        <div><span style={{ fontWeight: '700' }}>Pemanggil 2:</span> {room.assignedCaller2Nama || '-'}</div>
-                        <div><span style={{ fontWeight: '700' }}>Penunggu:</span> {room.assignedGuardNama || '-'}</div>
+                      <div className="active-room-info">
+                        <div><span>Bersama:</span> {partner}</div>
                       </div>
                     </div>
                   );
@@ -1064,8 +1062,7 @@ export default function AdminKatalogPage() {
 
               <div className="card-footer">
                 <button 
-                  className="footer-btn btn-id-card" 
-                  style={{ background: '#3b82f6', color: 'white', border: 'none' }}
+                  className="footer-btn btn-view-profile" 
                   onClick={() => setProfileDetail(item)}
                 >
                   <User size={14} />
@@ -1075,31 +1072,8 @@ export default function AdminKatalogPage() {
             </div>
 
             {isPulang && (
-              <div style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 10,
-                padding: "24px"
-              }}>
-                <div style={{
-                  background: "rgba(255, 255, 255, 0.95)",
-                  padding: "20px",
-                  borderRadius: "20px",
-                  textAlign: "center",
-                  color: "#ef4444",
-                  fontWeight: 700,
-                  fontSize: "14px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                  border: "2px solid #fee2e2",
-                  lineHeight: 1.5,
-                  backdropFilter: "blur(4px)"
-                }}>
+              <div className="pulang-overlay">
+                <div className="pulang-notice">
                   Mohon maaf, peserta {item.nama} pulang lebih awal.
                 </div>
               </div>
@@ -1108,6 +1082,48 @@ export default function AdminKatalogPage() {
           );
         })}
       </div>
+
+      {total > limit && (
+        <div className="pagination-bar">
+          <div className="pagination-info">
+            Menampilkan <strong>{(page - 1) * limit + 1}</strong> - <strong>{Math.min(page * limit, total)}</strong> dari <strong>{total}</strong> peserta
+          </div>
+          <div className="pagination-controls">
+            <button
+              className="page-btn page-nav"
+              disabled={page <= 1}
+              onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            >
+              &larr; Prev
+            </button>
+            {(() => {
+              const totalPages = Math.ceil(total / limit);
+              let start = Math.max(1, page - 2);
+              let end = Math.min(totalPages, start + 4);
+              if (end - start < 4) start = Math.max(1, end - 4);
+              start = Math.max(1, start);
+              const pages = [];
+              for (let i = start; i <= end; i++) pages.push(i);
+              return pages.map(p => (
+                <button
+                  key={p}
+                  className={`page-btn ${p === page ? 'active' : ''}`}
+                  onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                >
+                  {p}
+                </button>
+              ));
+            })()}
+            <button
+              className="page-btn page-nav"
+              disabled={page >= Math.ceil(total / limit)}
+              onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            >
+              Next &rarr;
+            </button>
+          </div>
+        </div>
+      )}
 
       {zoomPhoto && (
         <div className="modal-overlay zoom-overlay" onClick={() => setZoomPhoto(null)}>
@@ -1129,7 +1145,7 @@ export default function AdminKatalogPage() {
         <div className="modal-overlay" onClick={() => setProfileDetail(null)}>
           <div className="modal-content profile-detail-modal" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setProfileDetail(null)}>&times;</button>
-            <div className="pd-header" style={{ background: profileDetail.jenisKelamin === 'P' ? 'linear-gradient(135deg, #be185d, #ec4899)' : 'linear-gradient(135deg, #1d4ed8, #3b82f6)' }}>
+            <div className="pd-header" style={{ background: profileDetail.jenisKelamin === 'P' ? 'linear-gradient(135deg, #422830, #613946)' : 'linear-gradient(135deg, #17241b, #26392d)' }}>
               <div className="pd-photo">
                 {profileDetail.foto
                   ? <img src={profileDetail.foto} alt={profileDetail.nama} />
@@ -1214,24 +1230,24 @@ export default function AdminKatalogPage() {
 
       {showAccessQR && (
         <div className="modal-overlay" onClick={() => setShowAccessQR(false)}>
-          <div className="modal-content" style={{ maxWidth: '500px', background: 'white', borderRadius: '32px', padding: '20px' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content" style={{ maxWidth: '500px', background: 'white', borderRadius: '20px', padding: '20px', border: '1px solid #e6dfd3' }} onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setShowAccessQR(false)}>&times;</button>
-            <div className="qr-access-container" style={{ textAlign: 'center', padding: '20px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '900', marginBottom: '8px', color: '#1e3a8a' }}>Barcode Akses Katalog</h2>
-              <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '14px' }}>Scan barcode ini untuk masuk ke halaman Katalog Peserta secara mandiri.</p>
+            <div className="qr-access-container" style={{ textAlign: 'center', padding: '16px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px', color: '#26392d', fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Barcode Akses Katalog</h2>
+              <p style={{ color: '#5e6d62', marginBottom: '20px', fontSize: '14px' }}>Scan barcode ini untuk masuk ke halaman Katalog Peserta secara mandiri.</p>
 
-              <div style={{ background: 'white', padding: '20px', borderRadius: '32px', display: 'inline-flex', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9', marginBottom: '24px' }}>
+              <div style={{ background: '#faf7f2', padding: '20px', borderRadius: '20px', display: 'inline-flex', boxShadow: '0 4px 12px rgba(23,36,27,0.06)', border: '1px solid #e6dfd3', marginBottom: '20px' }}>
                 <canvas ref={accessQRCanvasRef} style={{ width: '280px', height: '280px' }} />
               </div>
 
-              <div className="url-display" style={{ background: '#f8fafc', padding: '12px 20px', borderRadius: '16px', border: '1px dashed #e2e8f0', marginBottom: '30px' }}>
-                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>{window.location.origin}/mandiri/katalog</span>
+              <div className="url-display" style={{ background: '#ffffff', padding: '10px 16px', borderRadius: '10px', border: '1px dashed #e6dfd3', marginBottom: '24px' }}>
+                <span style={{ fontSize: '13px', color: '#5e6d62', fontWeight: '600' }}>{window.location.origin}/mandiri/katalog</span>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                 <button
                   className="btn-print-card"
-                  style={{ background: '#3b82f6' }}
+                  style={{ background: '#26392d', color: '#ffffff', border: '1px solid #26392d' }}
                   onClick={() => {
                     const canvas = accessQRCanvasRef.current;
                     if (canvas) {
@@ -1244,7 +1260,7 @@ export default function AdminKatalogPage() {
                 >
                   <Download size={16} /> <span>Unduh Barcode</span>
                 </button>
-                <button className="btn-print-card" style={{ background: '#64748b' }} onClick={() => window.print()}>
+                <button className="btn-print-card" style={{ background: '#faf7f2', color: '#26392d', border: '1px solid #e6dfd3' }} onClick={() => window.print()}>
                   <Printer size={16} /> <span>Cetak</span>
                 </button>
               </div>
@@ -1342,7 +1358,7 @@ export default function AdminKatalogPage() {
                   <span>{selectedParticipant.mandiriDesaKota || "-"} &bull; {selectedParticipant.mandiriDesaNama || selectedParticipant.desaNama || "-"}</span>
                 </div>
                 <div className="id-footer-right">
-                  GENCAR &copy; 2026
+                  Pashmina &copy; 2026
                 </div>
               </div>
               <div className="id-card-seal" />
@@ -1433,7 +1449,7 @@ export default function AdminKatalogPage() {
                 <MapPin size={14} />
                 <span>{exportParticipant.mandiriDesaKota || "-"} &bull; {exportParticipant.mandiriDesaNama || exportParticipant.desaNama || "-"}</span>
               </div>
-              <div className="id-footer-right">GENCAR &copy; 2026</div>
+              <div className="id-footer-right">Pashmina &copy; 2026</div>
             </div>
           </div>
         )}
@@ -1441,176 +1457,131 @@ export default function AdminKatalogPage() {
 
       <style jsx>{`
         .pdkt-admin-container { 
-          padding: 40px; 
-          background: #fdfdfe; 
-          min-height: 100vh; 
-          font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-          color: #1e293b;
+          padding: 24px 32px 60px; 
+          background: var(--bg, #faf7f2); 
+          min-height: calc(100vh - 64px); 
+          font-family: var(--font-inter), system-ui, -apple-system, sans-serif; 
+          color: var(--text, #1f2b23);
         }
 
         /* Header Styles */
         .page-header { 
-          margin-bottom: 40px; 
+          margin-bottom: 24px; 
         }
-        .top-badge { 
-          display: inline-flex; 
-          align-items: center; 
-          gap: 8px; 
-          background: #eff6ff; 
-          color: #3b82f6; 
-          padding: 6px 14px; 
-          border-radius: 30px; 
-          font-size: 11px; 
-          font-weight: 800; 
-          letter-spacing: 0.5px;
-          margin-bottom: 16px; 
+        .page-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
         }
         .page-header h1 { 
-          font-size: 34px; 
-          font-weight: 900; 
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 32px; 
+          font-weight: 700; 
           margin: 0; 
-          letter-spacing: -0.5px;
-        }
-        .page-header h1 span { 
-          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          color: #26392d;
+          letter-spacing: -0.02em;
         }
         .subtitle { 
-          color: #64748b; 
-          font-size: 15px; 
-          margin-top: 8px; 
+          color: #5e6d62; 
+          font-size: 14px; 
+          margin-top: 4px; 
           font-weight: 500; 
         }
-
-        /* Stats Row */
-        .stats-row {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 20px;
-          margin-bottom: 32px;
-        }
-        .stat-card {
-          background: white;
-          padding: 24px;
-          border-radius: 24px;
-          border: 1px solid #f1f5f9;
+        .kegiatan-header-select {
           display: flex;
           align-items: center;
-          gap: 16px;
-          transition: 0.3s;
+          gap: 8px;
+          background: #ffffff;
+          padding: 6px 14px;
+          border-radius: 10px;
+          border: 1px solid #e6dfd3;
+          box-shadow: 0 1px 3px rgba(23, 36, 27, 0.04);
         }
-        .stat-card:hover {
-          box-shadow: 0 10px 25px rgba(0,0,0,0.04);
-          border-color: #e2e8f0;
-          transform: translateY(-2px);
+        .kegiatan-header-select label {
+          font-size: 12px;
+          font-weight: 700;
+          color: #5e6d62;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
-        .stat-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .stat-icon-blue { background: #eff6ff; color: #2563eb; }
-        .stat-icon-indigo { background: #eef2ff; color: #4f46e5; }
-        .stat-icon-pink { background: #fdf2f8; color: #db2777; }
-        .stat-icon-green { background: #f0fdf4; color: #16a34a; }
-        
-        .stat-info {
-          display: flex;
-          flex-direction: column;
-        }
-        .stat-label {
+        .kegiatan-header-select select {
+          border: none;
+          background: transparent;
           font-size: 13px;
-          color: #64748b;
           font-weight: 600;
+          color: #26392d;
+          outline: none;
+          cursor: pointer;
         }
-        .stat-value {
-          font-size: 24px;
-          font-weight: 800;
-          line-height: 1;
-          margin-top: 4px;
-        }
-        .val-indigo { color: #3730a3; }
-        .val-pink { color: #9d174d; }
-        
-        .stat-status {
-          font-size: 11px;
-          font-weight: 900;
-          margin-top: 6px;
-          padding: 2px 8px;
-          border-radius: 6px;
-          display: inline-block;
-          width: fit-content;
-        }
-        .stat-status.open { background: #dcfce7; color: #166534; }
-        .stat-status.closed { background: #fee2e2; color: #991b1b; }
 
         /* Toolbar Styles */
         .toolbar-section { 
-          background: white; 
-          padding: 30px; 
-          border-radius: 32px; 
-          box-shadow: 0 4px 30px rgba(0,0,0,0.02); 
-          border: 1px solid #f1f5f9; 
-          margin-bottom: 40px;
+          background: #ffffff; 
+          padding: 24px; 
+          border-radius: 16px; 
+          box-shadow: 0 4px 12px -2px rgba(23, 36, 27, 0.05); 
+          border: 1px solid #e6dfd3; 
+          margin-bottom: 28px;
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 20px;
         }
 
         .toolbar-top-row {
           display: flex;
-          gap: 20px;
+          gap: 16px;
           align-items: center;
           flex-wrap: wrap;
         }
 
         .search-box { 
           flex: 2; 
-          min-width: 300px;
+          min-width: 280px;
           display: flex; 
           align-items: center; 
           gap: 12px; 
-          background: #f8fafc; 
-          border: 1.5px solid #f1f5f9; 
-          padding: 12px 20px; 
-          border-radius: 18px; 
-          transition: 0.2s;
+          background: #faf7f2; 
+          border: 1px solid #e6dfd3; 
+          padding: 10px 16px; 
+          border-radius: 10px; 
+          transition: all 0.15s ease;
           position: relative;
         }
         .search-box:focus-within {
-          background: white;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+          background: #ffffff;
+          border-color: #3d5a45;
+          box-shadow: 0 0 0 3px rgba(61, 90, 69, 0.1);
         }
         .search-box input { 
           border: none; 
           background: transparent; 
           outline: none; 
           width: 100%; 
-          color: #1e293b; 
+          color: #1f2b23; 
           font-size: 14px;
           font-weight: 500; 
         }
+        .search-box input::placeholder {
+          color: #8e9e92;
+        }
         .clear-search-btn-admin {
-          background: #f1f5f9;
+          background: #f4efe6;
           border: none;
           border-radius: 50%;
-          width: 24px;
-          height: 24px;
+          width: 22px;
+          height: 22px;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #64748b;
-          transition: 0.2s;
+          color: #5e6d62;
+          transition: 0.15s;
         }
         .clear-search-btn-admin:hover {
-          background: #e2e8f0;
-          color: #1e293b;
+          background: #e6dfd3;
+          color: #1f2b23;
         }
 
         .main-actions {
@@ -1619,196 +1590,281 @@ export default function AdminKatalogPage() {
           flex-wrap: wrap;
         }
 
-        .export-actions-bar {
-          background: #f8fafc;
-          padding: 16px;
-          border-radius: 20px;
-          border: 1px solid #f1f5f9;
-        }
-        .export-group {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-
         .btn-toggle-public {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 0 18px;
-          height: 44px;
-          border-radius: 14px;
-          font-size: 12px;
-          font-weight: 700;
+          padding: 0 16px;
+          height: 40px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 600;
           cursor: pointer;
-          transition: 0.2s;
-          border: 1.5px solid #fee2e2;
-          background: #fef2f2;
-          color: #ef4444;
+          transition: all 0.15s ease;
+          border: 1px solid #fecaca;
+          background: #fff5f5;
+          color: #dc2626;
         }
         .btn-toggle-public.active {
-          background: #f0fdf4;
-          border-color: #dcfce7;
-          color: #16a34a;
+          background: #eef4f0;
+          border-color: rgba(61, 90, 69, 0.35);
+          color: #26392d;
         }
+        .btn-toggle-public:hover {
+          opacity: 0.9;
+        }
+
         .btn-box-love {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 0 18px;
-          height: 44px;
-          border-radius: 14px;
-          font-size: 12px;
-          font-weight: 700;
+          padding: 0 16px;
+          height: 40px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 600;
           cursor: pointer;
-          transition: 0.2s;
-          border: 1.5px solid #fce7f3;
-          background: #fdf2f8;
-          color: #be185d;
+          transition: all 0.15s ease;
+          border: 1px solid #e6dfd3;
+          background: #faf7f2;
+          color: #5e6d62;
         }
         .btn-box-love.active {
-          background: linear-gradient(135deg, #ec4899, #be185d);
-          border-color: #be185d;
-          color: white;
-          box-shadow: 0 4px 12px rgba(190, 24, 93, 0.2);
+          background: #fbf7ee;
+          border-color: #c5a059;
+          color: #a37f37;
+          box-shadow: 0 2px 6px rgba(197, 160, 89, 0.15);
         }
-        .btn-export-id-cards {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 0 18px;
-          height: 40px;
-          border-radius: 12px;
-          background: #1e293b;
-          color: white;
-          border: none;
-          font-size: 11px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: 0.2s;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .btn-export-id-cards:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-          filter: brightness(1.1);
-        }
+
         .btn-icon-sq {
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 14px;
-          border: 1.5px solid #e2e8f0;
-          background: white;
-          color: #64748b;
+          border-radius: 10px;
+          border: 1px solid #e6dfd3;
+          background: #ffffff;
+          color: #5e6d62;
           cursor: pointer;
-          transition: 0.2s;
+          transition: all 0.15s ease;
+        }
+        .btn-icon-sq:hover {
+          border-color: #c5a059;
+          color: #26392d;
+        }
+
+        .export-actions-bar {
+          background: #faf7f2;
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: 1px solid #e6dfd3;
+        }
+        .export-group {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .btn-export-id-cards {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 0 16px;
+          height: 38px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          border: 1px solid transparent;
+        }
+        .btn-export-id-cards:hover:not(:disabled) {
+          transform: translateY(-1px);
+        }
+        .btn-export-id-cards:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .btn-export-excel {
+          background: #26392d;
+          color: #ffffff;
+          border-color: #26392d;
+        }
+        .btn-export-excel:hover:not(:disabled) {
+          background: #3d5a45;
+          border-color: #3d5a45;
+        }
+        .btn-export-pdf {
+          background: #3d5a45;
+          color: #ffffff;
+          border-color: #3d5a45;
+        }
+        .btn-export-pdf:hover:not(:disabled) {
+          background: #26392d;
+          border-color: #26392d;
+        }
+        .btn-qr-access {
+          background: #ffffff;
+          color: #26392d;
+          border-color: #e6dfd3;
+        }
+        .btn-qr-access:hover {
+          background: #faf7f2;
+          border-color: #c5a059;
+        }
+        .btn-print-id {
+          background: #ffffff;
+          color: #26392d;
+          border-color: #e6dfd3;
+        }
+        .btn-print-id:hover:not(:disabled) {
+          background: #faf7f2;
+          border-color: #c5a059;
         }
 
         .filters-container {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
         .filters-header {
           display: flex;
           align-items: center;
           gap: 8px;
           font-size: 12px;
-          font-weight: 800;
-          color: #1e293b;
+          font-weight: 700;
+          color: #26392d;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 0.05em;
         }
         .filters-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 20px;
+          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+          gap: 16px;
         }
         .filter-group {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
         .filter-group label {
-          font-size: 10px;
-          font-weight: 800;
-          color: #94a3b8;
+          font-size: 11px;
+          font-weight: 700;
+          color: #5e6d62;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          padding-left: 4px;
+          padding-left: 2px;
         }
         .pill-group { 
           display: flex; 
-          background: #f1f5f9; 
+          background: #f4efe6; 
           padding: 3px; 
-          border-radius: 12px; 
+          border-radius: 10px; 
+          border: 1px solid #e6dfd3;
           gap: 3px; 
         }
         .pill-group button { 
           border: none; 
           background: transparent; 
-          padding: 8px 12px; 
-          border-radius: 9px; 
-          font-size: 11px; 
-          font-weight: 700; 
-          color: #64748b; 
+          padding: 7px 10px; 
+          border-radius: 7px; 
+          font-size: 12px; 
+          font-weight: 600; 
+          color: #5e6d62; 
           cursor: pointer; 
-          transition: 0.2s; 
+          transition: all 0.15s ease; 
           flex: 1;
         }
+        .pill-group button:hover {
+          color: #26392d;
+        }
         .pill-group button.active { 
-          background: white; 
-          color: #3b82f6; 
-          box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+          background: #26392d; 
+          color: #ffffff; 
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
         }
 
         .select-box-wrapper { position: relative; display: flex; align-items: center; }
         .dropdown-box { 
           appearance: none;
-          background: white; 
-          border: 1.5px solid #f1f5f9; 
-          padding: 10px 36px 10px 14px; 
-          border-radius: 12px; 
-          font-size: 11px; 
-          font-weight: 700; 
-          color: #1e293b; 
+          background: #ffffff; 
+          border: 1px solid #e6dfd3; 
+          padding: 9px 34px 9px 12px; 
+          border-radius: 10px; 
+          font-size: 12px; 
+          font-weight: 600; 
+          color: #1f2b23; 
           cursor: pointer;
           outline: none;
           width: 100%;
-          transition: 0.2s;
+          transition: all 0.15s ease;
         }
         .dropdown-box:focus {
-          border-color: #3b82f6;
+          border-color: #3d5a45;
+          box-shadow: 0 0 0 3px rgba(61, 90, 69, 0.1);
+        }
+        .dropdown-box:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          background: #faf7f2;
         }
         .dropdown-arrow {
           position: absolute;
           right: 12px;
           pointer-events: none;
-          color: #94a3b8;
+          color: #8e9e92;
+        }
+
+        .pill-btn-sort {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 8px 16px;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 700;
+          height: 38px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          border: 1px solid #e6dfd3;
+          background: #ffffff;
+          color: #26392d;
+        }
+        .pill-btn-sort:hover {
+          border-color: #c5a059;
+        }
+        .pill-btn-sort.asc {
+          background: #eef4f0;
+          color: #26392d;
+          border-color: rgba(61, 90, 69, 0.35);
+        }
+        .pill-btn-sort.desc {
+          background: #fff5f5;
+          color: #dc2626;
+          border-color: #fecaca;
         }
 
         /* Grid & Card Styles */
         .grid-section { 
           display: grid; 
           grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
-          gap: 24px; 
+          gap: 20px; 
         }
+
         .participant-card { 
-          background: white; 
-          border-radius: 32px; 
-          border: 1px solid #f1f5f9; 
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+          background: #ffffff; 
+          border-radius: 18px; 
+          border: 1px solid #e6dfd3; 
+          box-shadow: 0 4px 12px -2px rgba(23, 36, 27, 0.05); 
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
           overflow: hidden; 
           position: relative;
         }
         .participant-card:hover { 
-          transform: translateY(-6px); 
-          box-shadow: 0 20px 40px rgba(0,0,0,0.06); 
-          border-color: #3b82f633; 
+          transform: translateY(-3px); 
+          box-shadow: 0 12px 24px -4px rgba(23, 36, 27, 0.09); 
+          border-color: #c5a059; 
         }
         .card-inner {
           height: 100%;
@@ -1816,26 +1872,26 @@ export default function AdminKatalogPage() {
           flex-direction: column;
         }
         .card-main {
-          padding: 24px;
+          padding: 20px;
           display: flex;
-          gap: 20px;
+          gap: 18px;
           flex: 1;
         }
         .card-photo-col {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
         }
         .photo-wrapper {
-          width: 90px;
-          height: 90px;
-          border-radius: 24px;
+          width: 88px;
+          height: 88px;
+          border-radius: 16px;
           position: relative;
-          background: #f8fafc;
+          background: #faf7f2;
           overflow: hidden;
-          border: 3px solid white;
-          box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+          border: 2px solid #e6dfd3;
+          box-shadow: 0 4px 12px rgba(23, 36, 27, 0.06);
         }
         .photo-wrapper img {
           width: 100%;
@@ -1848,42 +1904,44 @@ export default function AdminKatalogPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 32px;
-          font-weight: 900;
-          color: #3b82f6;
-          background: #eff6ff;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 36px;
+          font-weight: 700;
+          color: #26392d;
+          background: #eef4f0;
         }
         .status-badge {
           position: absolute;
           bottom: 0;
           left: 0;
           right: 0;
-          padding: 4px 0;
-          font-size: 8px;
-          font-weight: 950;
+          padding: 3px 0;
+          font-size: 9px;
+          font-weight: 800;
           text-align: center;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          color: white;
+          color: #ffffff;
         }
-        .status-badge.peserta { background: #3b82f6; }
-        .status-badge.panitia { background: #10b981; }
+        .status-badge.peserta { background: #26392d; }
+        .status-badge.panitia { background: #c5a059; }
 
         .no-urut-tag {
-          font-size: 13px;
-          font-weight: 900;
-          color: #3b82f6;
+          font-size: 12px;
+          font-weight: 700;
+          color: #26392d;
           font-family: 'JetBrains Mono', monospace;
-          background: #eff6ff;
-          padding: 2px 10px;
-          border-radius: 8px;
+          background: #f4efe6;
+          border: 1px solid #e6dfd3;
+          padding: 2px 8px;
+          border-radius: 6px;
         }
 
         .card-info-col {
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
           min-width: 0;
         }
         .info-header {
@@ -1892,23 +1950,47 @@ export default function AdminKatalogPage() {
           gap: 4px;
         }
         .participant-name {
-          font-size: 19px;
-          font-weight: 800;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 21px;
+          font-weight: 700;
           margin: 0;
-          color: #0f172a;
+          color: #1f2b23;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          line-height: 1.25;
         }
         .region-tag {
           display: flex;
           align-items: center;
           gap: 4px;
-          color: #64748b;
+          color: #5e6d62;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 500;
         }
-        .region-tag svg { color: #3b82f6; }
+        .region-tag svg { color: #c5a059; }
+
+        .nomor-unik-badge {
+          margin-top: 2px;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          color: #26392d;
+          background: #f4efe6;
+          border: 1px solid #e6dfd3;
+          padding: 2px 8px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          font-family: 'JetBrains Mono', monospace;
+          transition: all 0.15s ease;
+          width: fit-content;
+        }
+        .nomor-unik-badge:hover {
+          background: #ece3d4;
+          border-color: #c5a059;
+        }
 
         .tags-row {
           display: flex;
@@ -1919,44 +2001,20 @@ export default function AdminKatalogPage() {
           display: flex;
           align-items: center;
           gap: 4px;
-          padding: 4px 10px;
-          border-radius: 8px;
-          background: #f1f5f9;
-          font-size: 10px;
-          font-weight: 700;
-          color: #475569;
-        }
-        .ig-pill {
-          background: #fdf2f8;
-          color: #be185d;
-        }
-        
-        /* Instagram Link Styles */
-        .instagram-link {
-          color: #be185d;
-          text-decoration: none;
-          transition: opacity 0.2s;
-        }
-        .instagram-link:hover {
-          text-decoration: underline;
-          opacity: 0.8;
-        }
-        
-        .instagram-link-contact {
-          color: #be185d;
-          text-decoration: none;
+          padding: 4px 8px;
+          border-radius: 6px;
+          background: #faf7f2;
+          border: 1px solid #e6dfd3;
+          font-size: 11px;
           font-weight: 600;
-          transition: opacity 0.2s;
+          color: #5e6d62;
         }
-        .instagram-link-contact:hover {
-          text-decoration: underline;
-          opacity: 0.8;
-        }
+        .info-pill svg { color: #8e9e92; }
 
         .contact-info {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 5px;
           margin-top: auto;
         }
         .contact-item {
@@ -1964,50 +2022,60 @@ export default function AdminKatalogPage() {
           align-items: center;
           gap: 8px;
           font-size: 12px;
-          font-weight: 600;
-          color: #1e293b;
+          font-weight: 500;
+          color: #1f2b23;
         }
-        .text-wa { color: #16a34a; }
+        .text-wa { color: #2e7d32; }
         .wa-link-text { 
-          color: #16a34a; 
+          color: #2e7d32; 
           text-decoration: none; 
-          font-weight: 700; 
+          font-weight: 600; 
         }
         .wa-link-text:hover { 
           text-decoration: underline; 
         }
-        
-        .id-footer-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-          text-align: left;
-        }
-        .id-footer-item label {
-          display: block;
-          font-size: 10px;
-          font-weight: 800;
-          color: rgba(255,255,255,0.6);
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          margin-bottom: 4px;
-        }
-        .id-footer-item p {
-          font-size: 12px;
-          color: white;
+        .text-job { color: #3d5a45; }
+        .text-ig { color: #a37f37; }
+        .instagram-link-contact {
+          color: #a37f37;
+          text-decoration: none;
           font-weight: 600;
-          margin: 0;
-          line-height: 1.4;
         }
-        .text-job { color: #3b82f6; }
-        .text-ig { color: #be185d; }
+        .instagram-link-contact:hover {
+          text-decoration: underline;
+        }
+
+        .active-room-card {
+          margin: 0 20px 16px;
+          padding: 14px 16px;
+          background: #fbf7ee;
+          border: 1px solid #c5a059;
+          border-radius: 12px;
+          color: #26392d;
+        }
+        .active-room-title {
+          font-weight: 700;
+          font-size: 15px;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #a37f37;
+        }
+        .active-room-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          font-size: 13px;
+        }
+        .active-room-info span { font-weight: 700; }
 
         .card-footer {
           display: flex;
-          padding: 16px 24px;
-          gap: 12px;
-          background: #fbfcfd;
-          border-top: 1px solid #f1f5f9;
+          padding: 12px 20px;
+          gap: 10px;
+          background: #faf7f2;
+          border-top: 1px solid #e6dfd3;
         }
         .footer-btn {
           flex: 1;
@@ -2015,26 +2083,105 @@ export default function AdminKatalogPage() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          height: 42px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 700;
+          height: 38px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
           cursor: pointer;
-          transition: 0.2s;
+          transition: all 0.15s ease;
           text-decoration: none;
         }
-        .btn-id-card {
-          background: #eff6ff;
-          color: #3b82f6;
-          border: 1px solid #dbeafe;
+        .btn-view-profile {
+          background: #26392d;
+          color: #ffffff;
+          border: 1px solid #26392d;
         }
-        .btn-id-card:hover { background: #dbeafe; }
-        .btn-profile-detail {
-          background: white;
-          color: #475569;
-          border: 1px solid #e2e8f0;
+        .btn-view-profile:hover { 
+          background: #3d5a45; 
+          border-color: #3d5a45;
         }
-        .btn-profile-detail:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        /* Pulang overlay */
+        .pulang-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          padding: 24px;
+        }
+        .pulang-notice {
+          background: rgba(255, 255, 255, 0.95);
+          padding: 16px 20px;
+          border-radius: 14px;
+          text-align: center;
+          color: #dc2626;
+          font-weight: 600;
+          font-size: 13px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+          border: 1px solid #fecaca;
+          line-height: 1.5;
+          backdrop-filter: blur(4px);
+        }
+
+        /* Pagination */
+        .pagination-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-top: 32px;
+          padding: 16px 20px;
+          background: #ffffff;
+          border-radius: 14px;
+          border: 1px solid #e6dfd3;
+        }
+        .pagination-info {
+          font-size: 13px;
+          color: #5e6d62;
+        }
+        .pagination-info strong {
+          color: #1f2b23;
+        }
+        .pagination-controls {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .page-btn {
+          min-width: 36px;
+          height: 36px;
+          padding: 0 10px;
+          border-radius: 8px;
+          border: 1px solid #e6dfd3;
+          background: #faf7f2;
+          color: #1f2b23;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .page-btn:hover:not(:disabled) {
+          border-color: #c5a059;
+          color: #26392d;
+        }
+        .page-btn.active {
+          background: #26392d;
+          border-color: #26392d;
+          color: #ffffff;
+        }
+        .page-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        .page-nav {
+          padding: 0 14px;
+        }
 
         /* Photo clickable */
         .photo-clickable { cursor: pointer; }
@@ -2044,91 +2191,96 @@ export default function AdminKatalogPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0,0,0,0.4);
-          font-size: 20px;
+          background: rgba(23, 36, 27, 0.35);
+          font-size: 18px;
           opacity: 0;
           transition: opacity 0.2s;
-          border-radius: 22px;
+          border-radius: 14px;
         }
         .photo-clickable:hover .photo-zoom-hint { opacity: 1; }
 
         /* Zoom Photo Modal */
-        .zoom-overlay { background: rgba(0,0,0,0.75); backdrop-filter: blur(12px); }
+        .zoom-overlay { background: rgba(23, 36, 27, 0.7); backdrop-filter: blur(8px); }
         .zoom-modal {
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 16px;
-          padding: 16px;
+          padding: 20px;
         }
         .zoom-img {
-          width: 340px;
-          height: 340px;
+          width: 320px;
+          height: 320px;
           object-fit: cover;
-          border-radius: 28px;
-          border: 4px solid white;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+          border-radius: 20px;
+          border: 4px solid #ffffff;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         .zoom-placeholder {
-          width: 340px;
-          height: 340px;
-          border-radius: 28px;
-          border: 4px solid white;
+          width: 320px;
+          height: 320px;
+          border-radius: 20px;
+          border: 4px solid #ffffff;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 120px;
-          font-weight: 900;
-          color: #3b82f6;
-          background: #eff6ff;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 100px;
+          font-weight: 700;
+          color: #26392d;
+          background: #eef4f0;
         }
         .zoom-name {
-          color: white;
-          font-size: 20px;
-          font-weight: 800;
+          color: #ffffff;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 24px;
+          font-weight: 700;
           text-align: center;
-          text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+          text-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
         .zoom-detail-btn {
           display: flex;
           align-items: center;
           gap: 8px;
-          background: white;
-          color: #1e293b;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 16px;
+          background: #26392d;
+          color: #ffffff;
+          border: 1px solid rgba(255,255,255,0.2);
+          padding: 10px 20px;
+          border-radius: 10px;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 600;
           cursor: pointer;
-          transition: 0.2s;
+          transition: 0.15s;
         }
-        .zoom-detail-btn:hover { background: #f1f5f9; transform: translateY(-1px); }
+        .zoom-detail-btn:hover { background: #3d5a45; }
 
         /* Profile Detail Modal */
         .profile-detail-modal {
-          background: white;
-          border-radius: 28px;
-          width: 480px;
+          background: #ffffff;
+          border-radius: 20px;
+          width: 500px;
           max-width: 100%;
           overflow: hidden;
           padding: 0 !important;
+          border: 1px solid #e6dfd3;
+          box-shadow: 0 20px 50px rgba(23, 36, 27, 0.2);
         }
         .pd-header {
           display: flex;
           align-items: center;
-          gap: 20px;
-          padding: 28px 28px 24px;
-          color: white;
+          gap: 18px;
+          padding: 24px;
+          color: #ffffff;
         }
         .pd-photo {
-          width: 80px;
-          height: 80px;
-          border-radius: 20px;
+          width: 76px;
+          height: 76px;
+          border-radius: 16px;
           overflow: hidden;
-          border: 3px solid rgba(255,255,255,0.4);
+          border: 2px solid rgba(255,255,255,0.5);
           flex-shrink: 0;
+          background: rgba(255,255,255,0.1);
         }
         .pd-photo img { width: 100%; height: 100%; object-fit: cover; }
         .pd-initials {
@@ -2137,82 +2289,126 @@ export default function AdminKatalogPage() {
           display: flex;
           align-items: center;
           justify-content: center;
+          font-family: 'Cormorant Garamond', Georgia, serif;
           font-size: 32px;
-          font-weight: 900;
+          font-weight: 700;
           background: rgba(255,255,255,0.2);
         }
         .pd-header-info { flex: 1; min-width: 0; }
         .pd-status-badge {
           display: inline-block;
-          background: rgba(255,255,255,0.2);
-          border: 1px solid rgba(255,255,255,0.3);
+          background: rgba(197, 160, 89, 0.25);
+          border: 1px solid rgba(197, 160, 89, 0.45);
+          color: #fbf7ee;
           padding: 2px 10px;
           border-radius: 20px;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
         .pd-name {
-          font-size: 20px;
-          font-weight: 900;
-          margin: 0 0 6px;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 22px;
+          font-weight: 700;
+          margin: 0 0 4px;
           line-height: 1.2;
+          color: #ffffff;
         }
         .pd-region {
           display: flex;
           align-items: center;
           gap: 5px;
           font-size: 12px;
-          font-weight: 600;
-          opacity: 0.85;
+          font-weight: 500;
+          opacity: 0.9;
         }
-        .pd-body { padding: 24px 28px; }
+        .pd-body { padding: 20px 24px; }
         .pd-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 16px;
+          gap: 14px;
         }
         .pd-item {
           display: flex;
           flex-direction: column;
-          gap: 3px;
+          gap: 2px;
         }
         .pd-item-full { grid-column: 1 / -1; }
         .pd-label {
           font-size: 10px;
-          font-weight: 800;
-          color: #94a3b8;
+          font-weight: 700;
+          color: #8e9e92;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
         .pd-value {
           font-size: 13px;
           font-weight: 600;
-          color: #1e293b;
+          color: #1f2b23;
           line-height: 1.4;
         }
         .pd-link {
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 600;
           text-decoration: none;
         }
-        .pd-link-wa { color: #16a34a; }
+        .pd-link-wa { color: #2e7d32; }
         .pd-link-wa:hover { text-decoration: underline; }
-        .pd-link-ig { color: #be185d; }
+        .pd-link-ig { color: #a37f37; }
         .pd-link-ig:hover { text-decoration: underline; }
         .pd-footer {
-          padding: 16px 28px 24px;
+          padding: 14px 24px;
           display: flex;
           justify-content: center;
-          border-top: 1px solid #f1f5f9;
+          border-top: 1px solid #e6dfd3;
+          background: #faf7f2;
         }
 
         /* Modal & Print Styles (Preserved/Enhanced) */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { position: relative; max-width: 100%; max-height: 95vh; overflow-y: auto; padding: 10px; }
-        .close-modal { position: absolute; top: 0; right: 0; width: 44px; height: 44px; border-radius: 50%; background: white; border: none; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .modal-overlay { 
+          position: fixed; 
+          inset: 0; 
+          background: rgba(23, 36, 27, 0.5); 
+          backdrop-filter: blur(4px); 
+          z-index: 1000; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          padding: 20px; 
+        }
+        .modal-content { 
+          position: relative; 
+          max-width: 100%; 
+          max-height: 95vh; 
+          overflow-y: auto; 
+          padding: 10px; 
+        }
+        .close-modal { 
+          position: absolute; 
+          top: 0; 
+          right: 0; 
+          width: 40px; 
+          height: 40px; 
+          border-radius: 50%; 
+          background: #ffffff; 
+          border: 1px solid #e6dfd3; 
+          font-size: 22px; 
+          font-weight: 700; 
+          cursor: pointer; 
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+          z-index: 10; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          color: #5e6d62;
+          transition: 0.15s;
+        }
+        .close-modal:hover {
+          color: #1f2b23;
+          border-color: #c5a059;
+        }
         
         @media (max-width: 992px) {
           .toolbar-top-row { flex-direction: column; align-items: stretch; }
@@ -2221,16 +2417,33 @@ export default function AdminKatalogPage() {
         }
 
         @media (max-width: 768px) {
-          .pdkt-admin-container { padding: 20px; }
-          .toolbar-section { padding: 20px; }
+          .pdkt-admin-container { padding: 16px; }
+          .toolbar-section { padding: 16px; }
           .export-group { justify-content: center; }
           .btn-export-id-cards { flex: 1; min-width: 140px; justify-content: center; }
           .filters-grid { grid-template-columns: 1fr; }
           .grid-section { grid-template-columns: 1fr; }
+          .page-header-row { flex-direction: column; align-items: flex-start; }
+          .kegiatan-header-select { width: 100%; justify-content: space-between; }
         }
         .modal-actions-print { margin-top: 20px; display: flex; justify-content: center; gap: 12px; }
-        .btn-print-card { display: flex; align-items: center; gap: 10px; background: #1e293b; color: white; border: none; padding: 12px 24px; border-radius: 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .btn-print-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .btn-print-card { 
+          display: flex; 
+          align-items: center; 
+          gap: 10px; 
+          background: #26392d; 
+          color: white; 
+          border: 1px solid #26392d; 
+          padding: 10px 20px; 
+          border-radius: 10px; 
+          font-size: 13px; 
+          font-weight: 600; 
+          cursor: pointer; 
+          transition: 0.15s; 
+        }
+        .btn-print-card:hover { 
+          background: #3d5a45; 
+        }
 
         /* ID Card Styles */
         .id-card-comprehensive { width: 10.5cm; height: 17cm; border-radius: 12mm; position: relative; overflow: hidden; display: flex; flex-direction: column; color: white; background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
@@ -2300,15 +2513,16 @@ export default function AdminKatalogPage() {
           transition: all 0.3s ease;
         }
         .url-display:hover {
-          background: #eff6ff !important;
-          border-color: #3b82f6 !important;
+          background: #f4efe6 !important;
+          border-color: #c5a059 !important;
         }
         .qr-access-container canvas {
           max-width: 100%;
           height: auto !important;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -41,12 +41,6 @@ export default function KatalogLoginPage() {
         localStorage.setItem("attended_nomor_urut_peserta", resData.nomorUrut);
         localStorage.setItem("attended_role", resData.role || "Peserta");
 
-        if (typeof window !== "undefined" && resData.noTelp) {
-          import("@/lib/fcm-client").then(({ registerFCM }) => {
-            registerFCM(resData.noTelp);
-          }).catch((e) => console.error("FCM login registration failed:", e));
-        }
-
         Swal.fire({
           title: `Selamat Datang, ${resData.nama}!`,
           text: "Berhasil masuk ke Katalog Peserta.",
@@ -178,7 +172,7 @@ export default function KatalogLoginPage() {
               </div>
 
               <div className="kl-admin-link">
-                <Link href="/login?admin=1">Akses Panitia / Pengurus</Link>
+                <Link href="/login">Akses Panitia / Pengurus</Link>
               </div>
             </div>
           </div>

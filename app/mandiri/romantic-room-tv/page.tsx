@@ -96,7 +96,7 @@ export default function RomanticRoomTV() {
                         <Heart size={28} color="white" fill="white" />
                     </div>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800, letterSpacing: "1px", color: "#0f172a" }}>ROMANTIC ROOM</h1>
+                        <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800, letterSpacing: "1px", color: "#0f172a" }}>PANGGILAN TA&apos;ARUF</h1>
                         <p style={{ margin: 0, color: "#475569", fontSize: "16px", marginTop: "2px" }}>Status Antrean Live</p>
                     </div>
                 </div>
@@ -122,7 +122,7 @@ export default function RomanticRoomTV() {
                 ) : rooms.length === 0 ? (
                     <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", opacity: 0.6 }}>
                         <Heart size={80} color="#0f172a" style={{ marginBottom: "20px" }} />
-                        <h2 style={{ fontSize: "32px", fontWeight: 600, color: "#0f172a" }}>TIDAK ADA ROOM YANG TERISI</h2>
+                        <h2 style={{ fontSize: "32px", fontWeight: 600, color: "#0f172a" }}>TIDAK ADA PANGGILAN AKTIF</h2>
                         <p style={{ fontSize: "20px", color: "#475569" }}>Menunggu panggilan dari admin...</p>
                     </div>
                 ) : (

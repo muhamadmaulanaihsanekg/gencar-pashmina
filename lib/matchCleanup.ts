@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { mandiriPemilihan, mandiriKunjungan, mandiriRooms } from "./schema";
+import { mandiriPemilihan, mandiriKunjungan } from "./schema";
 import { eq, and, or, sql } from "drizzle-orm";
 import { pusherServer } from "./pusher";
 
@@ -55,61 +55,18 @@ export async function handleMatchCleanup(pemilihanId: string) {
         }
       }
 
-      // 4. Vacate any other rooms (Tunggu Dalam / Sedang Berjalan)
-      const activeRooms = await db.select({
-        roomId: mandiriRooms.id,
-        pemilihanId: mandiriRooms.pemilihanId,
-      })
-      .from(mandiriRooms)
-      .innerJoin(mandiriPemilihan, eq(mandiriRooms.pemilihanId, mandiriPemilihan.id))
-      .where(and(
-        eq(mandiriRooms.status, "Terisi"),
-        sql`${mandiriRooms.pemilihanId} != ${pemilihanId}`,
-        or(
-          eq(mandiriPemilihan.pengirimId, p1),
-          eq(mandiriPemilihan.penerimaId, p1),
-          eq(mandiriPemilihan.pengirimId, p2),
-          eq(mandiriPemilihan.penerimaId, p2)
-        )
-      ));
-
-      for (const r of activeRooms) {
-        if (r.pemilihanId) {
-          // Mark the selection as "Selesai"
-          await db.update(mandiriPemilihan)
-            .set({ status: "Selesai" })
-            .where(eq(mandiriPemilihan.id, r.pemilihanId));
-        }
-
-        // Vacate the room
-        await db.update(mandiriRooms)
-          .set({
-            pemilihanId: null,
-            timGambuhId: null,
-            status: "Kosong",
-            startedAt: null,
-            updatedAt: sql`(datetime('now'))`
-          })
-          .where(eq(mandiriRooms.id, r.roomId));
-
-        // Broadcast Pusher room update — include participant IDs for notification targeting
-        const roomRecord = await db.query.mandiriRooms.findFirst({
-          where: eq(mandiriRooms.id, r.roomId)
-        });
-        try {
-          await pusherServer.trigger("taaruf-channel", "room-changed", {
-            roomId: r.roomId,
-            action: "clear",
-            pengirimId: p1,
-            penerimaId: p2,
-            assignedGuardId: roomRecord?.assignedGuardId,
-            assignedCallerId: roomRecord?.assignedCallerId,
-            assignedCaller2Id: roomRecord?.assignedCaller2Id,
-          });
-        } catch (pusherErr) {
-          console.error("Pusher match cleanup room clear trigger error:", pusherErr);
-        }
-      }
+      // 4. Cancel any remaining active calls for these participants
+      await db.update(mandiriPemilihan)
+        .set({ status: "Selesai", statusTunggu: "batal" })
+        .where(and(
+          sql`id != ${pemilihanId}`,
+          or(
+            eq(mandiriPemilihan.pengirimId, p1),
+            eq(mandiriPemilihan.penerimaId, p1),
+            eq(mandiriPemilihan.pengirimId, p2),
+            eq(mandiriPemilihan.penerimaId, p2)
+          )
+        ));
     }
   } catch (error) {
     console.error("Failed handleMatchCleanup:", error);

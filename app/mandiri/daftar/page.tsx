@@ -561,13 +561,6 @@ export default function MandiriDaftarPage() {
 
       if (!res.ok) throw new Error(data.error || "Gagal mendaftar");
 
-      // Bind FCM to newly registered phone number
-      if (typeof window !== "undefined" && cleanNoTelp) {
-        import("@/lib/fcm-client").then(({ registerFCM }) => {
-          registerFCM(cleanNoTelp);
-        }).catch(e => console.error("FCM client import failed:", e));
-      }
-
       setSuccess(true);
       setResult(data);
     } catch (err: any) {
@@ -749,7 +742,7 @@ export default function MandiriDaftarPage() {
           doc.setFont("helvetica", "bold");
           doc.setFontSize(6);
           doc.setTextColor(180, 205, 190);
-          const kegStr = (displayKegiatan || "TAARUF KUBRO").toUpperCase();
+          const kegStr = (displayKegiatan || "Pashmina 8.0").toUpperCase();
           doc.text(kegStr.length > 32 ? kegStr.substring(0, 32) + "..." : kegStr, 55, 25, { align: "center" });
         } else {
           doc.setFont("helvetica", "bold");
@@ -770,7 +763,7 @@ export default function MandiriDaftarPage() {
           doc.setFont("helvetica", "bold");
           doc.setFontSize(6.5);
           doc.setTextColor(180, 205, 190);
-          const kegStr = (displayKegiatan || "TAARUF KUBRO").toUpperCase();
+          const kegStr = (displayKegiatan || "Pashmina 8.0").toUpperCase();
           doc.text(kegStr.length > 38 ? kegStr.substring(0, 38) + "..." : kegStr, 45, 26, { align: "center" });
         }
 

@@ -342,23 +342,6 @@ export const mandiriPemilihan = sqliteTable("mandiri_pemilihan", {
   penerimaIdIdx: index("mandiri_pemilihan_penerima_id_idx").on(table.penerimaId),
 }));
 
-export const mandiriRooms = sqliteTable("mandiri_rooms", {
-  id: text("id").primaryKey(),
-  nama: text("nama").notNull(),
-  kegiatanId: text("kegiatan_id").references(() => mandiriKegiatan.id, { onDelete: "cascade" }),
-  pemilihanId: text("pemilihan_id").references(() => mandiriPemilihan.id, { onDelete: "set null" }),
-  timGambuhId: text("tim_gambuh_id").references(() => timGambuh.id, { onDelete: "set null" }),
-  status: text("status", { enum: ["Kosong", "Terisi"] }).default("Kosong"),
-  startedAt: text("started_at"),
-  assignedCallerId: text("assigned_caller_id").references(() => timGambuh.id, { onDelete: "set null" }),
-  assignedCaller2Id: text("assigned_caller2_id").references(() => timGambuh.id, { onDelete: "set null" }),
-  assignedGuardId: text("assigned_guard_id").references(() => timGambuh.id, { onDelete: "set null" }),
-  createdAt: text("created_at").default(sql`(datetime('now'))`),
-  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
-}, (table) => ({
-  kegiatanIdIdx: index("mandiri_rooms_kegiatan_id_idx").on(table.kegiatanId),
-}));
-
 export const mandiriKuisioner = sqliteTable("mandiri_kuisioner", {
   id: text("id").primaryKey(),
   pemilihanId: text("pemilihan_id").references(() => mandiriPemilihan.id, { onDelete: "set null" }),
@@ -373,13 +356,11 @@ export const mandiriKuisioner = sqliteTable("mandiri_kuisioner", {
 export const mandiriKunjungan = sqliteTable("mandiri_kunjungan", {
   id: text("id").primaryKey(),
   generusId: text("generus_id").notNull().references(() => generus.id, { onDelete: "cascade" }),
-  roomId: text("room_id").notNull().references(() => mandiriRooms.id, { onDelete: "cascade" }),
   pemilihanId: text("pemilihan_id").references(() => mandiriPemilihan.id, { onDelete: "set null" }),
   kegiatanId: text("kegiatan_id").references(() => mandiriKegiatan.id),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 }, (table) => ({
   generusIdIdx: index("mandiri_kunjungan_generus_id_idx").on(table.generusId),
-  roomIdIdx: index("mandiri_kunjungan_room_id_idx").on(table.roomId),
 }));
 
 export const mandiriKomentar = sqliteTable("mandiri_komentar", {
@@ -521,7 +502,6 @@ export type Rab = typeof rab.$inferSelect;
 export type RabApproval = typeof rabApproval.$inferSelect;
 export type Rundown = typeof rundown.$inferSelect;
 export type RundownApproval = typeof rundownApproval.$inferSelect;
-export type MandiriRoom = typeof mandiriRooms.$inferSelect;
 export type MandiriKunjungan = typeof mandiriKunjungan.$inferSelect;
 export type IdCardBuilderData = typeof idCardBuilderData.$inferSelect;
 export type FormPanitiaDanPengurus = typeof formPanitiaDanPengurus.$inferSelect;
@@ -573,7 +553,6 @@ export type NewRab = typeof rab.$inferInsert;
 export type NewRabApproval = typeof rabApproval.$inferInsert;
 export type NewRundown = typeof rundown.$inferInsert;
 export type NewRundownApproval = typeof rundownApproval.$inferInsert;
-export type NewMandiriRoom = typeof mandiriRooms.$inferInsert;
 export type NewMandiriKunjungan = typeof mandiriKunjungan.$inferInsert;
 export type NewIdCardBuilderData = typeof idCardBuilderData.$inferInsert;
 export type NewFormPanitiaDanPengurus = typeof formPanitiaDanPengurus.$inferInsert;
@@ -621,15 +600,3 @@ export const mandiriKegiatanDaerah = sqliteTable("mandiri_kegiatan_daerah", {
 
 export type MandiriKegiatanDaerah = typeof mandiriKegiatanDaerah.$inferSelect;
 export type NewMandiriKegiatanDaerah = typeof mandiriKegiatanDaerah.$inferInsert;
-
-export const fcmTokens = sqliteTable("fcm_tokens", {
-  id: text("id").primaryKey(),
-  phone: text("phone").notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: text("created_at").default(sql`(datetime('now'))`),
-}, (table) => ({
-  phoneIdx: index("fcm_tokens_phone_idx").on(table.phone),
-}));
-
-export type FcmToken = typeof fcmTokens.$inferSelect;
-export type NewFcmToken = typeof fcmTokens.$inferInsert;

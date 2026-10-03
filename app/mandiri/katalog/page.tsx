@@ -190,6 +190,9 @@ export default function PublicKatalogPage() {
   const [loadingHasil, setLoadingHasil] = useState(false);
   const [hasilRRDrafts, setHasilRRDrafts] = useState<Record<string, string>>({});
   const [submittingHasilId, setSubmittingHasilId] = useState<string | null>(null);
+  const [showAddHasilModal, setShowAddHasilModal] = useState(false);
+  const [newHasilTargetId, setNewHasilTargetId] = useState("");
+  const [newHasilChoice, setNewHasilChoice] = useState("Lanjut");
   const [saranText, setSaranText] = useState("");
   const [kepadaSaran, setKepadaSaran] = useState("");
   const [kepadaSaranLainnya, setKepadaSaranLainnya] = useState("");
@@ -717,13 +720,6 @@ export default function PublicKatalogPage() {
                 status: data.status,
               });
 
-              // Bind FCM to existing user phone number
-              if (typeof window !== "undefined" && data.noTelp) {
-                import("@/lib/fcm-client").then(({ registerFCM }) => {
-                  registerFCM(data.noTelp);
-                }).catch(e => console.error("FCM client import failed:", e));
-              }
-
               if (data.jenisKelamin) {
                 genderFromCheckStatus = data.jenisKelamin;
                 setUserGender(data.jenisKelamin);
@@ -1029,23 +1025,43 @@ export default function PublicKatalogPage() {
     }
   };
 
-  const submitHasilRR = async (id: string, hasil: string) => {
-    setSubmittingHasilId(id);
+  const submitHasilRR = async (id: string | null, hasil: string, targetId?: string) => {
+    const key = id || targetId || "new";
+    setSubmittingHasilId(key);
     try {
       const res = await fetch("/api/mandiri/hasil-rr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, generusId: currentUser?.id, hasil })
+        body: JSON.stringify({
+          id: id || undefined,
+          targetId: targetId || undefined,
+          generusId: currentUser?.id,
+          hasil,
+          kegiatanId: latestActivity?.id || ""
+        })
       });
       const data = await res.json();
       if (data.success) {
-        Swal.fire({ icon: "success", title: "Berhasil", text: "Hasil berhasil disimpan", timer: 1500, showConfirmButton: false });
-        setHasilRRDrafts(prev => {
-          const next = { ...prev };
-          delete next[id];
-          return next;
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Disimpan",
+          text: data.finished
+            ? "Penilaian kedua peserta lengkap! Pertemuan selesai."
+            : "Penilaian Anda disimpan. Menunggu penilaian dari lawan untuk mengetahui hasil.",
+          timer: 2200,
+          showConfirmButton: false
         });
+        if (id) {
+          setHasilRRDrafts(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+        }
+        setShowAddHasilModal(false);
+        setNewHasilTargetId("");
         fetchHasilRR();
+        fetchSelections();
       } else {
         Swal.fire("Gagal", data.error || "Gagal menyimpan hasil", "error");
       }
@@ -1059,16 +1075,16 @@ export default function PublicKatalogPage() {
   const handleSubmitHasilRR = async (id: string, partnerName: string) => {
     const hasil = hasilRRDrafts[id];
     if (!hasil) {
-      Swal.fire("Pilih Hasil", "Silakan pilih hasil RR terlebih dahulu.", "warning");
+      Swal.fire("Pilih Penilaian", "Silakan pilih penilaian terlebih dahulu (Lanjut / Ragu-Ragu / Tidak Lanjut).", "warning");
       return;
     }
 
     const result = await Swal.fire({
-      title: "Submit Hasil RR?",
-      text: `Anda akan menyimpan jawaban "${hasil}" untuk sesi bersama ${partnerName}.`,
+      title: "Simpan Penilaian?",
+      text: `Anda akan memberikan penilaian "${hasil}" untuk ${partnerName}. Hasil hanya disetujui (Approved) jika lawan juga memilih Lanjut.`,
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Submit",
+      confirmButtonText: "Simpan",
       cancelButtonText: "Batal",
       confirmButtonColor: "#10b981",
       cancelButtonColor: "#64748b",
@@ -1089,7 +1105,7 @@ export default function PublicKatalogPage() {
       const storedToken = localStorage.getItem("attended_session_token");
 
       const payload: any = {
-        untuk: "Romantic Room",
+        untuk: "Panggilan Ta'aruf",
         kepada: kepadaSaran === 'Lainnya' ? kepadaSaranLainnya : kepadaSaran,
         saran: saranText,
         nama: currentUser?.nama || "",
@@ -1149,7 +1165,7 @@ export default function PublicKatalogPage() {
 
   const handleEditSaran = (saran: any) => {
     setSaranText(saran.saran);
-    const standardOptions = ["Tim Acara", "Tim Romantic Room", "Tim PNKB dan Ibu Gambuh"];
+    const standardOptions = ["Tim Acara", "Tim Panggilan Ta'aruf", "Tim PNKB dan Ibu Gambuh"];
     if (saran.kepada && !standardOptions.includes(saran.kepada)) {
       setKepadaSaran("Lainnya");
       setKepadaSaranLainnya(saran.kepada);
@@ -1341,7 +1357,7 @@ export default function PublicKatalogPage() {
       Swal.fire({
         icon: "warning",
         title: "Sesi Belum Dimulai",
-        text: "Sesi di ruangan ini belum dimulai oleh Admin Romantic Room.",
+        text: "Sesi pertemuan belum dimulai oleh Admin.",
         confirmButtonColor: "#f43f5e"
       });
       return;
@@ -1528,7 +1544,7 @@ export default function PublicKatalogPage() {
 
     const result = await Swal.fire({
       title: 'Pilih Peserta?',
-      text: `Apakah Anda yakin ingin memilih ${targetName}? Pilihan ini akan langsung diteruskan ke Romantic Room.`,
+      text: `Apakah Anda yakin ingin memilih ${targetName}? Pilihan ini akan langsung diteruskan ke antrean panggilan ta'aruf.`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Ya, Pilih!',
@@ -1570,7 +1586,7 @@ export default function PublicKatalogPage() {
           setSelectedParticipant((prev: any) => ({ ...prev, selectedCount: (prev.selectedCount || 0) + 1 }));
         }
 
-        Swal.fire({ title: 'Berhasil!', text: 'Pilihan Anda telah dikirim. Sedang dalam antrean admin Romantic Room.', icon: 'success', timer: 3000, showConfirmButton: false });
+        Swal.fire({ title: 'Berhasil!', text: 'Pilihan Anda telah dikirim. Sedang dalam antrean panggilan panitia.', icon: 'success', timer: 3000, showConfirmButton: false });
         closeDetail();
       } catch (err: any) {
         Swal.fire("Gagal", err.message, "error");
@@ -1749,7 +1765,7 @@ export default function PublicKatalogPage() {
           <Sparkles size={12} />
           {activeTab === "katalog" && "KATALOG PESERTA"}
           {activeTab === "cart" && "PILIHAN SAYA"}
-          {activeTab === "hasil" && "HASIL ROMANTIC ROOM"}
+          {activeTab === "hasil" && "HASIL TA'ARUF"}
           {activeTab === "saran" && "SARAN & MASUKAN"}
           {activeTab === "profile" && "PROFIL SAYA"}
           {activeTab === "absen" && "ABSENSI SAYA"}
@@ -1757,7 +1773,7 @@ export default function PublicKatalogPage() {
         <h1>
           {activeTab === "katalog" && <>DATA <span>PESERTA</span></>}
           {activeTab === "cart" && <>LOVE <span>LETTER</span></>}
-          {activeTab === "hasil" && <>HASIL <span>RR</span></>}
+          {activeTab === "hasil" && <>HASIL <span>TA&apos;ARUF</span></>}
           {activeTab === "saran" && <>SARAN <span>MASUKAN</span></>}
           {activeTab === "profile" && <>PROFIL <span>SAYA</span></>}
           {activeTab === "absen" && <>SCAN <span>ABSENSI</span></>}
@@ -2078,7 +2094,7 @@ export default function PublicKatalogPage() {
             {statusQueue && (
               <div className="status-queue-banner">
                 <Timer size={14} />
-                <span>Sedang dalam antrean admin Romantic Room</span>
+                <span>Sedang dalam antrean panggilan</span>
               </div>
             )}
           </div>
@@ -2445,7 +2461,7 @@ export default function PublicKatalogPage() {
           {statusQueue && (
             <div className="status-queue-banner block mb-6">
               <Timer size={14} />
-              <span>Sedang dalam antrean admin Romantic Room</span>
+              <span>Sedang dalam antrean panggilan</span>
             </div>
           )}
 
@@ -2453,7 +2469,7 @@ export default function PublicKatalogPage() {
             <div className="empty-cart-state">
               <div className="empty-cart-icon">💌</div>
               <h3>Belum Ada Pilihan</h3>
-              <p>Cari peserta yang cocok di tab Katalog, lalu pilih untuk dikirim ke daftar antrean Romantic Room.</p>
+              <p>Cari peserta yang cocok di tab Katalog, lalu pilih untuk dikirim ke daftar antrean panggilan.</p>
               <button className="goto-catalog-btn" onClick={() => setActiveTab("katalog")}>Cari Peserta</button>
             </div>
           ) : (
@@ -2470,7 +2486,7 @@ export default function PublicKatalogPage() {
                         <div className="cart-item-name">#{sel.penerimaNoUrut || sel.penerimaNo} {sel.penerimaNama}</div>
                         <div className="cart-item-status">
                           <span className={`status-badge-pill ${sel.status.toLowerCase()}`}>
-                            {sel.status === "Menunggu" ? "⏳ Menunggu Admin" : `💖 ${sel.status}`}
+                            {sel.status === "Menunggu" ? "⏳ Menunggu Admin" : sel.status === "Selesai" ? "✓ Selesai (Kuota Terpakai)" : `💖 ${sel.status}`}
                           </span>
                         </div>
                       </div>
@@ -2486,7 +2502,7 @@ export default function PublicKatalogPage() {
                     ) : (
                       <button className="cart-btn-disabled" disabled>
                         <CheckCircle2 size={16} />
-                        <span>Terpilih</span>
+                        <span>{sel.status === "Selesai" ? "Terpakai" : "Terpilih"}</span>
                       </button>
                     )}
                   </div>
@@ -2707,13 +2723,75 @@ export default function PublicKatalogPage() {
       {/* TAB CONTENT: HASIL RR */}
       {activeTab === "hasil" && (
         <div className="cart-container" style={{ padding: '0 16px', maxWidth: '600px', margin: '0 auto', animation: 'slideUp 0.3s ease-out' }}>
+          {/* Header Bar */}
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '16px 20px',
+            marginBottom: '16px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.04)',
+            border: '1px solid #f1f5f9',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={18} color="#10b981" />
+                Hasil Pertemuan Ta&apos;aruf
+              </h3>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+                Saling beri penilaian. Disetujui jika kedua belah pihak memilih <b>Lanjut</b>.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddHasilModal(true)}
+              style={{
+                background: '#26392d',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '999px',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(38, 57, 45, 0.25)'
+              }}
+            >
+              + Beri Nilai Baru
+            </button>
+          </div>
+
           {loadingHasil ? (
             <div style={{ textAlign: 'center', padding: '40px' }}>Memuat Hasil...</div>
           ) : hasilRRList.length === 0 ? (
-            <div className="empty-cart" style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-              <MessageSquare size={48} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
-              <h3>Belum Ada Hasil</h3>
-              <p>Anda belum memiliki sesi Romantic Room yang sedang berjalan atau selesai.</p>
+            <div className="empty-cart" style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b', background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+              <MessageSquare size={48} style={{ margin: '0 auto 16px', opacity: 0.5, color: '#c5a059' }} />
+              <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#1e293b', marginBottom: '6px' }}>Belum Ada Hasil Pertemuan</h3>
+              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>
+                Anda belum memiliki hasil pertemuan. Jika sudah bertemu dengan peserta, klik tombol di bawah untuk memberikan penilaian.
+              </p>
+              <button
+                onClick={() => setShowAddHasilModal(true)}
+                style={{
+                  background: '#26392d',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 22px',
+                  borderRadius: '999px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(38, 57, 45, 0.2)'
+                }}
+              >
+                + Beri Nilai Pertemuan
+              </button>
             </div>
           ) : (() => {
             const matchList = hasilRRList.filter(h => h.hasilPengirim === "Lanjut" && h.hasilPenerima === "Lanjut");
@@ -2725,8 +2803,8 @@ export default function PublicKatalogPage() {
                   <div style={{ marginBottom: '8px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                       <span style={{ fontSize: '28px' }}>💕</span>
-                      <h3 style={{ margin: '4px 0 2px', fontSize: '17px', fontWeight: 800, color: '#be185d' }}>Pasangan Lanjut</h3>
-                      <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Kedua peserta memilih <b>Lanjut</b></p>
+                      <h3 style={{ margin: '4px 0 2px', fontSize: '17px', fontWeight: 800, color: '#be185d' }}>Pasangan Lanjut (Approved)</h3>
+                      <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Kedua peserta sama-sama memilih <b>Lanjut</b></p>
                     </div>
                     {matchList.map(h => {
                       const isPengirim = h.pengirimId === currentUser?.id;
@@ -2736,58 +2814,35 @@ export default function PublicKatalogPage() {
                       const partnerNoUrut = isPengirim ? h.penerimaNoUrut : h.pengirimNoUrut;
                       const myName = isPengirim ? h.pengirimNama : h.penerimaNama;
                       const myNoUrut = isPengirim ? h.pengirimNoUrut : h.penerimaNoUrut;
-                      const isDalamRuangan = h.status === "Diterima";
 
                       if (isPanitia) {
                         return (
                           <div key={`match-${h.id}`} style={{ background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '2px solid #fbcfe8', marginBottom: '4px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                               <div style={{ fontWeight: 800, fontSize: '16px', color: '#1e293b' }}>
-                                Ruangan: {h.roomNama || "Romantic Room"}
+                                Sesi: Pertemuan Ta&apos;aruf
                               </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                                <span style={{ fontSize: '11px', fontWeight: 800, color: isDalamRuangan ? '#1d4ed8' : '#166534', background: isDalamRuangan ? '#eff6ff' : '#f0fdf4', border: `1px solid ${isDalamRuangan ? '#bfdbfe' : '#bbf7d0'}`, borderRadius: '999px', padding: '4px 8px' }}>
-                                  {isDalamRuangan ? "Dalam Ruangan" : "Selesai"}
-                                </span>
-                              </div>
+                              <span style={{ fontSize: '11px', fontWeight: 800, color: '#166534', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '999px', padding: '4px 8px' }}>
+                                Selesai
+                              </span>
                             </div>
                             <div style={{ marginBottom: '16px', fontSize: '13px', color: '#475569' }}>
                               Peserta: <strong>{h.pengirimNama}</strong> & <strong>{h.penerimaNama}</strong>
                             </div>
-                            {isDalamRuangan ? (
-                              <button
-                                onClick={() => handleAdminSelesaikanSesi({ roomId: h.roomId, ...currentUser })}
-                                style={{
-                                  width: '100%',
-                                  padding: '11px',
-                                  borderRadius: '10px',
-                                  border: 'none',
-                                  background: '#f43f5e',
-                                  color: 'white',
-                                  fontSize: '13px',
-                                  fontWeight: 800,
-                                  cursor: 'pointer',
-                                  transition: '0.2s',
-                                }}
-                              >
-                                Selesaikan Sesi
-                              </button>
-                            ) : (
-                              <div style={{ display: 'flex', gap: '12px' }}>
-                                <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#dcfce7', border: '1px solid #bbf7d0', textAlign: 'center' }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#166534', marginBottom: '8px' }}>{h.pengirimNama}:</div>
-                                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: '#dcfce7', color: '#166534', border: `1px solid #bbf7d0` }}>
-                                    ✓ Lanjut
-                                  </span>
-                                </div>
-                                <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#dcfce7', border: '1px solid #bbf7d0', textAlign: 'center' }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#166534', marginBottom: '8px' }}>{h.penerimaNama}:</div>
-                                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: '#dcfce7', color: '#166534', border: `1px solid #bbf7d0` }}>
-                                    ✓ Lanjut
-                                  </span>
-                                </div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                              <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#dcfce7', border: '1px solid #bbf7d0', textAlign: 'center' }}>
+                                <div style={{ fontSize: '12px', fontWeight: 700, color: '#166534', marginBottom: '8px' }}>{h.pengirimNama}:</div>
+                                <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: '#dcfce7', color: '#166534', border: `1px solid #bbf7d0` }}>
+                                  ✓ Lanjut
+                                </span>
                               </div>
-                            )}
+                              <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#dcfce7', border: '1px solid #bbf7d0', textAlign: 'center' }}>
+                                <div style={{ fontSize: '12px', fontWeight: 700, color: '#166534', marginBottom: '8px' }}>{h.penerimaNama}:</div>
+                                <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: '#dcfce7', color: '#166534', border: `1px solid #bbf7d0` }}>
+                                  ✓ Lanjut
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         );
                       }
@@ -2864,7 +2919,6 @@ export default function PublicKatalogPage() {
                       const partnerHasil = isPengirim ? h.hasilPenerima : h.hasilPengirim;
                       const selectedHasil = myHasil || hasilRRDrafts[h.id] || "";
                       const isSubmittingThis = submittingHasilId === h.id;
-                      const isDalamRuangan = h.status === "Diterima";
 
                       const isPenerima = h.penerimaId === currentUser?.id;
                       const isPanitia = !isPengirim && !isPenerima;
@@ -2872,6 +2926,8 @@ export default function PublicKatalogPage() {
                       const isRagu = (val: string) => val === "Ragu-Ragu" || val === "Ragu-ragu";
 
                       const bothAnswered = !!myHasil && !!partnerHasil;
+                      const isSelesai = h.status === "Selesai" || bothAnswered;
+                      const isDipanggil = h.statusTunggu === "dipanggil";
 
                       const getResultBadge = (val: string) => {
                         if (val === "Lanjut") return { bg: '#dcfce7', color: '#166534', border: '#bbf7d0', label: '✓ Lanjut' };
@@ -2884,55 +2940,33 @@ export default function PublicKatalogPage() {
                           <div key={h.id} style={{ background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                               <div style={{ fontWeight: 800, fontSize: '16px', color: '#1e293b' }}>
-                                Ruangan: {h.roomNama || "Romantic Room"}
+                                Sesi: Pertemuan Ta&apos;aruf
                               </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                                <span style={{ fontSize: '11px', fontWeight: 800, color: isDalamRuangan ? '#1d4ed8' : '#166534', background: isDalamRuangan ? '#eff6ff' : '#f0fdf4', border: `1px solid ${isDalamRuangan ? '#bfdbfe' : '#bbf7d0'}`, borderRadius: '999px', padding: '4px 8px' }}>
-                                  {isDalamRuangan ? "Dalam Ruangan" : "Selesai"}
-                                </span>
-                              </div>
+                              <span style={{ fontSize: '11px', fontWeight: 800, color: isSelesai ? '#166534' : isDipanggil ? '#1d4ed8' : '#854d0e', background: isSelesai ? '#f0fdf4' : isDipanggil ? '#eff6ff' : '#fefce8', border: `1px solid ${isSelesai ? '#bbf7d0' : isDipanggil ? '#bfdbfe' : '#fde68a'}`, borderRadius: '999px', padding: '4px 8px' }}>
+                                {isSelesai ? "Selesai" : isDipanggil ? "Dipanggil" : "Dalam Antrean"}
+                              </span>
                             </div>
                             <div style={{ marginBottom: '16px', fontSize: '13px', color: '#475569' }}>
                               Peserta: <strong>{h.pengirimNama}</strong> & <strong>{h.penerimaNama}</strong>
                             </div>
-                            {isDalamRuangan ? (
-                              <button
-                                onClick={() => handleAdminSelesaikanSesi({ roomId: h.roomId, ...currentUser })}
-                                style={{
-                                  width: '100%',
-                                  padding: '11px',
-                                  borderRadius: '10px',
-                                  border: 'none',
-                                  background: '#f43f5e',
-                                  color: 'white',
-                                  fontSize: '13px',
-                                  fontWeight: 800,
-                                  cursor: 'pointer',
-                                  transition: '0.2s',
-                                }}
-                              >
-                                Selesaikan Sesi
-                              </button>
-                            ) : (
-                              <div style={{ display: 'flex', gap: '12px' }}>
-                                <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>{h.pengirimNama}:</div>
-                                  {h.hasilPengirim ? (
-                                    <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: getResultBadge(h.hasilPengirim).bg, color: getResultBadge(h.hasilPengirim).color, border: `1px solid ${getResultBadge(h.hasilPengirim).border}` }}>
-                                      {getResultBadge(h.hasilPengirim).label}
-                                    </span>
-                                  ) : "-"}
-                                </div>
-                                <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>{h.penerimaNama}:</div>
-                                  {h.hasilPenerima ? (
-                                    <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: getResultBadge(h.hasilPenerima).bg, color: getResultBadge(h.hasilPenerima).color, border: `1px solid ${getResultBadge(h.hasilPenerima).border}` }}>
-                                      {getResultBadge(h.hasilPenerima).label}
-                                    </span>
-                                  ) : "-"}
-                                </div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                              <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                                <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>{h.pengirimNama}:</div>
+                                {h.hasilPengirim ? (
+                                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: getResultBadge(h.hasilPengirim).bg, color: getResultBadge(h.hasilPengirim).color, border: `1px solid ${getResultBadge(h.hasilPengirim).border}` }}>
+                                    {getResultBadge(h.hasilPengirim).label}
+                                  </span>
+                                ) : <span style={{ color: '#94a3b8', fontSize: '12px' }}>Belum Menilai</span>}
                               </div>
-                            )}
+                              <div style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                                <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>{h.penerimaNama}:</div>
+                                {h.hasilPenerima ? (
+                                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, background: getResultBadge(h.hasilPenerima).bg, color: getResultBadge(h.hasilPenerima).color, border: `1px solid ${getResultBadge(h.hasilPenerima).border}` }}>
+                                    {getResultBadge(h.hasilPenerima).label}
+                                  </span>
+                                ) : <span style={{ color: '#94a3b8', fontSize: '12px' }}>Belum Menilai</span>}
+                              </div>
+                            </div>
                           </div>
                         );
                       }
@@ -2944,8 +2978,8 @@ export default function PublicKatalogPage() {
                               {partnerName} <span style={{ color: '#64748b', fontSize: '12px' }}>#{partnerNoUrut}</span>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 800, color: isDalamRuangan ? '#1d4ed8' : '#166534', background: isDalamRuangan ? '#eff6ff' : '#f0fdf4', border: `1px solid ${isDalamRuangan ? '#bfdbfe' : '#bbf7d0'}`, borderRadius: '999px', padding: '4px 8px' }}>
-                                {isDalamRuangan ? "Dalam Ruangan" : "Selesai"}
+                              <span style={{ fontSize: '11px', fontWeight: 800, color: isSelesai ? '#166534' : isDipanggil ? '#1d4ed8' : '#854d0e', background: isSelesai ? '#f0fdf4' : isDipanggil ? '#eff6ff' : '#fefce8', border: `1px solid ${isSelesai ? '#bbf7d0' : isDipanggil ? '#bfdbfe' : '#fde68a'}`, borderRadius: '999px', padding: '4px 8px' }}>
+                                {isSelesai ? "Selesai" : isDipanggil ? "Dipanggil" : "Dalam Antrean"}
                               </span>
                               <span style={{ fontSize: '12px', color: '#94a3b8' }}>
                                 {new Date(h.createdAt).toLocaleDateString('id-ID')}
@@ -3030,7 +3064,7 @@ export default function PublicKatalogPage() {
                               }}
                             >
                               <CheckCircle2 size={16} />
-                              {isSubmittingThis ? "Menyimpan..." : "Submit"}
+                              {isSubmittingThis ? "Menyimpan..." : "Submit Penilaian"}
                             </button>
                           )}
 
@@ -3053,16 +3087,19 @@ export default function PublicKatalogPage() {
                                   }}>{badge.label}</span>
                                 );
                               })()}
+                              <p style={{ margin: '8px 0 0', fontSize: '11px', color: '#94a3b8' }}>
+                                Penilaian selesai. Sesi panggilan telah selesai digunakan.
+                              </p>
                             </div>
                           )}
                           {myHasil && !partnerHasil && (
-                            <div style={{ marginTop: '14px', padding: '10px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>
-                              <Timer size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-                              Menunggu jawaban dari {partnerName}...
+                            <div style={{ marginTop: '14px', padding: '10px 14px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>
+                              <Timer size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '5px' }} />
+                              Menunggu jawaban dari <b>{partnerName}</b>... (Hasil baru disetujui jika lawan juga memberi nilai <b>Lanjut</b>)
                             </div>
                           )}
                         </div>
-                      )
+                      );
                     })}
                   </>
                 )}
@@ -3081,7 +3118,7 @@ export default function PublicKatalogPage() {
               Saran & Masukan
             </h3>
             <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#627265', lineHeight: 1.5 }}>
-              Berikan saran, kritik, atau masukan Anda terkait pelaksanaan Romantic Room untuk membantu kami menjadi lebih baik.
+              Berikan saran, kritik, atau masukan Anda terkait pelaksanaan sesi ta&apos;aruf untuk membantu kami menjadi lebih baik.
             </p>
 
             {mySaranList.length > 0 && !showSaranForm && !editingSaranId ? (
@@ -3134,7 +3171,7 @@ export default function PublicKatalogPage() {
                   >
                     <option value="" disabled>Pilih Tujuan Saran...</option>
                     <option value="Tim Acara">Tim Acara</option>
-                    <option value="Tim Romantic Room">Tim Romantic Room</option>
+                    <option value="Tim Panggilan Ta'aruf">Tim Panggilan Ta&apos;aruf</option>
                     <option value="Tim PNKB dan Ibu Gambuh">Tim PNKB dan Ibu Gambuh</option>
                     <option value="Lainnya">Lainnya</option>
                   </select>
@@ -3926,6 +3963,202 @@ export default function PublicKatalogPage() {
           </div>
         </div>
       )}
+
+      {/* MODAL BERI NILAI / TAMBAH HASIL */}
+      {showAddHasilModal && (() => {
+        const availableCandidateMap = new Map<string, { id: string; nama: string; nomor: string; detail: string }>();
+
+        // 1. From selections
+        (selections || []).forEach((s: any) => {
+          if (s.penerimaId) {
+            availableCandidateMap.set(String(s.penerimaId), {
+              id: String(s.penerimaId),
+              nama: s.penerimaNama,
+              nomor: String(s.penerimaNoUrut || s.penerimaNo || ""),
+              detail: "Dari Pilihan Anda"
+            });
+          }
+        });
+
+        // 2. From hasilRRList
+        (hasilRRList || []).forEach((h: any) => {
+          const isPengirim = h.pengirimId === currentUser?.id;
+          const partnerId = isPengirim ? h.penerimaId : h.pengirimId;
+          const partnerName = isPengirim ? h.penerimaNama : h.pengirimNama;
+          const partnerNo = isPengirim ? h.penerimaNoUrut : h.pengirimNoUrut;
+          if (partnerId && !availableCandidateMap.has(String(partnerId))) {
+            availableCandidateMap.set(String(partnerId), {
+              id: String(partnerId),
+              nama: partnerName,
+              nomor: String(partnerNo || ""),
+              detail: isPengirim ? "Pilihan Anda" : "Memilih / Memanggil Anda"
+            });
+          }
+        });
+
+        // 3. From catalog data
+        (data || []).forEach((p: any) => {
+          if (String(p.id) !== String(currentUser?.id) && !availableCandidateMap.has(String(p.id))) {
+            availableCandidateMap.set(String(p.id), {
+              id: String(p.id),
+              nama: p.nama,
+              nomor: String(p.nomorUrut || p.nomorPeserta || p.nomorUnik || ""),
+              detail: p.desaKota || p.desaNama || "Katalog"
+            });
+          }
+        });
+
+        const candidates = Array.from(availableCandidateMap.values());
+
+        return (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '16px'
+          }} onClick={() => setShowAddHasilModal(false)}>
+            <div style={{
+              background: 'white',
+              borderRadius: '20px',
+              maxWidth: '460px',
+              width: '100%',
+              padding: '24px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+              animation: 'slideUp 0.25s ease-out'
+            }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#1e293b' }}>Beri Nilai Pertemuan</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748b' }}>Pilih peserta yang telah Anda temui</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAddHasilModal(false)}
+                  style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '14px', fontWeight: 'bold' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Select Participant */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Peserta yang Ditemui <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <select
+                  value={newHasilTargetId}
+                  onChange={(e) => setNewHasilTargetId(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', fontSize: '13.5px', border: '1px solid #cbd5e1', outline: 'none', background: '#f8fafc' }}
+                >
+                  <option value="">-- Pilih Peserta --</option>
+                  {candidates.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      #{c.nomor} {c.nama} ({c.detail})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Select Rating */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+                  Penilaian Anda:
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setNewHasilChoice("Lanjut")}
+                    style={{
+                      flex: 1,
+                      padding: '10px 6px',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      border: newHasilChoice === "Lanjut" ? '2px solid #22c55e' : '1px solid #e2e8f0',
+                      background: newHasilChoice === "Lanjut" ? '#f0fdf4' : 'white',
+                      color: newHasilChoice === "Lanjut" ? '#166534' : '#64748b',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✓ Lanjut
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewHasilChoice("Ragu-Ragu")}
+                    style={{
+                      flex: 1,
+                      padding: '10px 6px',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      border: newHasilChoice === "Ragu-Ragu" ? '2px solid #eab308' : '1px solid #e2e8f0',
+                      background: newHasilChoice === "Ragu-Ragu" ? '#fefce8' : 'white',
+                      color: newHasilChoice === "Ragu-Ragu" ? '#854d0e' : '#64748b',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ~ Ragu-Ragu
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewHasilChoice("Tidak Lanjut")}
+                    style={{
+                      flex: 1,
+                      padding: '10px 6px',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      border: newHasilChoice === "Tidak Lanjut" ? '2px solid #ef4444' : '1px solid #e2e8f0',
+                      background: newHasilChoice === "Tidak Lanjut" ? '#fef2f2' : 'white',
+                      color: newHasilChoice === "Tidak Lanjut" ? '#991b1b' : '#64748b',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✗ Tidak Lanjut
+                  </button>
+                </div>
+                <p style={{ margin: '8px 0 0', fontSize: '11.5px', color: '#94a3b8', lineHeight: 1.4 }}>
+                  * Pasangan hanya akan disetujui (Approved) jika lawan juga memberikan penilaian <b>Lanjut</b>.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddHasilModal(false)}
+                  style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  disabled={!newHasilTargetId || submittingHasilId === "new"}
+                  onClick={() => submitHasilRR(null, newHasilChoice, newHasilTargetId)}
+                  style={{
+                    flex: 2,
+                    padding: '11px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: newHasilTargetId ? '#10b981' : '#cbd5e1',
+                    color: 'white',
+                    fontWeight: 800,
+                    fontSize: '13px',
+                    cursor: newHasilTargetId ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  {submittingHasilId === "new" ? "Menyimpan..." : "Simpan Penilaian"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       </div>
 

@@ -68,7 +68,7 @@ export default function Topbar({ title, role, className = "", children, userName
     creator: "Creator/Penulis",
     pending: "Pending",
     tim_pnkb: "Tim PNKB",
-    admin_romantic_room: "Admin Romantic Room",
+    admin_romantic_room: "Admin Panggilan",
     admin_keuangan: "Admin Keuangan",
     admin_kegiatan: "Admin Kegiatan",
     tim_pnkb_gambuh: "Tim PNKB & Ibu Gambuh",

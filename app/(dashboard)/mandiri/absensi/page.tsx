@@ -3,7 +3,7 @@
 
 
 import Topbar from "@/components/Topbar";
-import { Trash2, QrCode, Download } from "lucide-react";
+import { Trash2, QrCode, Download, Clock, MapPin } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
@@ -713,169 +713,6 @@ function AbsensiContent() {
                               </div>
                             )}
                           </div>
-
-                          <style jsx>{`
-                          .physical-scanner-container {
-                            min-height: 320px;
-                            background: white;
-                            border: 2px solid #e2e8f0;
-                            border-radius: 20px;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            justify-content: center;
-                            position: relative;
-                            overflow: hidden;
-                            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.05);
-                          }
-                          .physical-scanner-glow {
-                            position: absolute;
-                            top: -50%;
-                            left: -50%;
-                            width: 200%;
-                            height: 200%;
-                            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
-                            pointer-events: none;
-                          }
-                          .scanner-icon-container {
-                            position: relative;
-                            width: 100px;
-                            height: 100px;
-                            margin: 0 auto;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                          }
-                          .scanner-icon { color: #94a3b8; transition: all 0.3s; }
-                          .scanner-icon.success { color: #10b981; transform: scale(1.1); }
-                          .scanner-icon.error { color: #ef4444; transform: shake 0.3s; }
-                          .scanner-beam {
-                            position: absolute;
-                            top: 20%;
-                            left: 0;
-                            right: 0;
-                            height: 2px;
-                            background: rgba(59, 130, 246, 0.5);
-                            box-shadow: 0 0 10px #3b82f6;
-                            animation: scan 2s ease-in-out infinite;
-                            border-radius: 2px;
-                          }
-                          @keyframes scan {
-                            0%, 100% { top: 20%; opacity: 0; }
-                            50% { top: 80%; opacity: 1; }
-                          }
-                          .scanner-hidden-input {
-                            position: absolute;
-                            opacity: 0.05;
-                            width: 100px;
-                            height: 20px;
-                            top: 0;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            z-index: 10;
-                            cursor: default;
-                          }
-                          .scanner-instruction {
-                            font-size: 11px;
-                            color: #64748b;
-                            margin: 10px 0;
-                            line-height: 1.4;
-                          }
-                          .btn-refocus {
-                            background: #f1f5f9;
-                            border: 1px solid #e2e8f0;
-                            border-radius: 4px;
-                            padding: 0 6px;
-                            color: #475569;
-                            font-weight: 700;
-                            cursor: pointer;
-                            margin: 0 4px;
-                          }
-                          .btn-refocus:hover {
-                            background: #e2e8f0;
-                          }
-                          .scanner-status-indicator {
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 8px;
-                            font-size: 11px;
-                            font-weight: 700;
-                            color: #64748b;
-                            margin-bottom: 10px;
-                          }
-                          .status-dot {
-                            width: 8px;
-                            height: 8px;
-                            background: #10b981;
-                            border-radius: 50%;
-                          }
-                          .status-dot.pulsed {
-                            animation: pulse 1.5s infinite;
-                          }
-                          @keyframes pulse {
-                            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-                            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-                            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-                          }
-                          .input-preview {
-                            margin-top: 15px;
-                            font-size: 10px;
-                            color: #94a3b8;
-                            background: #f1f5f9;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            display: inline-block;
-                          }
-                          .scanner-badge {
-                             display: inline-block;
-                             font-size: "10px";
-                             font-weight: 800;
-                             background: #eff6ff;
-                             color: #2563eb;
-                             border: 1px solid #dbeafe;
-                             padding: 4px 12px;
-                             border-radius: 20px;
-                             text-transform: uppercase;
-                             letter-spacing: 1px;
-                             margin-bottom: 12px;
-                          }
-                          .last-scanned-card {
-                            margin: 20px 20px 0;
-                            background: #f8fafc;
-                            border: 1px solid #e2e8f0;
-                            padding: 12px;
-                            border-radius: 12px;
-                            display: flex;
-                            align-items: center;
-                            gap: 12px;
-                            animation: slideUp 0.4s ease-out;
-                            width: calc(100% - 40px);
-                            max-width: 320px;
-                          }
-                          @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-                          .last-scanned-avatar {
-                            width: 40px; height: 40px; border-radius: 10px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 800; overflow: hidden;
-                          }
-                          .last-scanned-avatar img { width: 100%; height: 100%; object-fit: cover; }
-                          .last-scanned-name { font-size: 14px; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                          .last-scanned-meta { font-size: 11px; color: #64748b; font-weight: 600; }
-                          .last-scanned-status { margin-left: auto; font-size: 10px; font-weight: 800; color: #10b981; background: #d1fae5; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; }
-
-                          @media (max-width: 768px) {
-                            .physical-scanner-container { min-height: 280px; }
-                            .scanner-badge { font-size: 8px; padding: 3px 10px; }
-                            .last-scanned-card { margin: 15px 10px 0; width: calc(100% - 20px); }
-                            .table-hide-mobile { display: none; }
-                            .search-result-item { flex-direction: column; align-items: flex-start !important; gap: 8px; }
-                            .search-result-item .badge { align-self: flex-end; }
-                          }
-
-                          @media (max-width: 480px) {
-                            .scanner-controls-wrapper { width: 100%; justify-content: space-between; }
-                            .page-header-left h2 { font-size: 18px; }
-                          }
-                        `}</style>
                         </div>
                       )}
                       <button className="btn btn-danger btn-full" style={{ marginTop: 12 }} onClick={stopScan}>
@@ -967,16 +804,16 @@ function AbsensiContent() {
 
           {/* Right: Attendance list */}
           <div className="card">
-            <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="card-header absensi-list-header">
+              <div className="absensi-header-title-group">
                 <span className="card-title">Daftar Hadir Peserta</span>
                 <span className="badge badge-blue">{filteredAbsensi.length} dari {absensiList.length} hadir</span>
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button className="btn btn-danger btn-sm" onClick={deleteAllAbsensi} disabled={!selectedKegiatan || absensiList.length === 0} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div className="absensi-header-buttons">
+                <button className="btn btn-danger btn-sm btn-absensi-header" onClick={deleteAllAbsensi} disabled={!selectedKegiatan || absensiList.length === 0}>
                   <Trash2 size={14} /> Hapus Semua
                 </button>
-                <button className="btn btn-green btn-sm" onClick={handleExport} disabled={absensiList.length === 0} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button className="btn btn-green btn-sm btn-absensi-header" onClick={handleExport} disabled={absensiList.length === 0}>
                   <Download size={14} /> Export Excel
                 </button>
               </div>
@@ -1024,57 +861,476 @@ function AbsensiContent() {
                 <p>{absensiList.length === 0 ? "Scan QR code atau cari manual untuk mencatat" : "Tidak ada data yang cocok dengan filter"}</p>
               </div>
             ) : (
-              <div className="table-wrapper">
-                <table className="responsive-table">
-                  <thead>
-                    <tr>
-                      <th className="table-hide-mobile">#</th>
-                      <th>Peserta</th>
-                      <th>Daerah</th>
-                      <th>Dapukan</th>
-                      <th className="table-hide-mobile">Waktu</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAbsensi.map((item, i) => (
-                      <tr key={item.id}>
-                        <td className="text-muted table-hide-mobile" data-label="#">{i + 1}</td>
-                        <td data-label="Peserta">
-                          <div style={{ fontWeight: 600, color: "var(--text)", fontSize: "14px" }}>{item.generusNama}</div>
-                          <div className="text-sm text-muted" style={{ fontWeight: 600, color: "var(--primary)" }}>
-                            {(item.nomorPeserta && isNaN(Number(item.nomorPeserta))) ? item.nomorPeserta : (item.nomorPeserta ? `#${item.nomorPeserta}` : 'PANITIA')}
-                          </div>
-                        </td>
-                        <td data-label="Daerah"><span className="badge badge-blue" style={{ fontSize: "10px" }}>{item.desaKota || item.desaNama || "Umum"}</span></td>
-                        <td data-label="Dapukan">
-                          <span style={{ 
-                            fontSize: "11px", fontWeight: 700, padding: "4px 8px", borderRadius: "10px", textTransform: "uppercase",
-                            background: item.dapukan?.toLowerCase() === '' ? '#f1f5f9' : '#e0e7ff',
-                            color: item.dapukan?.toLowerCase() === '' ? '#475569' : '#4338ca' 
-                          }}>{item.dapukan || 'Peserta'}</span>
-                        </td>
-                        <td className="text-sm text-muted table-hide-mobile" data-label="Waktu">
-                          {item.timestamp ? new Date(item.timestamp).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' }) : "-"}
-                        </td>
-                        <td data-label="Aksi">
-                          <button
-                            className="btn-icon text-red"
-                            title="Hapus Kehadiran"
-                            onClick={() => deleteAbsensi(item.id, item.generusNama || "Peserta")}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
+              <>
+                {/* Desktop Table View */}
+                <div className="table-wrapper desktop-only-table">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: "40px" }}>#</th>
+                        <th>Peserta</th>
+                        <th>Daerah</th>
+                        <th>Dapukan</th>
+                        <th>Waktu</th>
+                        <th style={{ width: "60px", textAlign: "center" }}>Aksi</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredAbsensi.map((item, i) => (
+                        <tr key={item.id}>
+                          <td className="text-muted">{i + 1}</td>
+                          <td>
+                            <div style={{ fontWeight: 600, color: "var(--text)", fontSize: "14px" }}>{item.generusNama}</div>
+                            <div className="text-sm text-muted" style={{ fontWeight: 600, color: "var(--primary)" }}>
+                              {(item.nomorPeserta && isNaN(Number(item.nomorPeserta))) ? item.nomorPeserta : (item.nomorPeserta ? `#${item.nomorPeserta}` : 'PANITIA')}
+                            </div>
+                          </td>
+                          <td><span className="badge badge-blue" style={{ fontSize: "10px" }}>{item.desaKota || item.desaNama || "Umum"}</span></td>
+                          <td>
+                            <span style={{ 
+                              fontSize: "11px", fontWeight: 700, padding: "4px 8px", borderRadius: "10px", textTransform: "uppercase",
+                              background: item.dapukan?.toLowerCase() === '' ? '#f1f5f9' : '#e0e7ff',
+                              color: item.dapukan?.toLowerCase() === '' ? '#475569' : '#4338ca' 
+                            }}>{item.dapukan || 'Peserta'}</span>
+                          </td>
+                          <td className="text-sm text-muted">
+                            {item.timestamp ? new Date(item.timestamp).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' }) : "-"}
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <button
+                              className="btn-icon text-red"
+                              title="Hapus Kehadiran"
+                              onClick={() => deleteAbsensi(item.id, item.generusNama || "Peserta")}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards View */}
+                <div className="mobile-only-cards">
+                  {filteredAbsensi.map((item, i) => {
+                    const isPanitia = item.dapukan && item.dapukan.toLowerCase() !== 'peserta' && item.dapukan.toLowerCase() !== '';
+                    const formattedNum = (item.nomorPeserta && isNaN(Number(item.nomorPeserta))) 
+                      ? item.nomorPeserta 
+                      : (item.nomorPeserta ? `#${item.nomorPeserta}` : 'PANITIA');
+
+                    return (
+                      <div key={item.id} className="absensi-mobile-card">
+                        <div className="card-top">
+                          <div className="top-badges">
+                            <span className="badge-index">#{i + 1}</span>
+                            <span className={`badge-nomor ${isPanitia ? 'badge-panitia' : 'badge-peserta'}`}>
+                              {formattedNum}
+                            </span>
+                            <span className={`badge-dapukan ${isPanitia ? 'dapukan-panitia' : 'dapukan-peserta'}`}>
+                              {item.dapukan || 'Peserta'}
+                            </span>
+                          </div>
+
+                          <div className="top-right-group">
+                            {item.timestamp && (
+                              <span className="badge-time">
+                                <Clock size={11} />
+                                {new Date(item.timestamp).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                            <button
+                              className="btn-delete-card"
+                              title="Hapus Kehadiran"
+                              onClick={() => deleteAbsensi(item.id, item.generusNama || "Peserta")}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="card-main">
+                          <div className="nama-text">{item.generusNama}</div>
+                          <div className="meta-row">
+                            <span className="meta-wilayah">
+                              <MapPin size={12} className="text-muted" />
+                              {item.desaKota || item.desaNama || "Umum"}
+                            </span>
+                            {item.generusNomorUnik && (
+                              <span className="unik-badge">{item.generusNomorUnik}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .physical-scanner-container {
+          min-height: 320px;
+          background: white;
+          border: 2px solid #e2e8f0;
+          border-radius: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 15px 30px -10px rgba(0,0,0,0.05);
+        }
+        .physical-scanner-glow {
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .scanner-icon-container {
+          position: relative;
+          width: 100px;
+          height: 100px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .scanner-icon { color: #94a3b8; transition: all 0.3s; }
+        .scanner-icon.success { color: #10b981; transform: scale(1.1); }
+        .scanner-icon.error { color: #ef4444; }
+        .scanner-beam {
+          position: absolute;
+          top: 20%;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: rgba(59, 130, 246, 0.5);
+          box-shadow: 0 0 10px #3b82f6;
+          animation: scan 2s ease-in-out infinite;
+          border-radius: 2px;
+        }
+        @keyframes scan {
+          0%, 100% { top: 20%; opacity: 0; }
+          50% { top: 80%; opacity: 1; }
+        }
+        .scanner-hidden-input {
+          position: absolute;
+          opacity: 0.05;
+          width: 100px;
+          height: 20px;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10;
+          cursor: default;
+        }
+        .scanner-instruction {
+          font-size: 11px;
+          color: #64748b;
+          margin: 10px 0;
+          line-height: 1.4;
+        }
+        .btn-refocus {
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          padding: 0 6px;
+          color: #475569;
+          font-weight: 700;
+          cursor: pointer;
+          margin: 0 4px;
+        }
+        .btn-refocus:hover {
+          background: #e2e8f0;
+        }
+        .scanner-status-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #64748b;
+          margin-bottom: 10px;
+        }
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          background: #10b981;
+          border-radius: 50%;
+        }
+        .status-dot.pulsed {
+          animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+          0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+          70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+          100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .input-preview {
+          margin-top: 15px;
+          font-size: 10px;
+          color: #94a3b8;
+          background: #f1f5f9;
+          padding: 4px 8px;
+          border-radius: 4px;
+          display: inline-block;
+        }
+        .scanner-badge {
+          display: inline-block;
+          font-size: 10px;
+          font-weight: 800;
+          background: #eff6ff;
+          color: #2563eb;
+          border: 1px solid #dbeafe;
+          padding: 4px 12px;
+          border-radius: 20px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 12px;
+        }
+        .last-scanned-card {
+          margin: 20px 20px 0;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          padding: 12px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          animation: slideUp 0.4s ease-out;
+          width: calc(100% - 40px);
+          max-width: 320px;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .last-scanned-avatar {
+          width: 40px; height: 40px; border-radius: 10px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 800; overflow: hidden;
+        }
+        .last-scanned-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .last-scanned-name { font-size: 14px; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .last-scanned-meta { font-size: 11px; color: #64748b; font-weight: 600; }
+        .last-scanned-status { margin-left: auto; font-size: 10px; font-weight: 800; color: #10b981; background: #d1fae5; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; }
+
+        .absensi-list-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .absensi-header-title-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .absensi-header-buttons {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .desktop-only-table {
+          display: block;
+        }
+
+        .mobile-only-cards {
+          display: none;
+        }
+
+        @media (max-width: 768px) {
+          .absensi-list-header {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 10px;
+          }
+
+          .absensi-header-title-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+          }
+
+          .absensi-header-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+          }
+
+          .btn-absensi-header {
+            justify-content: center;
+          }
+
+          .desktop-only-table {
+            display: none;
+          }
+
+          .mobile-only-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+          }
+
+          .absensi-mobile-card {
+            background: #ffffff;
+            border: 1px solid #e6dfd3;
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f4efe6;
+            padding-bottom: 8px;
+            gap: 6px;
+          }
+
+          .top-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+          }
+
+          .badge-index {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+          }
+
+          .badge-nomor {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+          }
+
+          .badge-peserta {
+            background: #eef4f0;
+            color: #26392d;
+            border: 1px solid rgba(61, 90, 69, 0.2);
+          }
+
+          .badge-panitia {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+          }
+
+          .badge-dapukan {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+            text-transform: uppercase;
+          }
+
+          .dapukan-peserta {
+            background: #f1f5f9;
+            color: #475569;
+          }
+
+          .dapukan-panitia {
+            background: #e0e7ff;
+            color: #4338ca;
+          }
+
+          .top-right-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .badge-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 2px 6px;
+            border-radius: 5px;
+            border: 1px solid #e2e8f0;
+            font-weight: 600;
+          }
+
+          .btn-delete-card {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+          }
+
+          .btn-delete-card:hover {
+            background: #fee2e2;
+          }
+
+          .card-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .nama-text {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-word;
+          }
+
+          .meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 12px;
+            color: #64748b;
+            flex-wrap: wrap;
+          }
+
+          .meta-wilayah {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .unik-badge {
+            font-family: monospace;
+            font-size: 10.5px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 1px 5px;
+            border-radius: 4px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
