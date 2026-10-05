@@ -42,7 +42,7 @@ new_sqlite_classes = ["RealtimeHub"]
 
 [vars]
 DAERAH_NAMA = "Cengkareng"
-R2_PUBLIC_URL = "https://media.gencar.my.id"
+R2_PUBLIC_URL = "https://pashmina.gencar.my.id/api/files"
 
 # NOTE: no [build] block — `wrangler dev` must not trigger a Next build (it fights `next dev`).
 # Production builds happen in the deploy script instead.

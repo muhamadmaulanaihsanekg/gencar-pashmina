@@ -68,11 +68,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // R2_PUBLIC_URL dipakai bila bucket punya custom domain; jika tidak,
-    // file dilayani Worker lewat /api/files/<key>.
-    const url = R2_PUBLIC_URL
-      ? `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`
-      : `/api/files/${key}`;
+    const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    const proto = request.headers.get("x-forwarded-proto") || "https";
+    const origin = host ? `${proto}://${host}` : "https://pashmina.gencar.my.id";
+
+    // R2_PUBLIC_URL dipakai bila bucket punya custom domain terverifikasi.
+    // Default: file disajikan langsung oleh Worker di domain pashmina lewat /api/files/<key>.
+    let url: string;
+    if (R2_PUBLIC_URL && !R2_PUBLIC_URL.includes("media.gencar.my.id")) {
+      url = `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
+    } else {
+      url = `${origin}/api/files/${key}`;
+    }
 
     return NextResponse.json({
       success: true,

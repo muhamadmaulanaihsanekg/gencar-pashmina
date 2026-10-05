@@ -32,7 +32,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gencar.my.id"),
+  metadataBase: new URL("https://pashmina.gencar.my.id"),
   title: {
     template: "%s | Pashmina 8.0",
     default: "Pashmina 8.0 - Portal Ta'aruf & Usia Mandiri",
@@ -41,11 +41,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Pashmina 8.0 - Portal Ta'aruf & Usia Mandiri",
     description: "Portal Ta'aruf & Usia Mandiri - Pashmina 8.0",
-    url: "https://gencar.my.id",
+    url: "https://pashmina.gencar.my.id",
     siteName: "Pashmina 8.0",
     images: [
       {
-        url: "https://gencar.my.id/img/pashmina-logo.png",
+        url: "https://pashmina.gencar.my.id/img/pashmina-logo.png",
         width: 800,
         height: 600,
         alt: "Logo Pashmina 8.0",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Pashmina 8.0 - Portal Ta'aruf & Usia Mandiri",
     description: "Portal Ta'aruf & Usia Mandiri - Pashmina 8.0",
-    images: ["https://gencar.my.id/img/pashmina-logo.png"],
+    images: ["https://pashmina.gencar.my.id/img/pashmina-logo.png"],
   },
 };
 

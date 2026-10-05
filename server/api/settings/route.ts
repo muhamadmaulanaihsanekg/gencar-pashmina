@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     let activeKegiatan = null;
     if (activeKegiatanId) {
       const result = await db
-        .select({ judul: mandiriKegiatan.judul, deskripsi: mandiriKegiatan.deskripsi })
+        .select({ judul: mandiriKegiatan.judul, deskripsi: mandiriKegiatan.deskripsi, lokasi: mandiriKegiatan.lokasi })
         .from(mandiriKegiatan)
         .where(eq(mandiriKegiatan.id, activeKegiatanId))
         .limit(1);
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     if (!activeKegiatan) {
       const latestKegiatan = await db
-        .select({ judul: mandiriKegiatan.judul, deskripsi: mandiriKegiatan.deskripsi })
+        .select({ judul: mandiriKegiatan.judul, deskripsi: mandiriKegiatan.deskripsi, lokasi: mandiriKegiatan.lokasi })
         .from(mandiriKegiatan)
         .orderBy(desc(mandiriKegiatan.tanggal))
         .limit(1);
@@ -56,6 +56,9 @@ export async function GET(request: NextRequest) {
       }
       if (activeKegiatan.deskripsi) {
         settingsObj["mandiri_registration_description"] = activeKegiatan.deskripsi;
+      }
+      if (activeKegiatan.lokasi && !settingsObj["mandiri_registration_location"]) {
+        settingsObj["mandiri_registration_location"] = activeKegiatan.lokasi;
       }
     }
 

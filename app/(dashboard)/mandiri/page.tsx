@@ -71,6 +71,7 @@ export default function MandiriPage() {
    const [userRole, setUserRole] = useState("");
    const [regStatus, setRegStatus] = useState("1");
    const [regTitle, setRegTitle] = useState("Pashmina 8.0");
+   const [regLocation, setRegLocation] = useState("");
    const [regDesc, setRegDesc] = useState("");
    const [regStatusPeserta, setRegStatusPeserta] = useState("Utusan Daerah");
    const [regGender, setRegGender] = useState("Semua");
@@ -153,6 +154,7 @@ export default function MandiriPage() {
             setRegStatus(statusVal);
             setIsClosed(statusVal === "0");
             setRegTitle(s.mandiri_registration_title || "");
+            setRegLocation(s.mandiri_registration_location || "");
             setRegDesc(s.mandiri_registration_description || "");
             setRegStatusPeserta(s.mandiri_registration_status_peserta || "Utusan Daerah");
             setRegGender(s.mandiri_registration_gender || "Semua");
@@ -192,7 +194,8 @@ export default function MandiriPage() {
          if (Array.isArray(kegiatanList)) {
             kegiatanOptions = kegiatanList.map((k: any) => {
                const descSafe = (k.deskripsi || "").replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '&#10;');
-               return `<option value="${k.id}" data-judul="${k.judul}" data-desc="${descSafe}" ${regTitle === k.judul ? "selected" : ""}>${k.judul} (${k.kota})</option>`;
+               const locSafe = (k.lokasi || "").replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+               return `<option value="${k.id}" data-judul="${k.judul}" data-desc="${descSafe}" data-lokasi="${locSafe}" ${regTitle === k.judul ? "selected" : ""}>${k.judul} (${k.kota})</option>`;
             }).join("");
          }
       } catch (e) {
@@ -208,10 +211,16 @@ export default function MandiriPage() {
          html: `
         <div style="text-align: left">
           <label class="form-label">Nama Kegiatan / Judul Form</label>
-          <select id="swal-title" class="form-control" style="margin-bottom: 12px; width: 100%; box-sizing: border-box;" onchange="document.getElementById('swal-desc').value = this.options[this.selectedIndex].getAttribute('data-desc') || ''">
-             <option value="" data-desc="">-- Pilih Kegiatan --</option>
+          <select id="swal-title" class="form-control" style="margin-bottom: 12px; width: 100%; box-sizing: border-box;" onchange="
+            document.getElementById('swal-desc').value = this.options[this.selectedIndex].getAttribute('data-desc') || '';
+            const loc = this.options[this.selectedIndex].getAttribute('data-lokasi');
+            if (loc) document.getElementById('swal-location').value = loc;
+          ">
+             <option value="" data-desc="" data-lokasi="">-- Pilih Kegiatan --</option>
              ${kegiatanOptions}
           </select>
+          <label class="form-label">Lokasi Acara / Link Google Maps</label>
+          <input type="text" id="swal-location" class="form-control" placeholder="Contoh: Gedung Serbaguna Cengkareng atau link Google Maps" style="margin-bottom: 12px; width: 100%; box-sizing: border-box;" value="${regLocation || ''}" />
           <label class="form-label">Deskripsi Kegiatan</label>
           <textarea id="swal-desc" class="form-control" rows="3" placeholder="Contoh: Diikuti oleh seluruh usia mandiri..." style="margin-bottom: 12px; width: 100%; box-sizing: border-box;">${regDesc}</textarea>
           <label class="form-label">Status Pendaftaran</label>
@@ -266,6 +275,7 @@ export default function MandiriPage() {
             return {
                id: selectEl.value,
                title: titleText,
+               location: (document.getElementById("swal-location") as HTMLInputElement)?.value || "",
                desc: (document.getElementById("swal-desc") as HTMLTextAreaElement).value,
                status: (document.getElementById("swal-status") as HTMLSelectElement).value,
                gender: (document.getElementById("swal-gender") as HTMLSelectElement).value,
@@ -284,6 +294,11 @@ export default function MandiriPage() {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ key: "mandiri_registration_title", value: formValues.title }),
+               }),
+               fetch("/api/mandiri/settings", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ key: "mandiri_registration_location", value: formValues.location }),
                }),
                fetch("/api/mandiri/settings", {
                   method: "POST",
@@ -331,6 +346,7 @@ export default function MandiriPage() {
             await Promise.all(updatePromises);
 
             setRegTitle(formValues.title);
+            setRegLocation(formValues.location);
             setRegDesc(formValues.desc);
             setRegStatus(formValues.status);
             setRegGender(formValues.gender);

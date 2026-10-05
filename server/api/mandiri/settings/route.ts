@@ -22,6 +22,16 @@ export async function GET(request: NextRequest) {
         const latest = await db.select({ value: mandiriKegiatan.deskripsi }).from(mandiriKegiatan).orderBy(desc(mandiriKegiatan.tanggal)).limit(1);
         return NextResponse.json({ key, value: latest[0]?.value || "" });
     }
+    if (key === "mandiri_registration_location" && !data[0]?.value) {
+        const activeSetting = await db.select().from(settings).where(eq(settings.key, "mandiri_active_kegiatan_id")).limit(1);
+        const targetId = activeSetting[0]?.value;
+        if (targetId) {
+            const active = await db.select({ value: mandiriKegiatan.lokasi }).from(mandiriKegiatan).where(eq(mandiriKegiatan.id, targetId)).limit(1);
+            if (active[0]?.value) return NextResponse.json({ key, value: active[0].value });
+        }
+        const latest = await db.select({ value: mandiriKegiatan.lokasi }).from(mandiriKegiatan).orderBy(desc(mandiriKegiatan.tanggal)).limit(1);
+        return NextResponse.json({ key, value: latest[0]?.value || "" });
+    }
 
     // Fallback logic for Generus
     if (key === "generus_registration_title" && !data[0]?.value) {
@@ -77,7 +87,14 @@ export async function POST(request: NextRequest) {
             targetActivityId = latestArr[0]?.id;
         }
         if (targetActivityId) {
-            const updateField = field === "title" ? { judul: value } : field === "description" ? { deskripsi: value } : null;
+            const updateField =
+              field === "title"
+                ? { judul: value }
+                : field === "description"
+                  ? { deskripsi: value }
+                  : field === "location"
+                    ? { lokasi: value }
+                    : null;
             if (updateField) {
                 await db.update(mandiriKegiatan).set(updateField).where(eq(mandiriKegiatan.id, targetActivityId));
             }

@@ -859,7 +859,7 @@ export default function MandiriDaftarPage() {
           doc.setFont("helvetica", "bold");
           doc.setFontSize(7.5);
           doc.setTextColor(150, 110, 40);
-          doc.text("https://gencar.my.id/mandiri/katalog", 45, 157.5, { align: "center" });
+          doc.text("https://pashmina.gencar.my.id/mandiri/katalog", 45, 157.5, { align: "center" });
 
           doc.setFont("helvetica", "normal");
           doc.setFontSize(6);
