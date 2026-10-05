@@ -143,6 +143,7 @@ export default function PublicKatalogPage() {
   const [umurMinFilter, setUmurMinFilter] = useState("");
   const [umurMaxFilter, setUmurMaxFilter] = useState("");
   const [anakKeFilter, setAnakKeFilter] = useState("");
+  const [jumlahAnakFilter, setJumlahAnakFilter] = useState("");
   const [jumlahSaudaraFilter, setJumlahSaudaraFilter] = useState("");
   const [tinggiMinFilter, setTinggiMinFilter] = useState("");
   const [tinggiMaxFilter, setTinggiMaxFilter] = useState("");
@@ -581,6 +582,7 @@ export default function PublicKatalogPage() {
         umurMax: umurMaxFilter,
         suku: sukuFilter,
         anakKe: anakKeFilter,
+        jumlahAnak: jumlahAnakFilter,
         jumlahSaudara: jumlahSaudaraFilter,
         tinggiMin: tinggiMinFilter,
         tinggiMax: tinggiMaxFilter,
@@ -611,7 +613,7 @@ export default function PublicKatalogPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, page, gender, category, pendidikan, selectedKota, desaFilter, kelompokFilter, pekerjaanFilter, umurFilter, umurMinFilter, umurMaxFilter, sukuFilter, anakKeFilter, jumlahSaudaraFilter, tinggiMinFilter, tinggiMaxFilter, kriteriaFilter, hobiFilter, makananFilter, hasAttended, isAdmin]);
+  }, [search, page, gender, category, pendidikan, selectedKota, desaFilter, kelompokFilter, pekerjaanFilter, umurFilter, umurMinFilter, umurMaxFilter, sukuFilter, anakKeFilter, jumlahAnakFilter, jumlahSaudaraFilter, tinggiMinFilter, tinggiMaxFilter, kriteriaFilter, hobiFilter, makananFilter, hasAttended, isAdmin]);
 
   useEffect(() => {
     if (hasAttended) fetchData();
@@ -2038,6 +2040,11 @@ export default function PublicKatalogPage() {
                 </div>
 
                 <div className="filter-field-group">
+                  <label className="filter-label">Jumlah Anak</label>
+                  <input type="number" className="filter-input-box" placeholder="Jumlah Anak" value={jumlahAnakFilter} onChange={(e) => { setJumlahAnakFilter(e.target.value); setPage(1); }} />
+                </div>
+
+                <div className="filter-field-group">
                   <label className="filter-label">Tinggi Badan (cm)</label>
                   <div className="input-range-container">
                     <input type="number" className="filter-input-box" placeholder="Tinggi Min" value={tinggiMinFilter} onChange={(e) => { setTinggiMinFilter(e.target.value); setPage(1); }} />
@@ -2104,6 +2111,7 @@ export default function PublicKatalogPage() {
                   setUmurMaxFilter("");
                   setSukuFilter("all");
                   setAnakKeFilter("");
+                  setJumlahAnakFilter("");
                   setJumlahSaudaraFilter("");
                   setTinggiMinFilter("");
                   setTinggiMaxFilter("");

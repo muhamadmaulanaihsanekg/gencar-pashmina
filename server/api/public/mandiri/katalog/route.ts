@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
     const makanan = searchParams.get("makanan") || "all";
     const suku = searchParams.get("suku") || "all";
     const anakKe = searchParams.get("anakKe") || "";
+    const jumlahAnak = searchParams.get("jumlahAnak") || "";
     const jumlahSaudara = searchParams.get("jumlahSaudara") || "";
     const tinggiMin = searchParams.get("tinggiMin") || "";
     const tinggiMax = searchParams.get("tinggiMax") || "";
@@ -182,6 +183,10 @@ export async function GET(request: NextRequest) {
 
     if (anakKe !== "") {
       conditions.push(eq(generus.anakKe, Number(anakKe)));
+    }
+
+    if (jumlahAnak !== "") {
+      conditions.push(eq(generus.jumlahAnak, Number(jumlahAnak)));
     }
 
     if (jumlahSaudara !== "") {
