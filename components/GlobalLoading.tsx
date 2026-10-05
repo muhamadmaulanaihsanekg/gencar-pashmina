@@ -18,19 +18,31 @@ export default function GlobalLoading() {
   return (
     <div className="page-loader-overlay">
       <div className="loader-progress-bar" />
-      <div className="loader-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-        {siteLogo && (
-          <img src={siteLogo} alt="Logo" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
-        )}
-        <span style={{
-          background: "linear-gradient(135deg, #dc2626, #eab308)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          color: "transparent",
-          fontWeight: 900
-        }}>
-          GENCAR
+      <div
+        className="loader-logo"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "10px",
+        }}
+      >
+        <img
+          src={siteLogo || "/img/pnkb.png"}
+          alt="Logo PNKB"
+          style={{ width: "64px", height: "64px", objectFit: "contain" }}
+        />
+        <span
+          style={{
+            fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontSize: "24px",
+            letterSpacing: "1px",
+            fontWeight: 700,
+            color: "var(--primary, #2d5a43)",
+          }}
+        >
+          Pashmina 8.0
         </span>
       </div>
       <div className="loader-dots">
@@ -38,12 +50,16 @@ export default function GlobalLoading() {
         <div className="loader-dot" />
         <div className="loader-dot" />
       </div>
-      <p style={{ 
-        marginTop: 10, 
-        fontSize: 14, 
-        color: 'var(--text-muted)', 
-        fontWeight: 500 
-      }}>Mewujudkan Generasi Penerus Profesional Religius</p>
+      <p
+        style={{
+          marginTop: 6,
+          fontSize: 13,
+          color: "var(--text-muted, #718096)",
+          fontWeight: 500,
+        }}
+      >
+        Portal Ta&apos;aruf &amp; Usia Mandiri
+      </p>
     </div>
   );
 }

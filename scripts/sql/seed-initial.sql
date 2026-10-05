@@ -675,4 +675,40 @@ VALUES (
   datetime("now")
 );
 
+-- ========================================================
+-- Kegiatan Default: Pashmina 8.0 & Settings Aktif
+-- ========================================================
+INSERT OR REPLACE INTO mandiri_kegiatan (
+  id, judul, deskripsi, tanggal, lokasi, kota, created_by, created_at, updated_at
+) VALUES (
+  "0952cb4e-6362-42ea-b617-04ccd4dd4111",
+  "Pashmina 8.0",
+  "Kegiatan Taaruf & Usia Mandiri Pashmina 8.0",
+  "2026-10-18",
+  "Jakarta Barat",
+  "Jakarta Barat",
+  "usr_admin_pashmina",
+  datetime("now"),
+  datetime("now")
+);
+
+INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES
+  ("mandiri_active_kegiatan_id", "0952cb4e-6362-42ea-b617-04ccd4dd4111", datetime("now")),
+  ("site_name", "Pashmina 8.0", datetime("now")),
+  ("site_logo", "/img/pnkb.png", datetime("now"));
+
+INSERT OR REPLACE INTO kegiatan (
+  id, judul, deskripsi, kategori_acara, tanggal, jam, lokasi, created_by, created_at
+) VALUES (
+  "keg_pashmina_8",
+  "Pashmina 8.0",
+  "Kegiatan Akbar Taaruf & Usia Mandiri Pashmina 8.0",
+  "keakraban",
+  "2026-10-18",
+  "08:00",
+  "Jakarta Barat",
+  "usr_admin_pashmina",
+  datetime("now")
+);
+
 PRAGMA foreign_keys = ON;
