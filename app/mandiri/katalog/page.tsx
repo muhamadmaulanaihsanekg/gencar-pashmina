@@ -9,7 +9,7 @@ import {
   Sparkles, Search, User, MapPin, Heart, Calendar,
   GraduationCap, Briefcase, Lock, LogOut, ChevronDown, ChevronLeft, ChevronRight,
   Settings2, CheckCircle2, UserCheck, Users, Globe, Music, Utensils,
-  X, ShieldCheck, Star, UtilityPole as UtensilsIcon, ArrowLeft, Instagram, Timer, MessageSquare, Clock, QrCode, Send, HelpCircle
+  X, ShieldCheck, Star, UtilityPole as UtensilsIcon, ArrowLeft, Instagram, Timer, MessageSquare, Clock, QrCode, Send, HelpCircle, Baby
 } from "lucide-react";
 import { startMandiriKatalogTour, isMandiriKatalogTourDone } from "@/lib/tours/tourKatalog";
 import Link from "next/link";
@@ -2206,6 +2206,7 @@ export default function PublicKatalogPage() {
 
                         <div className="card-stats-grid">
                           <div className="stat-pill"><Calendar size={14} /><span>{item.tanggalLahir ? `${new Date().getFullYear() - new Date(item.tanggalLahir).getFullYear()} Tahun` : "-"}</span></div>
+                          <div className="stat-pill"><Baby size={14} /><span>{item.jumlahAnak ?? 0} Anak</span></div>
                           <div className="stat-pill"><GraduationCap size={14} /><span>{item.pendidikan || "-"}</span></div>
                           <div className="stat-pill"><Briefcase size={14} /><span>{item.pekerjaan || "Swasta"}</span></div>
                           <div className="stat-pill"><Globe size={14} /><span>{item.suku || "-"}</span></div>
