@@ -2,6 +2,11 @@ name = "gencar-api"
 main = "worker/index.ts"
 compatibility_date = "2025-05-05"
 compatibility_flags = [ "nodejs_compat" ]
+workers_dev = true
+
+routes = [
+  { pattern = "pashmina.gencar.my.id", custom_domain = true }
+]
 
 # Frontend SPA hasil `next build` (output: 'export')
 # run_worker_first: request masuk ke Worker dulu agar guard (RBAC/rate-limit)
