@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import GlobalLoading from "@/components/GlobalLoading";
+import { startAdminPageTour } from "@/lib/tours/tourAdmin";
 import { 
   LayoutDashboard, 
   Sparkles, 
@@ -325,7 +326,7 @@ export default function Sidebar({ user }: SidebarProps) {
       )}
 
       <aside className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="sidebar-logo">
+        <div id="tour-sidebar-brand" className="sidebar-logo">
           <img
             src="/img/pashmina-logo.png"
             alt="Logo PNKB"
@@ -337,7 +338,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav id="tour-sidebar-nav" className="sidebar-nav">
           {(userNavs[user.role] || navItems).map((section) => {
             if (section.roles && !section.roles.includes(user.role)) return null;
             if (section.role && section.role !== user.role) return null;
@@ -382,7 +383,22 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-user">
+          <button
+            type="button"
+            className="sidebar-link sidebar-tour-btn"
+            onClick={() => {
+              startAdminPageTour(pathname, { force: true, includeShell: true });
+              setIsOpen(false);
+            }}
+            style={{ width: "100%", background: "rgba(197, 160, 89, 0.12)", border: "1px solid rgba(197, 160, 89, 0.3)", borderRadius: "8px", cursor: "pointer", color: "#dfc288", marginBottom: "8px", padding: "8px 12px", display: "flex", alignItems: "center", gap: "10px" }}
+            title="Panduan Operasional Sistem"
+            id="tour-sidebar-guide"
+          >
+            <Sparkles size={16} />
+            <span className="sidebar-link-text" style={{ fontSize: "12px", fontWeight: 600 }}>Panduan Tur Halaman</span>
+          </button>
+
+          <div id="tour-sidebar-user" className="sidebar-user">
             <div className="sidebar-avatar">
               {user.foto ? (
                 <img src={user.foto} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />

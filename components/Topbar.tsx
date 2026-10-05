@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Swal from "sweetalert2";
+import { Sparkles } from "lucide-react";
 import GlobalLoading from "@/components/GlobalLoading";
+import { startAdminPageTour, isAdminPageTourDone } from "@/lib/tours/tourAdmin";
 
 interface TopbarProps {
   title: string;
@@ -13,8 +16,19 @@ interface TopbarProps {
 }
 
 export default function Topbar({ title, role, className = "", children, userName }: TopbarProps) {
+  const pathname = usePathname() || "";
   const [siteLogo, setSiteLogo] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isAdminPageTourDone(pathname)) {
+      const timer = setTimeout(() => {
+        startAdminPageTour(pathname);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     // Initial logo fetch if already in window
@@ -110,7 +124,17 @@ export default function Topbar({ title, role, className = "", children, userName
             </div>
           )}
           {role && (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => startAdminPageTour(pathname, { force: true })}
+                className="topbar-tour-btn"
+                title="Panduan Halaman Ini"
+                id="tour-topbar-guide"
+              >
+                <Sparkles size={14} />
+                <span>Panduan</span>
+              </button>
               {roleLabel[role] && (
                 <div className={`badge ${roleColor[role] || "badge-blue"}`}>
                   {roleLabel[role]}
