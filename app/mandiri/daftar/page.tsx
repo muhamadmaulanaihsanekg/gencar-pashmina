@@ -171,6 +171,36 @@ export default function MandiriDaftarPage() {
     });
   }, []);
 
+  const addWilayah = async (type: "daerah" | "desa" | "kelompok", nama: string, opts?: { parentId?: number; kota?: string }) => {
+    const res = await fetch("/api/public/mandiri/wilayah", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, nama, ...opts }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Gagal menambah wilayah baru");
+    return data as { id: number; nama: string };
+  };
+
+  const handleAddDaerah = async (nama: string) => {
+    const data = await addWilayah("daerah", nama);
+    setKotaList((prev) => (prev.includes(data.nama) ? prev : [...prev, data.nama].sort()));
+    return { id: data.nama, name: data.nama };
+  };
+
+  const handleAddDesa = async (nama: string) => {
+    // API resolves/creates the parent daerah by kota name when parentId is absent
+    const data = await addWilayah("desa", nama, { kota: selectedKota });
+    setDesaList((prev) => (prev.some((d) => d.id === data.id) ? prev : [...prev, { id: data.id, nama: data.nama }]));
+    return { id: data.id, name: data.nama };
+  };
+
+  const handleAddKelompok = async (nama: string) => {
+    const data = await addWilayah("kelompok", nama, { parentId: Number(form.mandiriDesaId) });
+    setDesaList((prev) => (prev.some((k) => k.id === data.id) ? prev : [...prev, { id: data.id, nama: data.nama, mandiriDesaId: Number(form.mandiriDesaId) }]));
+    return { id: data.id, name: data.nama };
+  };
+
 
   const renderTextWithLinks = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -1160,6 +1190,7 @@ export default function MandiriDaftarPage() {
                   options={kotaList.map(k => ({ id: k, name: k }))}
                   value={selectedKota}
                   onChange={(val) => setSelectedKota(val)}
+                  onAddNew={handleAddDaerah}
                 />
               </div>
               <div className="form-group">
@@ -1172,6 +1203,7 @@ export default function MandiriDaftarPage() {
                     setForm(prev => ({ ...prev, mandiriDesaId: val, mandiriKelompokId: "" }));
                   }}
                   disabled={!selectedKota}
+                  onAddNew={handleAddDesa}
                 />
               </div>
             </div>
@@ -1186,6 +1218,7 @@ export default function MandiriDaftarPage() {
                   setForm(prev => ({ ...prev, mandiriKelompokId: val }));
                 }}
                 disabled={!form.mandiriDesaId}
+                onAddNew={handleAddKelompok}
               />
             </div>
 
