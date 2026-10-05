@@ -14,6 +14,9 @@ export interface GenerusItem {
   pendidikan: string | null;
   pekerjaan: string | null;
   statusNikah: string | null;
+  jumlahAnak?: number | null;
+  anakKe?: number | null;
+  jumlahSaudara?: number | null;
   hobi?: string | null;
   makananMinumanFavorit?: string | null;
   suku?: string | null;

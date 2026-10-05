@@ -40,7 +40,7 @@ export const generus = sqliteTable("generus", {
   // pendidikan P0 enum — SD/SMP/SMA/Sedang menempuh perguruan tinggi/Sarjana
   pendidikan: text("pendidikan"),
   pekerjaan: text("pekerjaan"),
-  statusNikah: text("status_nikah", { enum: ["Belum Menikah", "Menikah"] }).default("Belum Menikah"),
+  statusNikah: text("status_nikah"), // Lajang / Duda / Janda
   // P1: shift fleksibel JSON {mode, masuk, pulang, shifts[]}
   shiftPekerjaan: text("shift_pekerjaan"), // JSON string nullable
   statusOrtuJamaah: text("status_ortu_jamaah", { enum: ["sudah", "belum"] }),
@@ -52,6 +52,7 @@ export const generus = sqliteTable("generus", {
   suku: text("suku"),
   anakKe: integer("anak_ke"),
   jumlahSaudara: integer("jumlah_saudara"),
+  jumlahAnak: integer("jumlah_anak"),
   tinggiBadan: integer("tinggi_badan"),
   foto: text("foto"),
   desaId: integer("desa_id").references(() => desa.id, { onDelete: "cascade" }),

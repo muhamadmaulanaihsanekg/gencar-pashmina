@@ -85,7 +85,7 @@ CREATE TABLE "generus" (
 	`is_generus` integer DEFAULT 0,
 	`created_by` text,
 	`created_at` text DEFAULT (datetime('now')),
-	`updated_at` text DEFAULT (datetime('now')), `kriteria_pasangan` text, "kategori_muda_mudi" text, "asal_daerah" text, "domisili_anak" text, "domisili_ortu" text, "is_domisili_ortu_sama" integer, "shift_pekerjaan" text, "status_ortu_jamaah" text, "anak_ke" integer, "jumlah_saudara" integer, "tinggi_badan" integer, "status_haid" text, "target_menikah" text,
+	`updated_at` text DEFAULT (datetime('now')), `kriteria_pasangan` text, "kategori_muda_mudi" text, "asal_daerah" text, "domisili_anak" text, "domisili_ortu" text, "is_domisili_ortu_sama" integer, "shift_pekerjaan" text, "status_ortu_jamaah" text, "anak_ke" integer, "jumlah_saudara" integer, "jumlah_anak" integer, "tinggi_badan" integer, "status_haid" text, "target_menikah" text,
 	FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`kelompok_id`) REFERENCES `kelompok`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`mandiri_desa_id`) REFERENCES `mandiri_desa`(`id`) ON UPDATE no action ON DELETE set null,

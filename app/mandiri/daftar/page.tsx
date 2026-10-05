@@ -35,12 +35,13 @@ export default function MandiriDaftarPage() {
     noTelp: "",
     pendidikan: "",
     pekerjaan: "",
-    statusNikah: "Belum Menikah",
+    statusNikah: "Lajang",
     hobi: "",
     makananMinumanFavorit: "",
     suku: "",
     anakKe: "",
     jumlahSaudara: "",
+    jumlahAnak: "0",
     tinggiBadan: "",
     foto: "",
     mandiriDesaId: "",
@@ -501,6 +502,8 @@ export default function MandiriDaftarPage() {
       if (!form.tempatLahir?.trim()) missingFields.push("Kota Tempat Lahir");
       if (!form.tanggalLahir) missingFields.push("Tanggal Lahir");
       if (!form.jenisKelamin) missingFields.push("Jenis Kelamin");
+      if (!form.statusNikah) missingFields.push("Status Pernikahan");
+      if (form.statusNikah !== "Lajang" && form.jumlahAnak === "") missingFields.push("Jumlah Anak");
       if (!form.anakKe) missingFields.push("Anak Ke");
       if (!form.jumlahSaudara) missingFields.push("Dari Saudara");
       if (!form.tinggiBadan) missingFields.push("Tinggi Badan");
@@ -1103,10 +1106,22 @@ export default function MandiriDaftarPage() {
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Suku (Opsional)</label>
-                <input name="suku" className="form-control" value={form.suku} onChange={handleChange} placeholder="Betawi / Jawa / dll" />
+                <label className="form-label">Status Pernikahan <span className="required">*</span></label>
+                <select name="statusNikah" className="form-control" value={form.statusNikah} onChange={handleChange} required>
+                  <option value="Lajang">Lajang / Perjaka / Perawan</option>
+                  <option value={form.jenisKelamin === "L" ? "Duda" : "Janda"}>
+                    {form.jenisKelamin === "L" ? "Duda" : "Janda"}
+                  </option>
+                </select>
               </div>
             </div>
+
+            {form.statusNikah !== "Lajang" && (
+              <div className="form-group">
+                <label className="form-label">Jumlah Anak <span className="required">*</span></label>
+                <input type="number" name="jumlahAnak" className="form-control" value={form.jumlahAnak} onChange={handleChange} required placeholder="Contoh: 1" min={0} max={20} />
+              </div>
+            )}
 
             <div className="form-row">
               <div className="form-group">
@@ -1119,9 +1134,15 @@ export default function MandiriDaftarPage() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Tinggi Badan (cm) <span className="required">*</span></label>
-              <input type="number" name="tinggiBadan" className="form-control" value={form.tinggiBadan} onChange={handleChange} required placeholder="Contoh: 165" min={100} max={250} />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Tinggi Badan (cm) <span className="required">*</span></label>
+                <input type="number" name="tinggiBadan" className="form-control" value={form.tinggiBadan} onChange={handleChange} required placeholder="Contoh: 165" min={100} max={250} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Suku (Opsional)</label>
+                <input name="suku" className="form-control" value={form.suku} onChange={handleChange} placeholder="Betawi / Jawa / dll" />
+              </div>
             </div>
 
             {/* --- SEKSI 2: KONTAK & DOMISILI --- */}

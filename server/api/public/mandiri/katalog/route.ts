@@ -267,6 +267,7 @@ export async function GET(request: NextRequest) {
         suku: generus.suku,
         anakKe: generus.anakKe,
         jumlahSaudara: generus.jumlahSaudara,
+        jumlahAnak: generus.jumlahAnak,
         tinggiBadan: generus.tinggiBadan,
         foto: generus.foto,
         desaNama: desa.nama,
