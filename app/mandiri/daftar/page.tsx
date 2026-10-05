@@ -5,17 +5,27 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import { Calendar, Clock, MapPin, ExternalLink, Heart, Sparkles, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Heart, Sparkles, ArrowLeft, HelpCircle } from "lucide-react";
 import PhotoUpload from "@/components/mandiri/PhotoUpload";
 import SearchableSelect from "@/components/mandiri/SearchableSelect";
 import jsPDF from "jspdf";
 import JsBarcode from "jsbarcode";
 import QRCode from "qrcode";
+import { startDaftarTour, isDaftarTourDone } from "@/lib/tours/tourDaftar";
 
 interface Desa { id: number; nama: string; kota: string; }
 interface Kelompok { id: number; nama: string; }
 
 export default function MandiriDaftarPage() {
+  useEffect(() => {
+    if (!isDaftarTourDone()) {
+      const timer = setTimeout(() => {
+        startDaftarTour();
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   const [form, setForm] = useState({
     nama: "",
     jenisKelamin: "L",
@@ -992,6 +1002,16 @@ export default function MandiriDaftarPage() {
             <span className="btn-text-full">Kembali ke Beranda</span>
             <span className="btn-text-short">Beranda</span>
           </Link>
+          <button
+            type="button"
+            className="daftar-login-btn"
+            onClick={() => startDaftarTour({ force: true })}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#fef3c7", color: "#92400e", borderColor: "#fde68a", cursor: "pointer", marginRight: "8px" }}
+            title="Buka panduan cara pengisian formulir pendaftaran"
+          >
+            <HelpCircle size={14} />
+            <span>Panduan Daftar</span>
+          </button>
           <Link href="/mandiri/katalog/login" className="daftar-login-btn">
             <span className="btn-text-full">Sudah punya ID? <strong>Masuk Katalog &rarr;</strong></span>
             <span className="btn-text-short"><strong>Masuk Katalog &rarr;</strong></span>
@@ -1025,7 +1045,7 @@ export default function MandiriDaftarPage() {
 
           <form onSubmit={handleSubmit}>
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              <div className="form-group" style={{ textAlign: "center" }}>
+              <div id="tour-daftar-foto" className="form-group" style={{ textAlign: "center" }}>
                 <PhotoUpload
                   value={form.foto}
                   onChange={(url) => setForm(prev => ({ ...prev, foto: url }))}
@@ -1035,7 +1055,7 @@ export default function MandiriDaftarPage() {
               </div>
 
               {/* --- SEKSI 1: INFORMASI PRIBADI --- */}
-              <h3 className="daftar-section-header" style={{ marginTop: "10px", marginBottom: "16px" }}>Informasi Pribadi</h3>
+              <h3 id="tour-daftar-identitas" className="daftar-section-header" style={{ marginTop: "10px", marginBottom: "16px" }}>Informasi Pribadi</h3>
 
             <div className="form-group">
               <label className="form-label">Nama Lengkap <span className="required">*</span></label>
@@ -1115,7 +1135,7 @@ export default function MandiriDaftarPage() {
               </p>
             </div>
 
-            <div className="form-row">
+            <div id="tour-daftar-wilayah" className="form-row">
               <div className="form-group">
                 <label className="form-label">Daerah <span className="required">*</span></label>
                 <SearchableSelect
@@ -1199,7 +1219,7 @@ export default function MandiriDaftarPage() {
               </p>
             </div>
 
-            <div className="form-group">
+            <div id="tour-daftar-kriteria" className="form-group">
               <label className="form-label">Kriteria Pasangan (Opsional)</label>
               <textarea
                 name="kriteriaPasangan"
@@ -1335,7 +1355,7 @@ export default function MandiriDaftarPage() {
               </ol>
             </div>
 
-            <button type="submit" className="btn-submit-pashmina" disabled={loading || !agreed}>
+            <button id="tour-daftar-submit" type="submit" className="btn-submit-pashmina" disabled={loading || !agreed}>
               <Heart size={18} fill="#17241b" />
               <span>{loading ? "Menyimpan Pendaftaran..." : "Kirim Formulir Pendaftaran Peserta"}</span>
             </button>

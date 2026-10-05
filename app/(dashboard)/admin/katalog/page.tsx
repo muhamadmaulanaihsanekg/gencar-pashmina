@@ -12,8 +12,9 @@ import { GenerusItem } from "@/lib/types";
 import {
   Sparkles, Search, User, MapPin, Phone, GraduationCap,
   Briefcase, Heart, Globe, Calendar, Lock, ClipboardList,
-  Download, Eye, EyeOff, ChevronDown, ChevronUp, Settings2, Users, Share2, Music, Utensils, Printer, Home, Instagram, QrCode, FileSpreadsheet, FileText, X, ArrowUpDown, Copy, Fingerprint, PhoneCall
+  Download, Eye, EyeOff, ChevronDown, ChevronUp, Settings2, Users, Share2, Music, Utensils, Printer, Home, Instagram, QrCode, FileSpreadsheet, FileText, X, ArrowUpDown, Copy, Fingerprint, PhoneCall, HelpCircle
 } from "lucide-react";
+import { startAdminKatalogTour, isAdminKatalogTourDone } from "@/lib/tours/tourAdmin";
 import { getPusherClient } from "@/lib/pusher-client";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -173,6 +174,17 @@ export default function AdminKatalogPage() {
     }
     init();
   }, []);
+
+  useEffect(() => {
+    if (authorizedChecked && isAuthorized && !loading) {
+      if (!isAdminKatalogTourDone()) {
+        const timer = setTimeout(() => {
+          startAdminKatalogTour();
+        }, 700);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [authorizedChecked, isAuthorized, loading]);
 
   useEffect(() => {
     let interval: any;
@@ -742,7 +754,7 @@ export default function AdminKatalogPage() {
               <p className="subtitle">{kegiatanList.find(k => k.id === selectedKegiatanId)?.judul || latestActivity?.judul || "Daftar Peserta Aktif"}</p>
             </div>
             {kegiatanList.length > 1 && (
-              <div className="kegiatan-header-select">
+              <div id="tour-kegiatan-select" className="kegiatan-header-select">
                 <label>Kegiatan:</label>
                 <select
                   value={selectedKegiatanId}
@@ -759,7 +771,7 @@ export default function AdminKatalogPage() {
 
         <div className="toolbar-section">
           <div className="toolbar-top-row">
-            <div className="search-box">
+            <div id="tour-admin-search" className="search-box">
               <Search size={18} className="icon-muted" />
               <input
                 type="text"
@@ -777,7 +789,7 @@ export default function AdminKatalogPage() {
               )}
             </div>
             <div className="main-actions">
-              <button className={`btn-toggle-public ${publicStatus === "open" ? "active" : ""}`} onClick={handleTogglePublic}>
+              <button id="tour-toggle-public" className={`btn-toggle-public ${publicStatus === "open" ? "active" : ""}`} onClick={handleTogglePublic}>
                 {publicStatus === "open" ? <Eye size={16} /> : <EyeOff size={16} />}
                 <span>Public View {publicStatus === "open" ? "(ON)" : "(OFF)"}</span>
               </button>
@@ -786,7 +798,7 @@ export default function AdminKatalogPage() {
                   <Share2 size={16} />
                 </button>
               )}
-              <button className={`btn-box-love ${boxLoveStatus === "open" ? "active" : ""}`} onClick={handleToggleBoxLove}>
+              <button id="tour-toggle-boxlove" className={`btn-box-love ${boxLoveStatus === "open" ? "active" : ""}`} onClick={handleToggleBoxLove}>
                 <Heart size={16} />
                 <span>Box Love {boxLoveStatus === "open" ? "(ON)" : "(OFF)"}</span>
               </button>
@@ -795,7 +807,17 @@ export default function AdminKatalogPage() {
 
           <div className="export-actions-bar">
             <div className="export-group">
-              <button className="btn-export-id-cards btn-qr-access" onClick={() => setShowAccessQR(true)}>
+              <button
+                type="button"
+                className="btn-export-id-cards"
+                onClick={() => startAdminKatalogTour({ force: true })}
+                style={{ background: "#fef3c7", color: "#92400e", borderColor: "#fde68a", fontWeight: 600 }}
+                title="Buka panduan cara pengisian & penggunaan admin katalog"
+              >
+                <HelpCircle size={16} />
+                <span>Panduan</span>
+              </button>
+              <button id="tour-qr-access" className="btn-export-id-cards btn-qr-access" onClick={() => setShowAccessQR(true)}>
                 <QrCode size={16} />
                 <span>QR Akses</span>
               </button>
@@ -807,7 +829,7 @@ export default function AdminKatalogPage() {
                 <FileText size={16} />
                 <span>Export PDF</span>
               </button>
-              <button className="btn-export-id-cards btn-print-id" onClick={handleExportIDCards} disabled={isExporting}>
+              <button id="tour-export-id" className="btn-export-id-cards btn-print-id" onClick={handleExportIDCards} disabled={isExporting}>
                 <Printer size={16} />
                 <span>Cetak ID Card</span>
               </button>
@@ -956,7 +978,7 @@ export default function AdminKatalogPage() {
         </div>
       </div>
 
-      <div className="grid-section">
+      <div id="tour-participant-grid" className="grid-section">
         {data.map((item) => {
           const isPulang = item.keterangan === "pulang";
           return (

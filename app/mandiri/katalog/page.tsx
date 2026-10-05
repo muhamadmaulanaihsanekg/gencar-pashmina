@@ -9,8 +9,9 @@ import {
   Sparkles, Search, User, MapPin, Heart, Calendar,
   GraduationCap, Briefcase, Lock, LogOut, ChevronDown, ChevronLeft, ChevronRight,
   Settings2, CheckCircle2, UserCheck, Users, Globe, Music, Utensils,
-  X, ShieldCheck, Star, UtilityPole as UtensilsIcon, ArrowLeft, Instagram, Timer, MessageSquare, Clock, QrCode, Send
+  X, ShieldCheck, Star, UtilityPole as UtensilsIcon, ArrowLeft, Instagram, Timer, MessageSquare, Clock, QrCode, Send, HelpCircle
 } from "lucide-react";
+import { startMandiriKatalogTour, isMandiriKatalogTourDone } from "@/lib/tours/tourKatalog";
 import Link from "next/link";
 import { getPusherClient } from "@/lib/pusher-client";
 import JsBarcode from "jsbarcode";
@@ -908,6 +909,18 @@ export default function PublicKatalogPage() {
     }
   }, [currentUser?.id, fetchHasilRR]);
 
+  // Auto-run Onboarding Tour saat pertama kali buka katalog
+  useEffect(() => {
+    if (currentUser?.id && !loading) {
+      if (!isMandiriKatalogTourDone()) {
+        const timer = setTimeout(() => {
+          startMandiriKatalogTour();
+        }, 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentUser?.id, loading]);
+
   // Realtime updates using Pusher
   useEffect(() => {
     const pusher = getPusherClient();
@@ -1730,12 +1743,12 @@ export default function PublicKatalogPage() {
       <div className="container pb-24">
 
       {/* Desktop Tabs */}
-      <div className="desktop-tab-nav">
+      <div id="tour-katalog-tabs" className="desktop-tab-nav">
         <button className={activeTab === "katalog" ? "active" : ""} onClick={() => setActiveTab("katalog")}>
           <Users size={16} />
           <span>Katalog</span>
         </button>
-        <button className={activeTab === "cart" ? "active" : ""} onClick={() => setActiveTab("cart")}>
+        <button id="tour-katalog-cart-tab" className={activeTab === "cart" ? "active" : ""} onClick={() => setActiveTab("cart")}>
           <div className="badge-icon-wrapper">
             <Heart size={16} fill={activeTab === "cart" ? "#c5a059" : "transparent"} color={activeTab === "cart" ? "#c5a059" : "#64748b"} />
             {selectedIds.length > 0 && (
@@ -1753,7 +1766,7 @@ export default function PublicKatalogPage() {
           </div>
           <span>Hasil RR</span>
         </button>
-        <button className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}>
+        <button id="tour-katalog-profile-tab" className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}>
           <User size={16} />
           <span>Profil Saya</span>
         </button>
@@ -1779,6 +1792,15 @@ export default function PublicKatalogPage() {
           {activeTab === "absen" && <>SCAN <span>ABSENSI</span></>}
         </h1>
         <div className="header-actions">
+          <button
+            type="button"
+            className="btn-notification"
+            onClick={() => startMandiriKatalogTour({ force: true })}
+            title="Panduan Penggunaan Katalog"
+            style={{ marginRight: 8, background: "rgba(197, 160, 89, 0.15)", color: "#c5a059", border: "1px solid rgba(197, 160, 89, 0.4)" }}
+          >
+            <HelpCircle size={18} />
+          </button>
           <p className="welcome-msg">Selamat datang kembali, {currentUser?.nama || "User"}</p>
           <button
             className={`btn-notification ${hasNewComments ? 'has-new' : ''}`}
@@ -1867,7 +1889,7 @@ export default function PublicKatalogPage() {
       {activeTab === "katalog" && (
         <>
           <div className="toolbar" style={{ width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div className="search-group" style={{ display: 'grid', gridTemplateColumns: '1fr 44px', gap: '8px', width: '100%' }}>
+            <div id="tour-katalog-search" className="search-group" style={{ display: 'grid', gridTemplateColumns: '1fr 44px', gap: '8px', width: '100%' }}>
               <div className="search-bar" style={{ minWidth: 0, overflow: 'hidden' }}>
                 <Search size={18} className="search-icon" />
                 <input
@@ -2099,7 +2121,7 @@ export default function PublicKatalogPage() {
             )}
           </div>
 
-          <main className="grid-container">
+          <main id="tour-katalog-cards" className="grid-container">
             {loading && data.length === 0 ? (
               [...Array(6)].map((_, i) => <div key={i} className="skeleton-card" />)
             ) : (
