@@ -1108,7 +1108,7 @@ export default function MandiriDaftarPage() {
               <div className="form-group">
                 <label className="form-label">Status Pernikahan <span className="required">*</span></label>
                 <select name="statusNikah" className="form-control" value={form.statusNikah} onChange={handleChange} required>
-                  <option value="Lajang">Lajang / Perjaka / Perawan</option>
+                  <option value="Lajang">Belum Pernah Menikah</option>
                   <option value={form.jenisKelamin === "L" ? "Duda" : "Janda"}>
                     {form.jenisKelamin === "L" ? "Duda" : "Janda"}
                   </option>
