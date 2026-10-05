@@ -1757,6 +1757,10 @@ export default function PublicKatalogPage() {
           </div>
           <span>Pilihanku</span>
         </button>
+        <button className={activeTab === "absen" ? "active" : ""} onClick={() => setActiveTab("absen")}>
+          <QrCode size={16} />
+          <span>Absen</span>
+        </button>
         <button className={activeTab === "hasil" ? "active" : ""} onClick={() => setActiveTab("hasil")}>
           <div className="badge-icon-wrapper">
             <MessageSquare size={16} />
@@ -1766,9 +1770,13 @@ export default function PublicKatalogPage() {
           </div>
           <span>Hasil RR</span>
         </button>
+        <button className={activeTab === "saran" ? "active" : ""} onClick={() => setActiveTab("saran")}>
+          <Sparkles size={16} />
+          <span>Saran</span>
+        </button>
         <button id="tour-katalog-profile-tab" className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}>
           <User size={16} />
-          <span>Profil Saya</span>
+          <span>Profil</span>
         </button>
       </div>
 
