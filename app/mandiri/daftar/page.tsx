@@ -35,7 +35,7 @@ export default function MandiriDaftarPage() {
     noTelp: "",
     pendidikan: "",
     pekerjaan: "",
-    statusNikah: "Lajang",
+    statusNikah: "Duda",
     hobi: "",
     makananMinumanFavorit: "",
     suku: "",
@@ -123,8 +123,8 @@ export default function MandiriDaftarPage() {
       .then((d) => {
         if (d.value) {
           setRegGender(d.value);
-          if (d.value === "Laki-laki") setForm(prev => ({ ...prev, jenisKelamin: "L" }));
-          else if (d.value === "Perempuan") setForm(prev => ({ ...prev, jenisKelamin: "P" }));
+          if (d.value === "Laki-laki") setForm(prev => ({ ...prev, jenisKelamin: "L", statusNikah: "Duda" }));
+          else if (d.value === "Perempuan") setForm(prev => ({ ...prev, jenisKelamin: "P", statusNikah: "Janda" }));
         }
       });
 
@@ -446,7 +446,11 @@ export default function MandiriDaftarPage() {
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "jenisKelamin" ? { statusNikah: value === "L" ? "Duda" : "Janda" } : {}),
+    }));
   };
 
   const handleDibayarkanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -502,8 +506,7 @@ export default function MandiriDaftarPage() {
       if (!form.tempatLahir?.trim()) missingFields.push("Kota Tempat Lahir");
       if (!form.tanggalLahir) missingFields.push("Tanggal Lahir");
       if (!form.jenisKelamin) missingFields.push("Jenis Kelamin");
-      if (!form.statusNikah) missingFields.push("Status Pernikahan");
-      if (form.statusNikah !== "Lajang" && form.jumlahAnak === "") missingFields.push("Jumlah Anak");
+      if (form.jumlahAnak === "") missingFields.push("Jumlah Anak");
       if (!form.anakKe) missingFields.push("Anak Ke");
       if (!form.jumlahSaudara) missingFields.push("Dari Saudara");
       if (!form.tinggiBadan) missingFields.push("Tinggi Badan");
@@ -1106,22 +1109,15 @@ export default function MandiriDaftarPage() {
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Status Pernikahan <span className="required">*</span></label>
-                <select name="statusNikah" className="form-control" value={form.statusNikah} onChange={handleChange} required>
-                  <option value="Lajang">Belum Pernah Menikah</option>
-                  <option value={form.jenisKelamin === "L" ? "Duda" : "Janda"}>
-                    {form.jenisKelamin === "L" ? "Duda" : "Janda"}
-                  </option>
-                </select>
+                <label className="form-label">Suku (Opsional)</label>
+                <input name="suku" className="form-control" value={form.suku} onChange={handleChange} placeholder="Betawi / Jawa / dll" />
               </div>
             </div>
 
-            {form.statusNikah !== "Lajang" && (
-              <div className="form-group">
-                <label className="form-label">Jumlah Anak <span className="required">*</span></label>
-                <input type="number" name="jumlahAnak" className="form-control" value={form.jumlahAnak} onChange={handleChange} required placeholder="Contoh: 1" min={0} max={20} />
-              </div>
-            )}
+            <div className="form-group">
+              <label className="form-label">Jumlah Anak <span className="required">*</span></label>
+              <input type="number" name="jumlahAnak" className="form-control" value={form.jumlahAnak} onChange={handleChange} required placeholder="Contoh: 1" min={0} max={20} />
+            </div>
 
             <div className="form-row">
               <div className="form-group">

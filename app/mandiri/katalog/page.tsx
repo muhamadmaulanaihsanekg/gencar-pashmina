@@ -3394,7 +3394,7 @@ export default function PublicKatalogPage() {
                   setEditProfileForm({
                     nama: myFullProfile.nama || "",
                     jenisKelamin: myFullProfile.jenisKelamin || "L",
-                    statusNikah: myFullProfile.statusNikah || "Lajang",
+                    statusNikah: myFullProfile.statusNikah || (myFullProfile.jenisKelamin === "P" ? "Janda" : "Duda"),
                     jumlahAnak: myFullProfile.jumlahAnak ?? 0,
                     anakKe: myFullProfile.anakKe ?? "",
                     jumlahSaudara: myFullProfile.jumlahSaudara ?? "",
@@ -3559,21 +3559,18 @@ export default function PublicKatalogPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Status Pernikahan</label>
-                  <select value={editProfileForm.statusNikah || "Lajang"} onChange={e => setEditProfileForm({ ...editProfileForm, statusNikah: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}>
-                    <option value="Lajang">Lajang / Perjaka / Perawan</option>
+                  <select value={editProfileForm.statusNikah || (editProfileForm.jenisKelamin === "P" ? "Janda" : "Duda")} onChange={e => setEditProfileForm({ ...editProfileForm, statusNikah: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}>
                     <option value="Duda">Duda</option>
                     <option value="Janda">Janda</option>
                   </select>
                 </div>
               </div>
-              {editProfileForm.statusNikah && editProfileForm.statusNikah !== "Lajang" && (
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Jumlah Anak</label>
-                    <input type="number" min={0} value={editProfileForm.jumlahAnak ?? ""} onChange={e => setEditProfileForm({ ...editProfileForm, jumlahAnak: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
-                  </div>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Jumlah Anak</label>
+                  <input type="number" min={0} value={editProfileForm.jumlahAnak ?? ""} onChange={e => setEditProfileForm({ ...editProfileForm, jumlahAnak: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }} />
                 </div>
-              )}
+              </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Anak Ke</label>
@@ -3785,7 +3782,7 @@ export default function PublicKatalogPage() {
                   <div className="dm-field"><span className="dm-label">Pendidikan</span><span className="dm-val">{sp.pendidikan || "-"}</span></div>
                   <div className="dm-field"><span className="dm-label">Pekerjaan</span><span className="dm-val">{sp.pekerjaan || "-"}</span></div>
                   <div className="dm-field"><span className="dm-label">Suku</span><span className="dm-val">{sp.suku || "-"}</span></div>
-                  <div className="dm-field"><span className="dm-label">Status Pernikahan</span><span className="dm-val">{sp.statusNikah || "-"}{sp.statusNikah && sp.statusNikah !== "Lajang" && sp.jumlahAnak != null ? ` • ${sp.jumlahAnak} anak` : ""}</span></div>
+                  <div className="dm-field"><span className="dm-label">Status Pernikahan</span><span className="dm-val">{sp.statusNikah || "-"}{sp.jumlahAnak != null ? ` • ${sp.jumlahAnak} anak` : ""}</span></div>
                   <div className="dm-field"><span className="dm-label">Anak Ke</span><span className="dm-val">{sp.anakKe || "-"}</span></div>
                   <div className="dm-field"><span className="dm-label">Dari Saudara</span><span className="dm-val">{sp.jumlahSaudara || "-"}</span></div>
                   <div className="dm-field"><span className="dm-label">Hobi</span><span className="dm-val">{sp.hobi || "-"}</span></div>

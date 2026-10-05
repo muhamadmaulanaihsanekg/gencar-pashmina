@@ -1202,12 +1202,10 @@ export default function AdminKatalogPage() {
                   <span className="pd-label">Status Nikah</span>
                   <span className="pd-value">{profileDetail.statusNikah || "-"}</span>
                 </div>
-                {profileDetail.statusNikah && profileDetail.statusNikah !== "Lajang" && (
-                  <div className="pd-item">
-                    <span className="pd-label">Jumlah Anak</span>
-                    <span className="pd-value">{profileDetail.jumlahAnak ?? 0}</span>
-                  </div>
-                )}
+                <div className="pd-item">
+                  <span className="pd-label">Jumlah Anak</span>
+                  <span className="pd-value">{profileDetail.jumlahAnak ?? 0}</span>
+                </div>
                 <div className="pd-item">
                   <span className="pd-label">Pendidikan</span>
                   <span className="pd-value">{profileDetail.pendidikan || "-"}</span>
