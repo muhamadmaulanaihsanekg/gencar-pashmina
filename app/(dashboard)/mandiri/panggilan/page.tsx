@@ -26,7 +26,8 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
-  FilterX
+  FilterX,
+  Edit3
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -61,6 +62,7 @@ interface QueuedPair {
 interface VisitRecord {
   id: string;
   createdAt: string;
+  pemilihId?: string;
   pemilihNomorUrut?: number;
   pemilihNo?: string;
   pemilihNama: string;
@@ -69,6 +71,7 @@ interface VisitRecord {
   pemilihKota?: string;
   pemilihDesa?: string;
   pemilihWa?: string;
+  terpilihId?: string;
   terpilihNomorUrut?: number;
   terpilihNo?: string;
   terpilihNama: string;
@@ -122,6 +125,18 @@ export default function PanggilanPage() {
   const [hasilPemilihInput, setHasilPemilihInput] = useState<"Lanjut" | "Ragu-ragu" | "Tidak Lanjut">("Lanjut");
   const [hasilTerpilihInput, setHasilTerpilihInput] = useState<"Lanjut" | "Ragu-ragu" | "Tidak Lanjut">("Lanjut");
   const [isSubmittingResult, setIsSubmittingResult] = useState(false);
+
+  // Modal input manual hasil ta'aruf
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [manualPesertaList, setManualPesertaList] = useState<any[]>([]);
+  const [loadingPeserta, setLoadingPeserta] = useState(false);
+  const [manualPengirimId, setManualPengirimId] = useState("");
+  const [manualPenerimaId, setManualPenerimaId] = useState("");
+  const [manualHasilPengirim, setManualHasilPengirim] = useState<"Lanjut" | "Ragu-ragu" | "Tidak Lanjut">("Lanjut");
+  const [manualHasilPenerima, setManualHasilPenerima] = useState<"Lanjut" | "Ragu-ragu" | "Tidak Lanjut">("Lanjut");
+  const [isSubmittingManual, setIsSubmittingManual] = useState(false);
+  const [searchPengirimText, setSearchPengirimText] = useState("");
+  const [searchPenerimaText, setSearchPenerimaText] = useState("");
 
   // Fetch kegiatan list
   const fetchKegiatan = async () => {
@@ -309,9 +324,121 @@ export default function PanggilanPage() {
   // Handle buka modal hasil
   const handleOpenResultModal = (item: QueuedPair) => {
     setActiveTargetPair(item);
-    setHasilPemilihInput("Lanjut");
-    setHasilTerpilihInput("Lanjut");
+    setHasilPemilihInput(
+      item.hasilPengirim === "Tidak Lanjut"
+        ? "Tidak Lanjut"
+        : item.hasilPengirim === "Ragu-ragu"
+        ? "Ragu-ragu"
+        : "Lanjut"
+    );
+    setHasilTerpilihInput(
+      item.hasilPenerima === "Tidak Lanjut"
+        ? "Tidak Lanjut"
+        : item.hasilPenerima === "Ragu-ragu"
+        ? "Ragu-ragu"
+        : "Lanjut"
+    );
     setShowResultModal(true);
+  };
+
+  // Handle buka modal isi manual
+  const handleOpenManualModal = async () => {
+    setShowManualModal(true);
+    setManualPengirimId("");
+    setManualPenerimaId("");
+    setManualHasilPengirim("Lanjut");
+    setManualHasilPenerima("Lanjut");
+    setSearchPengirimText("");
+    setSearchPenerimaText("");
+
+    if (manualPesertaList.length === 0) {
+      setLoadingPeserta(true);
+      try {
+        const res = await fetch(`/api/mandiri?limit=1000&kegiatanId=${selectedKegiatanId}`, {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setManualPesertaList(json.data || []);
+        }
+      } catch (e) {
+        console.error("Gagal load peserta:", e);
+      } finally {
+        setLoadingPeserta(false);
+      }
+    }
+  };
+
+  const filteredPengirimList = useMemo(() => {
+    const q = searchPengirimText.toLowerCase().trim();
+    return manualPesertaList.filter((p) => {
+      const matchGender = !p.jenisKelamin || p.jenisKelamin === "L";
+      if (!matchGender) return false;
+      if (!q) return true;
+      const nama = (p.nama || "").toLowerCase();
+      const noUrut = String(p.nomorUrut || "");
+      const desa = (p.desaNama || "").toLowerCase();
+      const daerah = (p.desaKota || "").toLowerCase();
+      return nama.includes(q) || noUrut.includes(q) || desa.includes(q) || daerah.includes(q);
+    });
+  }, [manualPesertaList, searchPengirimText]);
+
+  const filteredPenerimaList = useMemo(() => {
+    const q = searchPenerimaText.toLowerCase().trim();
+    return manualPesertaList.filter((p) => {
+      const matchGender = !p.jenisKelamin || p.jenisKelamin === "P";
+      if (!matchGender) return false;
+      if (!q) return true;
+      const nama = (p.nama || "").toLowerCase();
+      const noUrut = String(p.nomorUrut || "");
+      const desa = (p.desaNama || "").toLowerCase();
+      const daerah = (p.desaKota || "").toLowerCase();
+      return nama.includes(q) || noUrut.includes(q) || desa.includes(q) || daerah.includes(q);
+    });
+  }, [manualPesertaList, searchPenerimaText]);
+
+  const handleSubmitManual = async () => {
+    if (!manualPengirimId || !manualPenerimaId) {
+      Swal.fire("Perhatian", "Silakan pilih Peserta 1 (Ikhwan) dan Peserta 2 (Akhwat) terlebih dahulu.", "warning");
+      return;
+    }
+    if (manualPengirimId === manualPenerimaId) {
+      Swal.fire("Perhatian", "Peserta 1 dan Peserta 2 tidak boleh orang yang sama.", "warning");
+      return;
+    }
+
+    setIsSubmittingManual(true);
+    try {
+      const res = await fetch("/api/mandiri/kunjungan/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pengirimId: manualPengirimId,
+          penerimaId: manualPenerimaId,
+          hasilPengirim: manualHasilPengirim,
+          hasilPenerima: manualHasilPenerima,
+          kegiatanId: selectedKegiatanId,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Gagal menyimpan hasil");
+
+      setShowManualModal(false);
+      Swal.fire({
+        title: "Berhasil Disimpan",
+        text: "Hasil ta'aruf berhasil dicatat ke riwayat.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      fetchHistory();
+      fetchQueue();
+    } catch (err: any) {
+      Swal.fire("Gagal", err.message, "error");
+    } finally {
+      setIsSubmittingManual(false);
+    }
   };
 
   // Submit hasil
@@ -762,6 +889,13 @@ export default function PanggilanPage() {
               ))}
             </div>
             <div className="export-buttons">
+              <button
+                type="button"
+                className="btn-export btn-manual"
+                onClick={handleOpenManualModal}
+              >
+                <Plus size={15} /> Isi Manual
+              </button>
               <button className="btn-export btn-excel" onClick={handleExportExcel}>
                 <FileSpreadsheet size={15} /> Excel
               </button>
@@ -954,6 +1088,7 @@ export default function PanggilanPage() {
                       <th>Yang Dipilih</th>
                       <th>Hasil 2</th>
                       <th>Kesimpulan</th>
+                      <th>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -967,6 +1102,7 @@ export default function PanggilanPage() {
                           status: "selesai",
                           statusTunggu: "selesai",
                           createdAt: row.createdAt,
+                          pengirimId: row.pemilihId,
                           pengirimNama: row.pemilihNama,
                           pengirimNo: row.pemilihNo || "",
                           pengirimNomorUrut: row.pemilihNomorUrut,
@@ -975,6 +1111,7 @@ export default function PanggilanPage() {
                           pengirimDesa: row.pemilihDesa,
                           pengirimWa: row.pemilihWa,
                           hasilPengirim: row.pemilihHasil,
+                          penerimaId: row.terpilihId,
                           penerimaNama: row.terpilihNama,
                           penerimaNo: row.terpilihNo || "",
                           penerimaNomorUrut: row.terpilihNomorUrut,
@@ -1043,6 +1180,51 @@ export default function PanggilanPage() {
                           <span className={`badge-conclusion ${conclusion.type}`}>
                             {conclusion.label}
                           </span>
+                        </td>
+                        <td onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenResultModal({
+                              id: row.id,
+                              status: "selesai",
+                              statusTunggu: "selesai",
+                              createdAt: row.createdAt,
+                              pengirimId: row.pemilihId,
+                              pengirimNama: row.pemilihNama,
+                              pengirimNo: row.pemilihNo || "",
+                              pengirimNomorUrut: row.pemilihNomorUrut,
+                              pengirimStatus: row.pemilihStatus,
+                              pengirimKota: row.pemilihKota,
+                              pengirimDesa: row.pemilihDesa,
+                              pengirimWa: row.pemilihWa,
+                              hasilPengirim: row.pemilihHasil,
+                              penerimaId: row.terpilihId,
+                              penerimaNama: row.terpilihNama,
+                              penerimaNo: row.terpilihNo || "",
+                              penerimaNomorUrut: row.terpilihNomorUrut,
+                              penerimaStatus: row.terpilihStatus,
+                              penerimaKota: row.terpilihKota,
+                              penerimaDesa: row.terpilihDesa,
+                              penerimaWa: row.terpilihWa,
+                              hasilPenerima: row.terpilihHasil,
+                            })}
+                            style={{
+                              padding: "4px 8px",
+                              fontSize: "12px",
+                              borderRadius: "6px",
+                              border: "1px solid #cbd5e1",
+                              background: "#ffffff",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              color: "#1e293b",
+                              fontWeight: 500,
+                            }}
+                            title="Ubah Hasil Ta'aruf"
+                          >
+                            <Edit3 size={12} color="#2563eb" /> Edit
+                          </button>
                         </td>
                       </tr>
                     );
@@ -1238,7 +1420,7 @@ export default function PanggilanPage() {
                 >
                   Tutup
                 </button>
-                {selectedDetailPair.statusTunggu !== "selesai" && (
+                {selectedDetailPair.statusTunggu !== "selesai" ? (
                   <button
                     type="button"
                     className="btn-save-modal"
@@ -1249,6 +1431,19 @@ export default function PanggilanPage() {
                     }}
                   >
                     <CheckCircle size={15} /> Catat Hasil
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn-save-modal"
+                    onClick={() => {
+                      const p = selectedDetailPair;
+                      setSelectedDetailPair(null);
+                      handleOpenResultModal(p);
+                    }}
+                    style={{ background: "#2563eb" }}
+                  >
+                    <Edit3 size={15} /> Ubah Hasil
                   </button>
                 )}
               </div>
@@ -1414,6 +1609,210 @@ export default function PanggilanPage() {
                 disabled={isSubmittingResult}
               >
                 {isSubmittingResult ? "Menyimpan..." : "Simpan Hasil Pertemuan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL INPUT MANUAL HASIL TA'ARUF */}
+      {showManualModal && (
+        <div className="modal-backdrop" onClick={() => setShowManualModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "600px" }}>
+            <div className="modal-header">
+              <h3>Input Manual Hasil Ta&apos;aruf</h3>
+              <button className="modal-close" onClick={() => setShowManualModal(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <p className="modal-sub">
+                Catat langsung hasil pertemuan ta&apos;aruf antara dua peserta tanpa melalui antrean:
+              </p>
+
+              {loadingPeserta ? (
+                <div style={{ textAlign: "center", padding: "24px 0" }}>
+                  <RefreshCw size={24} className="spin" color="#2d5a43" />
+                  <p style={{ marginTop: 8, fontSize: 13, color: "#64748b" }}>Memuat daftar peserta...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Peserta 1 (Ikhwan) */}
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 6 }}>
+                      Peserta 1 (Ikhwan / Laki-laki) <span style={{ color: "#dc2626" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Cari nama, nomor urut (#12), atau desa..."
+                      value={searchPengirimText}
+                      onChange={(e) => setSearchPengirimText(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        fontSize: 13,
+                        borderRadius: 6,
+                        border: "1px solid #cbd5e1",
+                        marginBottom: 6,
+                        background: "#f8fafc",
+                        outline: "none",
+                      }}
+                    />
+                    <select
+                      value={manualPengirimId}
+                      onChange={(e) => setManualPengirimId(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        fontSize: 13,
+                        borderRadius: 6,
+                        border: "1px solid #cbd5e1",
+                        background: "#fff",
+                        color: "#1e293b",
+                        outline: "none",
+                      }}
+                    >
+                      <option value="">-- Pilih Peserta 1 ({filteredPengirimList.length} peserta) --</option>
+                      {filteredPengirimList.map((p) => {
+                        const pId = p.generusId || p.id;
+                        return (
+                          <option key={pId} value={pId}>
+                            #{p.nomorUrut || "-"} {p.nama} ({p.desaNama || p.desaKota || "-"})
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {/* Peserta 2 (Akhwat) */}
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 6 }}>
+                      Peserta 2 (Akhwat / Perempuan) <span style={{ color: "#dc2626" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Cari nama, nomor urut (#501), atau desa..."
+                      value={searchPenerimaText}
+                      onChange={(e) => setSearchPenerimaText(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        fontSize: 13,
+                        borderRadius: 6,
+                        border: "1px solid #cbd5e1",
+                        marginBottom: 6,
+                        background: "#f8fafc",
+                        outline: "none",
+                      }}
+                    />
+                    <select
+                      value={manualPenerimaId}
+                      onChange={(e) => setManualPenerimaId(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        fontSize: 13,
+                        borderRadius: 6,
+                        border: "1px solid #cbd5e1",
+                        background: "#fff",
+                        color: "#1e293b",
+                        outline: "none",
+                      }}
+                    >
+                      <option value="">-- Pilih Peserta 2 ({filteredPenerimaList.length} peserta) --</option>
+                      {filteredPenerimaList.map((p) => {
+                        const pId = p.generusId || p.id;
+                        return (
+                          <option key={pId} value={pId}>
+                            #{p.nomorUrut || "-"} {p.nama} ({p.desaNama || p.desaKota || "-"})
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {/* Radio Hasil */}
+                  <div className="form-result-row" style={{ marginTop: 16 }}>
+                    <div className="participant-result-box">
+                      <div className="pr-header">
+                        <strong>Hasil Peserta 1</strong>
+                      </div>
+                      <div className="pr-options">
+                        {(["Lanjut", "Ragu-ragu", "Tidak Lanjut"] as const).map((opt) => (
+                          <label
+                            key={opt}
+                            className={`radio-label ${
+                              manualHasilPengirim === opt
+                                ? `selected ${opt === "Lanjut" ? "lanjut" : opt === "Ragu-ragu" ? "ragu" : "tidak"}`
+                                : ""
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="manualHasilPengirim"
+                              checked={manualHasilPengirim === opt}
+                              onChange={() => setManualHasilPengirim(opt)}
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="participant-result-box">
+                      <div className="pr-header">
+                        <strong>Hasil Peserta 2</strong>
+                      </div>
+                      <div className="pr-options">
+                        {(["Lanjut", "Ragu-ragu", "Tidak Lanjut"] as const).map((opt) => (
+                          <label
+                            key={opt}
+                            className={`radio-label ${
+                              manualHasilPenerima === opt
+                                ? `selected ${opt === "Lanjut" ? "lanjut" : opt === "Ragu-ragu" ? "ragu" : "tidak"}`
+                                : ""
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="manualHasilPenerima"
+                              checked={manualHasilPenerima === opt}
+                              onChange={() => setManualHasilPenerima(opt)}
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {manualHasilPengirim === "Lanjut" && manualHasilPenerima === "Lanjut" && (
+                    <div className="match-notice" style={{ marginTop: 16 }}>
+                      <CheckCircle size={16} />
+                      Kedua pihak memilih <strong>Lanjut</strong>. Pasangan akan otomatis tercatat cocok!
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn-cancel-modal"
+                onClick={() => setShowManualModal(false)}
+                disabled={isSubmittingManual}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn-save-modal"
+                onClick={handleSubmitManual}
+                disabled={isSubmittingManual || loadingPeserta}
+              >
+                {isSubmittingManual ? "Menyimpan..." : "Simpan Hasil Ta'aruf"}
               </button>
             </div>
           </div>
@@ -1847,6 +2246,14 @@ export default function PanggilanPage() {
         }
         .btn-excel:hover {
           background: #166534;
+        }
+
+        .btn-manual {
+          background: #2d5a43;
+          color: #ffffff;
+        }
+        .btn-manual:hover {
+          background: #1f3d2e;
         }
 
         .btn-pdf {

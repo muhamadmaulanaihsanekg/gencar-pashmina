@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
             id: mandiriKunjungan.id,
             createdAt: mandiriKunjungan.createdAt,
             // Pemilih (Pengirim)
+            pemilihId: g1.id,
             pemilihNomorUrut: m1.nomorUrut,
             pemilihNo: g1.nomorUnik,
             pemilihNama: g1.nama,
@@ -52,6 +53,7 @@ export async function GET(request: NextRequest) {
             pemilihKota: mda1.nama,
             pemilihDesa: md1.nama,
             // Terpilih (Penerima)
+            terpilihId: g2.id,
             terpilihNomorUrut: m2.nomorUrut,
             terpilihNo: g2.nomorUnik,
             terpilihNama: g2.nama,
