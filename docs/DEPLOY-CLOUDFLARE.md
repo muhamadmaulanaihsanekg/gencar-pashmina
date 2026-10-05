@@ -19,7 +19,7 @@ Media disimpan di **Cloudflare R2** (binding `BUCKET`); realtime memakai
 
 ```bash
 npx wrangler login
-npx wrangler d1 create gencar-db          # salin database_id ke wrangler.toml
+npx wrangler d1 create pashmina-db          # salin database_id ke wrangler.toml
 npx wrangler r2 bucket create gencar-media
 ```
 
@@ -30,11 +30,9 @@ Isi `database_id` di `wrangler.toml` dengan hasil perintah D1 di atas.
 ```bash
 npx wrangler secret put JWT_SECRET
 npx wrangler secret put APP_ENCRYPTION_KEY
-npx wrangler secret put FONNTE_TOKEN
 ```
 
-Opsional (notifikasi WhatsApp): `WHATSAPP_API_KEY`, `WHATSAPP_PHONE_NUMBER_ID`,
-`FONNTE_TOKEN_2`, `FONNTE_TOKEN_BACKUP`, `FONNTE_API_KEY`.
+Opsional (bila pakai WhatsApp Meta): `WHATSAPP_API_KEY`, `WHATSAPP_PHONE_NUMBER_ID`.
 
 Realtime (Durable Object) dan upload (R2) **tidak butuh secret** — cukup binding
 di `wrangler.toml`. Cloudinary, Pusher, dan Firebase sudah tidak dipakai.
@@ -52,10 +50,10 @@ Skema kanonik ada di `scripts/sql/schema-from-localdb.sql` (dump lengkap dari
 
 ```bash
 # lokal
-npx wrangler d1 execute gencar-db --local  --file=scripts/sql/schema-from-localdb.sql
+npx wrangler d1 execute pashmina-db --local  --file=scripts/sql/schema-from-localdb.sql
 
 # produksi
-npx wrangler d1 execute gencar-db --remote --file=scripts/sql/schema-from-localdb.sql
+npx wrangler d1 execute pashmina-db --remote --file=scripts/sql/schema-from-localdb.sql
 ```
 
 Migrasi data dari Turso: lihat `scripts/migrate-jb2id-to-d1.ts`.

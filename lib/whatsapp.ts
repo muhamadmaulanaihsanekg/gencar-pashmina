@@ -111,7 +111,7 @@ export const sendWhatsApp = async (target: string, msg: string) => {
   // 2. Secondary & Tertiary Fallbacks: Fonnte API (Token 1, then Token 2)
   const rawFonnteTokens = [
     process.env.FONNTE_TOKEN,
-    process.env.FONNTE_TOKEN_2 || process.env.FONNTE_TOKEN_BACKUP || "nqYfKQbi3gemc59g4CqX",
+    process.env.FONNTE_TOKEN_2 || process.env.FONNTE_TOKEN_BACKUP,
     process.env.FONNTE_API_KEY,
   ];
   const fonnteTokens = rawFonnteTokens.filter(
