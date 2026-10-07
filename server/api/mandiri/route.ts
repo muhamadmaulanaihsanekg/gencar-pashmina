@@ -261,10 +261,69 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { generusId, statusMandiri, catatan } = body;
+    const { statusMandiri, catatan } = body;
+    let { generusId } = body;
 
+    // Tambah manual oleh admin: buat generus baru kalau generusId kosong
     if (!generusId) {
-      return NextResponse.json({ error: "Generus ID wajib diisi" }, { status: 400 });
+      const {
+        nama, jenisKelamin, tempatLahir, tanggalLahir, alamat, noTelp,
+        pendidikan, pekerjaan, statusNikah, hobi, makananMinumanFavorit, suku,
+        foto, jumlahAnak, anakKe, jumlahSaudara, tinggiBadan,
+        mandiriDesaId, mandiriKelompokId, instagram, kriteriaPasangan, targetMenikah,
+      } = body;
+
+      if (!nama || !isMandiriJenisKelamin(jenisKelamin) || !mandiriDesaId) {
+        return NextResponse.json({ error: "Nama, jenis kelamin, dan desa wajib diisi" }, { status: 400 });
+      }
+
+      const dupConditions = [];
+      if (tanggalLahir) dupConditions.push(and(eq(generus.nama, nama), eq(generus.tanggalLahir, tanggalLahir)));
+      if (noTelp) dupConditions.push(eq(generus.noTelp, noTelp));
+      const duplicate = dupConditions.length > 0
+        ? await db.query.generus.findFirst({ where: or(...dupConditions) })
+        : null;
+      if (duplicate) {
+        return NextResponse.json({
+          error: `Data dengan nama "${nama}" atau No. HP "${noTelp}" sudah terdaftar sebelumnya.`,
+        }, { status: 400 });
+      }
+
+      let nomorUnik = `MND${Math.floor(100000 + Math.random() * 900000)}`;
+      while (await db.query.generus.findFirst({ where: eq(generus.nomorUnik, nomorUnik) })) {
+        nomorUnik = `MND${Math.floor(100000 + Math.random() * 900000)}`;
+      }
+
+      generusId = uuidv4();
+      await db.insert(generus).values({
+        id: generusId,
+        nomorUnik,
+        nama,
+        jenisKelamin,
+        kategoriUsia: "Bekerja",
+        tempatLahir,
+        tanggalLahir,
+        alamat,
+        noTelp,
+        pendidikan,
+        pekerjaan,
+        statusNikah: statusNikah || null,
+        hobi,
+        makananMinumanFavorit,
+        suku,
+        anakKe: anakKe ? Number(anakKe) : null,
+        jumlahSaudara: jumlahSaudara ? Number(jumlahSaudara) : null,
+        jumlahAnak: jumlahAnak !== undefined && jumlahAnak !== "" ? Number(jumlahAnak) : 0,
+        tinggiBadan: tinggiBadan ? Number(tinggiBadan) : null,
+        foto,
+        mandiriDesaId: mandiriDesaId ? Number(mandiriDesaId) : null,
+        mandiriKelompokId: mandiriKelompokId ? Number(mandiriKelompokId) : null,
+        instagram,
+        kriteriaPasangan,
+        targetMenikah,
+        createdBy: session.userId,
+        isGenerus: 0,
+      });
     }
 
     // Check if already in list
@@ -304,6 +363,9 @@ export async function POST(request: NextRequest) {
       kegiatanId: activeKegiatanId,
       nomorUrut: nextNr,
       statusMandiri: statusMandiri || "Aktif",
+      statusPeserta: body.statusPeserta === "Person" ? "Person" : "Utusan Daerah",
+      dibayarkanSenilai: body.statusPeserta === "Person" && body.dibayarkanSenilai ? Number(body.dibayarkanSenilai) : null,
+      buktiPembayaran: body.statusPeserta === "Person" ? body.buktiPembayaran || null : null,
       catatan,
     });
 
@@ -334,7 +396,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, id, nomorUrut: nextNr });
+    return NextResponse.json({ success: true, id, nomorUnik: genData.nomorUnik, nama: genData.nama, nomorUrut: nextNr });
   } catch (error) {
     console.error("Mandiri POST error:", error);
     const status = Number((error as any)?.status || 500);

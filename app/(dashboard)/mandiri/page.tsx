@@ -100,8 +100,9 @@ export default function MandiriPage() {
    
    // Edit Modal State
    const [editModalOpen, setEditModalOpen] = useState(false);
+   const [addMode, setAddMode] = useState(false);
    const [isSubmitting, setIsSubmitting] = useState(false);
-   const [editForm, setEditForm] = useState({
+   const blankEditForm = () => ({
       id: "",
       statusMandiri: "Aktif",
       statusPeserta: "Utusan Daerah",
@@ -132,6 +133,7 @@ export default function MandiriPage() {
       mandiriKelompokId: "",
       buktiPembayaran: "",
    });
+   const [editForm, setEditForm] = useState(blankEditForm);
 
    const limit = 10;
 
@@ -466,6 +468,13 @@ export default function MandiriPage() {
          mandiriKelompokId: mKelId,
          buktiPembayaran: item.buktiPembayaran || "",
       });
+      setAddMode(false);
+      setEditModalOpen(true);
+   };
+
+   const handleTambah = () => {
+      setEditForm(blankEditForm());
+      setAddMode(true);
       setEditModalOpen(true);
    };
 
@@ -473,6 +482,49 @@ export default function MandiriPage() {
       e.preventDefault();
       setIsSubmitting(true);
       try {
+         if (addMode) {
+            const res = await fetch("/api/mandiri", {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({
+                  statusMandiri: editForm.statusMandiri,
+                  statusPeserta: editForm.statusPeserta,
+                  statusNikah: editForm.statusNikah || null,
+                  jumlahAnak: editForm.jumlahAnak,
+                  dibayarkanSenilai: editForm.dibayarkanSenilai || null,
+                  buktiPembayaran: editForm.buktiPembayaran || null,
+                  catatan: editForm.catatan,
+                  nama: editForm.nama,
+                  foto: editForm.foto,
+                  noTelp: editForm.noTelp,
+                  jenisKelamin: editForm.jenisKelamin,
+                  tanggalLahir: editForm.tanggalLahir || null,
+                  tempatLahir: editForm.tempatLahir,
+                  alamat: editForm.alamat,
+                  pendidikan: editForm.pendidikan,
+                  pekerjaan: editForm.pekerjaan,
+                  suku: editForm.suku,
+                  hobi: editForm.hobi,
+                  makananMinumanFavorit: editForm.makananMinumanFavorit,
+                  instagram: editForm.instagram,
+                  kriteriaPasangan: editForm.kriteriaPasangan || null,
+                  targetMenikah: editForm.targetMenikah || null,
+                  mandiriDaerahId: editForm.mandiriDaerahId || null,
+                  mandiriDesaId: editForm.mandiriDesaId || null,
+                  mandiriKelompokId: editForm.mandiriKelompokId || null,
+               }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Gagal menambah peserta");
+            setEditModalOpen(false);
+            Swal.fire({
+               icon: "success",
+               title: "Peserta Ditambahkan",
+               html: `ID akun: <b>${data.nomorUnik || "-"}</b><br/>Nomor urut: <b>${data.nomorUrut ?? "-"}</b>`,
+            });
+            fetchData();
+            return;
+         }
          const payload = {
             id: editForm.id,
             generusId: editForm.generusId,
@@ -1167,21 +1219,7 @@ export default function MandiriPage() {
                    {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
                       <button
                          className="toolbar-btn toolbar-btn-primary"
-                         onClick={() => {
-                            Swal.fire({
-                               title: "Tambah Peserta Manual",
-                               text: "Pilih jenis peserta yang ingin ditambahkan",
-                               icon: "question",
-                               showDenyButton: true,
-                               confirmButtonText: "Peserta Wajib",
-                               denyButtonText: "Person",
-                               showCancelButton: true,
-                               cancelButtonText: "Batal",
-                            }).then((r) => {
-                               if (r.isConfirmed) window.open("/mandiri/daftar?admin=1", "_blank");
-                               else if (r.isDenied) window.open("/mandiri/daftar?admin=1&status=person", "_blank");
-                            });
-                         }}
+                         onClick={handleTambah}
                          title="Tambah peserta secara manual"
                       >
                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1771,7 +1809,7 @@ export default function MandiriPage() {
                >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                      <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#0f172a", margin: 0 }}>
-                        Update Status Akun
+                        {addMode ? "Tambah Peserta Manual" : "Update Status Akun"}
                      </h3>
                      <button 
                         onClick={() => setEditModalOpen(false)}
@@ -1783,10 +1821,12 @@ export default function MandiriPage() {
                      </button>
                   </div>
                   
+                  {!addMode && (
                   <div style={{ padding: "12px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "20px" }}>
                      <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "2px" }}>Peserta</div>
                      <div style={{ fontWeight: "700", color: "#0f172a" }}>{editForm.nama} <span style={{ color: "#94a3b8", fontWeight: "normal" }}>#{editForm.nomorUrut}</span></div>
                   </div>
+                  )}
 
                   <form onSubmit={submitEdit}>
                      {/* Data Diri Section */}
@@ -2045,6 +2085,7 @@ export default function MandiriPage() {
                         </div>
 
                         <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                           {!addMode && (
                            <div className="form-group" style={{ flex: 1 }}>
                               <label className="form-label">Status Akun</label>
                               <select
@@ -2057,6 +2098,7 @@ export default function MandiriPage() {
                                  <option value="Batal">Batal</option>
                               </select>
                            </div>
+                           )}
 
                            <div className="form-group" style={{ flex: 1 }}>
                               <label className="form-label">Status Peserta</label>
@@ -2148,6 +2190,22 @@ export default function MandiriPage() {
                            </>
                         )}
 
+                        {addMode && editForm.statusPeserta !== "Person" && (
+                           <div className="form-group" style={{ marginBottom: "16px" }}>
+                              <label className="form-label">Target Menikah (Opsional)</label>
+                              <select
+                                 className="form-control"
+                                 value={editForm.targetMenikah || ""}
+                                 onChange={(e) => setEditForm({ ...editForm, targetMenikah: e.target.value })}
+                              >
+                                 <option value="">-- Pilih Target Menikah --</option>
+                                 {Array.from({ length: 15 }, (_, i) => 2026 + i).map(y => (
+                                    <option key={y} value={String(y)}>{y}</option>
+                                 ))}
+                              </select>
+                           </div>
+                        )}
+
                         <div className="form-group" style={{ marginBottom: "16px" }}>
                            <label className="form-label">Catatan</label>
                            <textarea
@@ -2173,7 +2231,7 @@ export default function MandiriPage() {
                            Batal
                         </button>
                         <button type="submit" className="btn btn-primary" style={{ margin: 0 }} disabled={isSubmitting}>
-                           {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+                           {isSubmitting ? "Menyimpan..." : addMode ? "Tambah Peserta" : "Simpan Perubahan"}
                         </button>
                      </div>
                   </form>
