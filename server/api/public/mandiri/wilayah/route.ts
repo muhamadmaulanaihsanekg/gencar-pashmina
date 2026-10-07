@@ -64,6 +64,16 @@ export async function POST(request: NextRequest) {
         } else {
           const newD = await db.insert(mandiriDaerah).values({ nama: kota.trim() }).returning({ id: mandiriDaerah.id });
           daerahId = newD[0].id;
+
+          if (activeKegiatanId && daerahId) {
+            const { v4: uuidv4 } = require("uuid");
+            await db.insert(mandiriKegiatanDaerah).values({
+              id: uuidv4(),
+              kegiatanId: activeKegiatanId,
+              daerahId: daerahId,
+              isActive: 0,
+            });
+          }
         }
       }
 

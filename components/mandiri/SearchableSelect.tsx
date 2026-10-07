@@ -24,6 +24,7 @@ export default function SearchableSelect({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,6 +93,30 @@ export default function SearchableSelect({
             placeholder="Cari..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={async (e) => {
+              if (e.key === "Escape") {
+                setIsOpen(false);
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (filtered.length > 0) {
+                  onChange(String(filtered[0].id));
+                  setIsOpen(false);
+                  setSearch("");
+                } else if (showAddNew && onAddNew && !isAdding) {
+                  setIsAdding(true);
+                  try {
+                    const newOpt = await onAddNew(search.trim());
+                    onChange(String(newOpt.id));
+                    setIsOpen(false);
+                    setSearch("");
+                  } catch (err) {
+                    console.error("Failed to add new option on Enter:", err);
+                  } finally {
+                    setIsAdding(false);
+                  }
+                }
+              }
+            }}
             style={{
               margin: '8px',
               padding: '8px 12px',
@@ -140,6 +165,8 @@ export default function SearchableSelect({
             {showAddNew && (
               <div
                 onClick={async () => {
+                  if (isAdding) return;
+                  setIsAdding(true);
                   try {
                     const newOpt = await onAddNew(search.trim());
                     onChange(String(newOpt.id));
@@ -147,22 +174,25 @@ export default function SearchableSelect({
                     setSearch("");
                   } catch (e) {
                     console.error("Failed to add new option:", e);
+                  } finally {
+                    setIsAdding(false);
                   }
                 }}
                 style={{
                   padding: '10px 12px',
                   fontSize: '13.5px',
-                  cursor: 'pointer',
+                  cursor: isAdding ? 'not-allowed' : 'pointer',
                   backgroundColor: '#f0fdf4',
                   color: '#166534',
                   fontWeight: '600',
                   borderTop: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '6px',
+                  opacity: isAdding ? 0.7 : 1
                 }}
               >
-                <span style={{ fontSize: '16px' }}>+</span> Tambah baru: "{search.trim()}"
+                <span style={{ fontSize: '16px' }}>+</span> {isAdding ? "Menambahkan..." : `Tambah baru: "${search.trim()}"`}
               </div>
             )}
           </div>

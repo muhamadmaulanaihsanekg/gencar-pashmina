@@ -2,7 +2,7 @@
 
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import Link from "next/link";
 import { Calendar, Clock, MapPin, ExternalLink, Heart, Sparkles, ArrowLeft, HelpCircle } from "lucide-react";
@@ -13,8 +13,8 @@ import JsBarcode from "jsbarcode";
 import QRCode from "qrcode";
 import { startDaftarTour, isDaftarTourDone } from "@/lib/tours/tourDaftar";
 
-interface Desa { id: number; nama: string; kota: string; }
-interface Kelompok { id: number; nama: string; }
+interface Desa { id: number; nama: string; kota: string; mandiriDaerahId?: number; }
+interface Kelompok { id: number; nama: string; mandiriDesaId?: number; }
 
 export default function MandiriDaftarPage() {
   useEffect(() => {
@@ -55,8 +55,6 @@ export default function MandiriDaftarPage() {
 
   const [daerahList, setDaerahList] = useState<Desa[]>([]);
   const [desaList, setDesaList] = useState<Kelompok[]>([]);
-  const [filteredDaerahList, setFilteredDaerahList] = useState<Desa[]>([]);
-  const [filteredDesaList, setFilteredDesaList] = useState<Kelompok[]>([]);
   const [kotaList, setKotaList] = useState<string[]>([]);
   const [selectedKota, setSelectedKota] = useState("");
   const [loading, setLoading] = useState(false);
@@ -159,15 +157,19 @@ export default function MandiriDaftarPage() {
       });
 
     Promise.all([
-      fetch("/api/public/mandiri/desa").then((r) => r.json()),
-      fetch("/api/public/mandiri/kelompok").then((r) => r.json()),
-    ]).then(([daerahs, desas]) => {
-      if (Array.isArray(daerahs)) {
-        setDaerahList(daerahs);
-        const cities = Array.from(new Set(daerahs.map((d: any) => d.kota))).sort() as string[];
-        setKotaList(cities);
+      fetch("/api/public/mandiri/daerah").then((r) => r.json()).catch(() => []),
+      fetch("/api/public/mandiri/desa").then((r) => r.json()).catch(() => []),
+      fetch("/api/public/mandiri/kelompok").then((r) => r.json()).catch(() => []),
+    ]).then(([daerahData, desaData, kelompokData]) => {
+      if (Array.isArray(desaData)) {
+        setDaerahList(desaData);
       }
-      if (Array.isArray(desas)) setDesaList(desas);
+      const cities = Array.from(new Set([
+        ...(Array.isArray(daerahData) ? daerahData.map((d: any) => d.nama) : []),
+        ...(Array.isArray(desaData) ? desaData.map((d: any) => d.kota) : []),
+      ])).filter(Boolean).sort() as string[];
+      setKotaList(cities);
+      if (Array.isArray(kelompokData)) setDesaList(kelompokData);
     });
   }, []);
 
@@ -183,22 +185,45 @@ export default function MandiriDaftarPage() {
   };
 
   const handleAddDaerah = async (nama: string) => {
-    const data = await addWilayah("daerah", nama);
-    setKotaList((prev) => (prev.includes(data.nama) ? prev : [...prev, data.nama].sort()));
-    return { id: data.nama, name: data.nama };
+    try {
+      const data = await addWilayah("daerah", nama);
+      setKotaList((prev) => (prev.includes(data.nama) ? prev : [...prev, data.nama].sort()));
+      return { id: data.nama, name: data.nama };
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "Gagal Menambah Daerah", text: err.message || "Terjadi kesalahan" });
+      throw err;
+    }
   };
 
   const handleAddDesa = async (nama: string) => {
-    // API resolves/creates the parent daerah by kota name when parentId is absent
-    const data = await addWilayah("desa", nama, { kota: selectedKota });
-    setDesaList((prev) => (prev.some((d) => d.id === data.id) ? prev : [...prev, { id: data.id, nama: data.nama }]));
-    return { id: data.id, name: data.nama };
+    if (!selectedKota) {
+      Swal.fire({ icon: "warning", title: "Pilih Daerah Terlebih Dahulu", text: "Silakan pilih daerah sebelum menambah desa." });
+      throw new Error("Daerah belum dipilih");
+    }
+    try {
+      const match = daerahList.find(d => d.kota === selectedKota);
+      const data = await addWilayah("desa", nama, { kota: selectedKota, parentId: match?.mandiriDaerahId });
+      setDaerahList((prev) => (prev.some((d) => d.id === data.id) ? prev : [...prev, { id: data.id, nama: data.nama, kota: selectedKota, mandiriDaerahId: match?.mandiriDaerahId }]));
+      return { id: data.id, name: data.nama };
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "Gagal Menambah Desa", text: err.message || "Terjadi kesalahan" });
+      throw err;
+    }
   };
 
   const handleAddKelompok = async (nama: string) => {
-    const data = await addWilayah("kelompok", nama, { parentId: Number(form.mandiriDesaId) });
-    setDesaList((prev) => (prev.some((k) => k.id === data.id) ? prev : [...prev, { id: data.id, nama: data.nama, mandiriDesaId: Number(form.mandiriDesaId) }]));
-    return { id: data.id, name: data.nama };
+    if (!form.mandiriDesaId) {
+      Swal.fire({ icon: "warning", title: "Pilih Desa Terlebih Dahulu", text: "Silakan pilih desa sebelum menambah kelompok." });
+      throw new Error("Desa belum dipilih");
+    }
+    try {
+      const data = await addWilayah("kelompok", nama, { parentId: Number(form.mandiriDesaId) });
+      setDesaList((prev) => (prev.some((k) => k.id === data.id) ? prev : [...prev, { id: data.id, nama: data.nama, mandiriDesaId: Number(form.mandiriDesaId) }]));
+      return { id: data.id, name: data.nama };
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "Gagal Menambah Kelompok", text: err.message || "Terjadi kesalahan" });
+      throw err;
+    }
   };
 
 
@@ -457,22 +482,20 @@ export default function MandiriDaftarPage() {
     );
   };
 
-  useEffect(() => {
-    if (selectedKota) {
-      setFilteredDaerahList(daerahList.filter(d => d.kota === selectedKota));
-    } else {
-      setFilteredDaerahList([]);
-    }
-    setForm(prev => ({ ...prev, mandiriDesaId: "", mandiriKelompokId: "" }));
+  const filteredDaerahList = useMemo(() => {
+    return selectedKota ? daerahList.filter(d => d.kota === selectedKota) : [];
   }, [selectedKota, daerahList]);
 
-  useEffect(() => {
-    if (form.mandiriDesaId) {
-      setFilteredDesaList(desaList.filter((d: any) => d.mandiriDesaId === Number(form.mandiriDesaId)));
-    } else {
-      setFilteredDesaList([]);
-    }
+  const filteredDesaList = useMemo(() => {
+    return form.mandiriDesaId ? desaList.filter((d: any) => d.mandiriDesaId === Number(form.mandiriDesaId)) : [];
   }, [form.mandiriDesaId, desaList]);
+
+  useEffect(() => {
+    setForm(prev => {
+      if (!prev.mandiriDesaId && !prev.mandiriKelompokId) return prev;
+      return { ...prev, mandiriDesaId: "", mandiriKelompokId: "" };
+    });
+  }, [selectedKota]);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
