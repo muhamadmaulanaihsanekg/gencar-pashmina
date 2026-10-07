@@ -106,6 +106,8 @@ export async function GET(request: NextRequest) {
         jenisKelamin: generus.jenisKelamin,
         kategoriUsia: generus.kategoriUsia,
         tanggalLahir: generus.tanggalLahir,
+        statusNikah: generus.statusNikah,
+        jumlahAnak: generus.jumlahAnak,
         pekerjaan: generus.pekerjaan,
         tempatLahir: generus.tempatLahir,
         alamat: generus.alamat,
@@ -349,7 +351,8 @@ export async function PUT(request: NextRequest) {
     const { 
       id: mandiriId, statusMandiri, catatan, resetDevice, statusPeserta, dibayarkanSenilai,
       generusId, nama, foto, noTelp, jenisKelamin, tanggalLahir, pekerjaan, mandiriDesaId, mandiriKelompokId,
-      tempatLahir, alamat, pendidikan, suku, hobi, makananMinumanFavorit, instagram, kriteriaPasangan, targetMenikah
+      tempatLahir, alamat, pendidikan, suku, hobi, makananMinumanFavorit, instagram, kriteriaPasangan, targetMenikah,
+      statusNikah, jumlahAnak
     } = body;
 
     if (!mandiriId) return NextResponse.json({ error: "ID wajib diisi" }, { status: 400 });
@@ -398,6 +401,8 @@ export async function PUT(request: NextRequest) {
       if (noTelp !== undefined) genUpdate.noTelp = noTelp;
       if (jenisKelamin !== undefined) genUpdate.jenisKelamin = jenisKelamin;
       if (tanggalLahir !== undefined) genUpdate.tanggalLahir = tanggalLahir;
+      if (statusNikah !== undefined) genUpdate.statusNikah = statusNikah || null;
+      if (jumlahAnak !== undefined) genUpdate.jumlahAnak = jumlahAnak !== "" ? Number(jumlahAnak) : 0;
       if (pekerjaan !== undefined) genUpdate.pekerjaan = pekerjaan;
       if (tempatLahir !== undefined) genUpdate.tempatLahir = tempatLahir;
       if (alamat !== undefined) genUpdate.alamat = alamat;

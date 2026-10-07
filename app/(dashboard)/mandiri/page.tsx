@@ -23,6 +23,8 @@ interface MandiriItem {
    jenisKelamin: string;
    kategoriUsia: string;
    tanggalLahir?: string | null;
+   statusNikah?: string | null;
+   jumlahAnak?: number | null;
    pekerjaan?: string | null;
    tempatLahir?: string | null;
    alamat?: string | null;
@@ -103,6 +105,8 @@ export default function MandiriPage() {
       id: "",
       statusMandiri: "Aktif",
       statusPeserta: "Utusan Daerah",
+      statusNikah: "",
+      jumlahAnak: 0,
       dibayarkanSenilai: "",
       catatan: "",
       resetDevice: false,
@@ -435,6 +439,8 @@ export default function MandiriPage() {
          id: item.id,
          statusMandiri: item.statusMandiri || "Aktif",
          statusPeserta: item.statusPeserta || "Utusan Daerah",
+         statusNikah: item.statusNikah || "",
+         jumlahAnak: item.jumlahAnak ?? 0,
          dibayarkanSenilai: item.dibayarkanSenilai ? String(item.dibayarkanSenilai) : "",
          catatan: item.catatan || "",
          resetDevice: false,
@@ -472,6 +478,8 @@ export default function MandiriPage() {
             generusId: editForm.generusId,
             statusMandiri: editForm.statusMandiri,
             statusPeserta: editForm.statusPeserta,
+            statusNikah: editForm.statusNikah || null,
+            jumlahAnak: editForm.jumlahAnak,
             dibayarkanSenilai: editForm.dibayarkanSenilai || null,
             catatan: editForm.catatan,
             resetDevice: editForm.resetDevice,
@@ -691,6 +699,8 @@ export default function MandiriPage() {
             { header: "Desa", key: "desa", width: 15 },
             { header: "Kelompok", key: "kelompok", width: 15 },
             { header: "Kehadiran", key: "kehadiran", width: 15 },
+            { header: "Status Pernikahan", key: "statusNikah", width: 25 },
+            { header: "Jumlah Anak", key: "jumlahAnak", width: 12 },
             { header: "Status Akun", key: "statusAkun", width: 15 },
             { header: "Status Peserta", key: "statusPeserta", width: 20 },
             { header: "Dibayarkan", key: "dibayarkan", width: 15 },
@@ -722,6 +732,8 @@ export default function MandiriPage() {
                desa: item.desaNama && item.desaNama !== "N/A" ? item.desaNama : "-",
                kelompok: item.kelompokNama && item.kelompokNama !== "N/A" ? item.kelompokNama : "-",
                kehadiran: item.keterangan === "pulang" ? "Pulang" : item.isHadir === 1 ? "Hadir" : "Belum Hadir",
+               statusNikah: item.statusNikah || "-",
+               jumlahAnak: item.jumlahAnak ?? 0,
                statusAkun: item.statusMandiri,
                statusPeserta: item.statusPeserta || "Utusan Daerah",
                dibayarkan: item.statusPeserta === "Person" ? (item.dibayarkanSenilai ? `Rp ${Number(item.dibayarkanSenilai).toLocaleString("id-ID")}` : "-") : "Gratis",
@@ -1305,6 +1317,7 @@ export default function MandiriPage() {
                                        <th>Nama</th>
                                        <th>JK</th>
                                        <th>Umur</th>
+                                       <th>Status Pernikahan</th>
                                        <th>Pekerjaan</th>
                                        <th>Daerah / Desa</th>
                                        <th>Kelompok</th>
@@ -1366,6 +1379,18 @@ export default function MandiriPage() {
                                           <td data-label="Nama" style={{ fontWeight: 500 }}>{item.nama}</td>
                                           <td data-label="JK">{item.jenisKelamin}</td>
                                           <td data-label="Umur">{hitungUmur(item.tanggalLahir)}</td>
+                                          <td data-label="Status Pernikahan">
+                                             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                                                <span style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>
+                                                   {item.statusNikah || "-"}
+                                                </span>
+                                                {item.jumlahAnak != null && (
+                                                   <span style={{ fontSize: 11, color: "#64748b" }}>
+                                                      {item.jumlahAnak} Anak
+                                                   </span>
+                                                )}
+                                             </div>
+                                          </td>
                                           <td data-label="Pekerjaan">{item.pekerjaan || "-"}</td>
                                           <td data-label="Daerah / Desa" style={{ fontSize: 12, opacity: 0.8 }}>
                                              {item.desaKota && item.desaKota !== "N/A" ? item.desaKota : "-"} / {item.desaNama && item.desaNama !== "N/A" ? item.desaNama : "-"}
@@ -1543,6 +1568,13 @@ export default function MandiriPage() {
                                           ) : (
                                              <span className="badge badge-gray">Belum Hadir</span>
                                           )}
+                                       </div>
+
+                                       <div className="status-item">
+                                          <span className="status-label">Status Pernikahan</span>
+                                          <span style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>
+                                             {item.statusNikah || "-"} {item.jumlahAnak != null ? `(${item.jumlahAnak} Anak)` : ""}
+                                          </span>
                                        </div>
 
                                        <div className="status-item">
@@ -1948,6 +1980,44 @@ export default function MandiriPage() {
                      <div style={{ marginBottom: "20px" }}>
                         <div style={{ fontSize: "14px", fontWeight: "700", color: "#334155", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px", marginBottom: "16px" }}>3. Status & Pembayaran</div>
                         
+                        <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                           <div className="form-group" style={{ flex: 1 }}>
+                              <label className="form-label">Status Pernikahan</label>
+                              <select
+                                 className="form-control"
+                                 value={editForm.statusNikah}
+                                 onChange={(e) => {
+                                    const val = e.target.value;
+                                    const isTanpaAnak = val.includes("Tanpa Anak");
+                                    setEditForm({
+                                       ...editForm,
+                                       statusNikah: val,
+                                       ...(isTanpaAnak ? { jumlahAnak: 0 } : {})
+                                    });
+                                 }}
+                              >
+                                 <option value="">-- Pilih Status --</option>
+                                 <option value="Single Parent karena Cerai Hidup">Single Parent karena Cerai Hidup</option>
+                                 <option value="Single Parent karena Cerai Mati">Single Parent karena Cerai Mati</option>
+                                 <option value="Cerai Hidup Tanpa Anak">Cerai Hidup Tanpa Anak</option>
+                                 <option value="Cerai Mati Tanpa Anak">Cerai Mati Tanpa Anak</option>
+                              </select>
+                           </div>
+
+                           <div className="form-group" style={{ flex: 1 }}>
+                              <label className="form-label">Jumlah Anak</label>
+                              <input
+                                 type="number"
+                                 min={0}
+                                 max={20}
+                                 className="form-control"
+                                 value={editForm.jumlahAnak}
+                                 onChange={(e) => setEditForm({ ...editForm, jumlahAnak: Number(e.target.value) })}
+                                 disabled={editForm.statusNikah.includes("Tanpa Anak")}
+                              />
+                           </div>
+                        </div>
+
                         <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
                            <div className="form-group" style={{ flex: 1 }}>
                               <label className="form-label">Status Akun</label>
