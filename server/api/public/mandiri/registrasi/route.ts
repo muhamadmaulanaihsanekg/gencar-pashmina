@@ -6,6 +6,7 @@ import { generus, mandiri, settings, desa, kelompok, users, mandiriDesa, mandiri
 import { eq, desc, and, or, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { getMandiriPersonPerempuanQuotaStatus, getNextMandiriNomorUrut, isMandiriJenisKelamin } from "@/lib/mandiriNomorUrut";
+import { getSession } from "@/lib/auth";
 
 function generateNomorUnik() {
   const prefix = "MND"; // Using MND prefix for public mandiri registration
@@ -17,21 +18,27 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Admin/panitia boleh menambah peserta manual walau pendaftaran ditutup & kuota penuh
+    const session = await getSession();
+    const isAdminBypass = !!session && ["admin", "admin_romantic_room", "pengurus_daerah", "kmm_daerah"].includes(session.role);
+
     // 1. Check Registration Status (Open/Closed)
     const statusSet = await db.select().from(settings).where(eq(settings.key, "mandiri_registration_status"));
     const currentStatus = statusSet[0]?.value;
     const reqStatusPeserta = body.statusPeserta || "Utusan Daerah";
 
-    if (currentStatus === "0") {
-      return NextResponse.json({ error: "Mohon maaf, pendaftaran saat ini sudah ditutup" }, { status: 403 });
-    }
-    
-    if (currentStatus === "tutup_utusan" && reqStatusPeserta !== "Person") {
-      return NextResponse.json({ error: "Pendaftaran untuk Utusan Daerah saat ini sedang ditutup." }, { status: 403 });
-    }
+    if (!isAdminBypass) {
+      if (currentStatus === "0") {
+        return NextResponse.json({ error: "Mohon maaf, pendaftaran saat ini sudah ditutup" }, { status: 403 });
+      }
 
-    if (currentStatus === "tutup_person" && reqStatusPeserta === "Person") {
-      return NextResponse.json({ error: "Pendaftaran untuk Peserta Person saat ini sedang ditutup." }, { status: 403 });
+      if (currentStatus === "tutup_utusan" && reqStatusPeserta !== "Person") {
+        return NextResponse.json({ error: "Pendaftaran untuk Utusan Daerah saat ini sedang ditutup." }, { status: 403 });
+      }
+
+      if (currentStatus === "tutup_person" && reqStatusPeserta === "Person") {
+        return NextResponse.json({ error: "Pendaftaran untuk Peserta Person saat ini sedang ditutup." }, { status: 403 });
+      }
     }
 
     // 2. Fetch active activity
@@ -115,7 +122,7 @@ export async function POST(request: NextRequest) {
       ? "Sudah dibayar oleh peserta Person"
       : `Sudah dibayar oleh ${desaRecord[0]?.daerahNama || "Daerah Terkait"}`;
 
-    if (quotaValue > 0 && desaRecord.length > 0 && desaRecord[0].daerahId) {
+    if (!isAdminBypass && quotaValue > 0 && desaRecord.length > 0 && desaRecord[0].daerahId) {
       const targetDaerahId = desaRecord[0].daerahId;
       const targetDaerahNama = desaRecord[0].daerahNama || "Daerah Terkait";
 

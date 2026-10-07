@@ -94,6 +94,7 @@ export default function MandiriDaftarPage() {
 
     // Determine Peserta Type from URL ONLY
     const urlParams = new URLSearchParams(window.location.search);
+    const isAdminMode = urlParams.get('admin') === '1';
     const statusParam = urlParams.get('status');
     if (statusParam && statusParam.toLowerCase() === 'person') {
       setRegStatusPeserta("Person");
@@ -111,7 +112,7 @@ export default function MandiriDaftarPage() {
           (val === "tutup_utusan" && currentPesertaType === "Utusan Daerah") ||
           (val === "tutup_person" && currentPesertaType === "Person");
 
-        if (val === "0" || specificClosed) {
+        if (!isAdminMode && (val === "0" || specificClosed)) {
           setIsClosed(true);
         }
       });

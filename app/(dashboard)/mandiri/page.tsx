@@ -1164,6 +1164,32 @@ export default function MandiriPage() {
                          Perbaiki Nomor
                       </button>
                    )}
+                   {!(userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
+                      <button
+                         className="toolbar-btn toolbar-btn-primary"
+                         onClick={() => {
+                            Swal.fire({
+                               title: "Tambah Peserta Manual",
+                               text: "Pilih jenis peserta yang ingin ditambahkan",
+                               icon: "question",
+                               showDenyButton: true,
+                               confirmButtonText: "Peserta Wajib",
+                               denyButtonText: "Person",
+                               showCancelButton: true,
+                               cancelButtonText: "Batal",
+                            }).then((r) => {
+                               if (r.isConfirmed) window.open("/mandiri/daftar?admin=1", "_blank");
+                               else if (r.isDenied) window.open("/mandiri/daftar?admin=1&status=person", "_blank");
+                            });
+                         }}
+                         title="Tambah peserta secara manual"
+                      >
+                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 5v14M5 12h14" />
+                         </svg>
+                         Tambah Manual
+                      </button>
+                   )}
                    {(userRole === "admin_romantic_room" || userRole === "admin" || userRole === "pengurus_daerah" || userRole === "kmm_daerah" || userRole === "tim_pnkb" || userRole === "tim_pnkb_gambuh") && (
                       <button
                          className="toolbar-btn toolbar-btn-primary"
