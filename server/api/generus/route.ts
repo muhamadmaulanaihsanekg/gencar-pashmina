@@ -252,6 +252,7 @@ export async function GET(request: NextRequest) {
         pendidikan: generus.pendidikan,
         pekerjaan: generus.pekerjaan,
         statusNikah: generus.statusNikah,
+        jumlahAnak: generus.jumlahAnak,
         suku: generus.suku,
         hobi: generus.hobi,
         makananMinumanFavorit: generus.makananMinumanFavorit,
