@@ -35,7 +35,7 @@ export default function MandiriDaftarPage() {
     noTelp: "",
     pendidikan: "",
     pekerjaan: "",
-    statusNikah: "Duda",
+    statusNikah: "",
     hobi: "",
     makananMinumanFavorit: "",
     suku: "",
@@ -121,8 +121,8 @@ export default function MandiriDaftarPage() {
       .then((d) => {
         if (d.value) {
           setRegGender(d.value);
-          if (d.value === "Laki-laki") setForm(prev => ({ ...prev, jenisKelamin: "L", statusNikah: "Duda" }));
-          else if (d.value === "Perempuan") setForm(prev => ({ ...prev, jenisKelamin: "P", statusNikah: "Janda" }));
+          if (d.value === "Laki-laki") setForm(prev => ({ ...prev, jenisKelamin: "L" }));
+          else if (d.value === "Perempuan") setForm(prev => ({ ...prev, jenisKelamin: "P" }));
         }
       });
 
@@ -502,7 +502,6 @@ export default function MandiriDaftarPage() {
     setForm((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "jenisKelamin" ? { statusNikah: value === "L" ? "Duda" : "Janda" } : {}),
     }));
   };
 
@@ -559,6 +558,7 @@ export default function MandiriDaftarPage() {
       if (!form.tempatLahir?.trim()) missingFields.push("Kota Tempat Lahir");
       if (!form.tanggalLahir) missingFields.push("Tanggal Lahir");
       if (!form.jenisKelamin) missingFields.push("Jenis Kelamin");
+      if (!form.statusNikah) missingFields.push("Status");
       if (form.jumlahAnak === "") missingFields.push("Jumlah Anak");
       if (!form.anakKe) missingFields.push("Anak Ke");
       if (!form.jumlahSaudara) missingFields.push("Dari Saudara");
@@ -1167,9 +1167,51 @@ export default function MandiriDaftarPage() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Jumlah Anak <span className="required">*</span></label>
-              <input type="number" name="jumlahAnak" className="form-control" value={form.jumlahAnak} onChange={handleChange} required placeholder="Contoh: 1" min={0} max={20} />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Status <span className="required">*</span></label>
+                <select
+                  name="statusNikah"
+                  className="form-control"
+                  value={form.statusNikah}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const isTanpaAnak = val.includes("Tanpa Anak");
+                    setForm(prev => ({
+                      ...prev,
+                      statusNikah: val,
+                      ...(isTanpaAnak ? { jumlahAnak: "0" } : (prev.jumlahAnak === "0" ? { jumlahAnak: "1" } : {}))
+                    }));
+                  }}
+                  required
+                >
+                  <option value="">-- Pilih Status --</option>
+                  <option value="Single Parent karena Cerai Hidup">Single Parent karena Cerai Hidup</option>
+                  <option value="Single Parent karena Cerai Mati">Single Parent karena Cerai Mati</option>
+                  <option value="Cerai Hidup Tanpa Anak">Cerai Hidup Tanpa Anak</option>
+                  <option value="Cerai Mati Tanpa Anak">Cerai Mati Tanpa Anak</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Jumlah Anak <span className="required">*</span></label>
+                <input
+                  type="number"
+                  name="jumlahAnak"
+                  className="form-control"
+                  value={form.jumlahAnak}
+                  onChange={handleChange}
+                  required
+                  placeholder="Contoh: 1"
+                  min={0}
+                  max={20}
+                  disabled={form.statusNikah?.includes("Tanpa Anak")}
+                />
+                {form.statusNikah?.includes("Tanpa Anak") && (
+                  <p style={{ fontSize: "10.5px", color: "var(--text-muted)", marginTop: "4px" }}>
+                    Otomatis 0 untuk status tanpa anak.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="form-row">
@@ -1183,15 +1225,9 @@ export default function MandiriDaftarPage() {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Tinggi Badan (cm) <span className="required">*</span></label>
-                <input type="number" name="tinggiBadan" className="form-control" value={form.tinggiBadan} onChange={handleChange} required placeholder="Contoh: 165" min={100} max={250} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Suku (Opsional)</label>
-                <input name="suku" className="form-control" value={form.suku} onChange={handleChange} placeholder="Betawi / Jawa / dll" />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Tinggi Badan (cm) <span className="required">*</span></label>
+              <input type="number" name="tinggiBadan" className="form-control" value={form.tinggiBadan} onChange={handleChange} required placeholder="Contoh: 165" min={100} max={250} />
             </div>
 
             {/* --- SEKSI 2: KONTAK & DOMISILI --- */}

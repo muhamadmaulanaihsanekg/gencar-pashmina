@@ -297,7 +297,7 @@ export default function PublicKatalogDetailPage({ params }: { params: { id: stri
                 </div>
                 <div className="info-item">
                   <label>Status Pernikahan</label>
-                  <p>{data.statusNikah || "Belum Menikah"}</p>
+                  <p>{data.statusNikah || "-"}</p>
                 </div>
                 <div className="info-item">
                     <label>Pendidikan</label>

@@ -164,7 +164,7 @@ export default function AdminKatalogDetailPage({ params }: { params: { id: strin
                   <Heart className="icon-detail text-pink-500" />
                   <div>
                     <label>Status Pernikahan</label>
-                    <p>{data.statusNikah || "Belum Menikah"}</p>
+                    <p>{data.statusNikah || "-"}</p>
                   </div>
                 </div>
 

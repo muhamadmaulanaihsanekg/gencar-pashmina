@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
     const hobi = searchParams.get("hobi") || "all";
     const makanan = searchParams.get("makanan") || "all";
     const suku = searchParams.get("suku") || "all";
+    const statusNikah = searchParams.get("statusNikah") || "all";
     const anakKe = searchParams.get("anakKe") || "";
     const jumlahAnak = searchParams.get("jumlahAnak") || "";
     const jumlahSaudara = searchParams.get("jumlahSaudara") || "";
@@ -179,6 +180,10 @@ export async function GET(request: NextRequest) {
 
     if (suku && suku !== "all") {
       conditions.push(eq(generus.suku, suku));
+    }
+
+    if (statusNikah && statusNikah !== "all") {
+      conditions.push(eq(generus.statusNikah, statusNikah));
     }
 
     if (anakKe !== "") {

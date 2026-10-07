@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
         // Also remove from youth category (isGenerus = 0)
         await db.update(generus).set({
             nama, jenisKelamin, tempatLahir, tanggalLahir,
-            alamat, noTelp, pendidikan, pekerjaan, statusNikah: statusNikah || "Belum Menikah",
+            alamat, noTelp, pendidikan, pekerjaan, statusNikah: statusNikah || null,
             hobi, makananMinumanFavorit, suku, foto,
             anakKe: anakKe ? Number(anakKe) : null,
             jumlahSaudara: jumlahSaudara ? Number(jumlahSaudara) : null,
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
       noTelp,
       pendidikan,
       pekerjaan,
-      statusNikah: statusNikah || "Lajang",
+      statusNikah: statusNikah || null,
       hobi,
       makananMinumanFavorit,
       suku,

@@ -140,6 +140,7 @@ export default function PublicKatalogPage() {
   const [hobiFilter, setHobiFilter] = useState("all");
   const [makananFilter, setMakananFilter] = useState("all");
   const [sukuFilter, setSukuFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [umurMinFilter, setUmurMinFilter] = useState("");
   const [umurMaxFilter, setUmurMaxFilter] = useState("");
   const [anakKeFilter, setAnakKeFilter] = useState("");
@@ -581,6 +582,7 @@ export default function PublicKatalogPage() {
         umurMin: umurMinFilter,
         umurMax: umurMaxFilter,
         suku: sukuFilter,
+        statusNikah: statusFilter,
         anakKe: anakKeFilter,
         jumlahAnak: jumlahAnakFilter,
         jumlahSaudara: jumlahSaudaraFilter,
@@ -613,7 +615,7 @@ export default function PublicKatalogPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, page, gender, category, pendidikan, selectedKota, desaFilter, kelompokFilter, pekerjaanFilter, umurFilter, umurMinFilter, umurMaxFilter, sukuFilter, anakKeFilter, jumlahAnakFilter, jumlahSaudaraFilter, tinggiMinFilter, tinggiMaxFilter, kriteriaFilter, hobiFilter, makananFilter, hasAttended, isAdmin]);
+  }, [search, page, gender, category, pendidikan, selectedKota, desaFilter, kelompokFilter, pekerjaanFilter, umurFilter, umurMinFilter, umurMaxFilter, sukuFilter, statusFilter, anakKeFilter, jumlahAnakFilter, jumlahSaudaraFilter, tinggiMinFilter, tinggiMaxFilter, kriteriaFilter, hobiFilter, makananFilter, hasAttended, isAdmin]);
 
   useEffect(() => {
     if (hasAttended) fetchData();
@@ -2032,6 +2034,20 @@ export default function PublicKatalogPage() {
                 </div>
 
                 <div className="filter-field-group">
+                  <label className="filter-label">Status</label>
+                  <div className="select-container">
+                    <select className="select-box" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
+                      <option value="all">Semua Status</option>
+                      <option value="Single Parent karena Cerai Hidup">Single Parent karena Cerai Hidup</option>
+                      <option value="Single Parent karena Cerai Mati">Single Parent karena Cerai Mati</option>
+                      <option value="Cerai Hidup Tanpa Anak">Cerai Hidup Tanpa Anak</option>
+                      <option value="Cerai Mati Tanpa Anak">Cerai Mati Tanpa Anak</option>
+                    </select>
+                    <ChevronDown size={14} className="select-arrow" />
+                  </div>
+                </div>
+
+                <div className="filter-field-group">
                   <label className="filter-label">Urutan Anak</label>
                   <div className="input-range-container">
                     <input type="number" className="filter-input-box" placeholder="Anak Ke" value={anakKeFilter} onChange={(e) => { setAnakKeFilter(e.target.value); setPage(1); }} />
@@ -2110,6 +2126,7 @@ export default function PublicKatalogPage() {
                   setUmurMinFilter("");
                   setUmurMaxFilter("");
                   setSukuFilter("all");
+                  setStatusFilter("all");
                   setAnakKeFilter("");
                   setJumlahAnakFilter("");
                   setJumlahSaudaraFilter("");
@@ -3411,7 +3428,7 @@ export default function PublicKatalogPage() {
                   setEditProfileForm({
                     nama: myFullProfile.nama || "",
                     jenisKelamin: myFullProfile.jenisKelamin || "L",
-                    statusNikah: myFullProfile.statusNikah || (myFullProfile.jenisKelamin === "P" ? "Janda" : "Duda"),
+                    statusNikah: myFullProfile.statusNikah || "",
                     jumlahAnak: myFullProfile.jumlahAnak ?? 0,
                     anakKe: myFullProfile.anakKe ?? "",
                     jumlahSaudara: myFullProfile.jumlahSaudara ?? "",
@@ -3576,9 +3593,24 @@ export default function PublicKatalogPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#26392d' }}>Status Pernikahan</label>
-                  <select value={editProfileForm.statusNikah || (editProfileForm.jenisKelamin === "P" ? "Janda" : "Duda")} onChange={e => setEditProfileForm({ ...editProfileForm, statusNikah: e.target.value })} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}>
-                    <option value="Duda">Duda</option>
-                    <option value="Janda">Janda</option>
+                  <select
+                    value={editProfileForm.statusNikah || ""}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const isTanpaAnak = val.includes("Tanpa Anak");
+                      setEditProfileForm({
+                        ...editProfileForm,
+                        statusNikah: val,
+                        ...(isTanpaAnak ? { jumlahAnak: 0 } : {})
+                      });
+                    }}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(197, 160, 89, 0.4)', background: '#ffffff', color: '#1f2922', outline: 'none' }}
+                  >
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Single Parent karena Cerai Hidup">Single Parent karena Cerai Hidup</option>
+                    <option value="Single Parent karena Cerai Mati">Single Parent karena Cerai Mati</option>
+                    <option value="Cerai Hidup Tanpa Anak">Cerai Hidup Tanpa Anak</option>
+                    <option value="Cerai Mati Tanpa Anak">Cerai Mati Tanpa Anak</option>
                   </select>
                 </div>
               </div>
